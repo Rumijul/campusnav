@@ -23,6 +23,8 @@
     "@tailwindcss/vite": "^4.1.18",
     "hono": "^4.11.9",
     "konva": "^10.2.0",
+    "ngraph.graph": "^20.1.2",
+    "ngraph.path": "^1.6.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-konva": "^19.2.2",

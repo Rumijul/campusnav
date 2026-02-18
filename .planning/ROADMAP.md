@@ -65,11 +65,11 @@ Plans:
   2. Given the same graph with some edges marked as non-accessible, the engine returns the shortest wheelchair-accessible path that avoids those edges
   3. If no path exists (disconnected graph), the engine returns a clear "no route found" result instead of crashing
   4. Pathfinding completes in under 50ms for a graph of 500 nodes (verified by test)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Pathfinding types, graph builder, test fixture, and builder tests
+- [ ] 03-02-PLAN.md — Pathfinding engine with dual-mode A* (TDD: tests first, then implementation)
 
 ### Phase 4: Map Landmarks & Location Display
 **Goal**: Users can see meaningful locations on the map and tap them to view details
