@@ -1,0 +1,128 @@
+{
+  "nodes": [
+    {
+      "id": "entrance",
+      "x": 0.1,
+      "y": 0.5,
+      "label": "Main Entrance",
+      "type": "entrance",
+      "searchable": true,
+      "floor": 1
+    },
+    {
+      "id": "hall-1",
+      "x": 0.3,
+      "y": 0.5,
+      "label": "Main Hall",
+      "type": "hallway",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "junction-1",
+      "x": 0.5,
+      "y": 0.5,
+      "label": "Junction",
+      "type": "junction",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "stairs-1",
+      "x": 0.5,
+      "y": 0.3,
+      "label": "Stairs A",
+      "type": "stairs",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "elevator-1",
+      "x": 0.5,
+      "y": 0.7,
+      "label": "Elevator A",
+      "type": "elevator",
+      "searchable": true,
+      "floor": 1
+    },
+    {
+      "id": "room-101",
+      "x": 0.7,
+      "y": 0.3,
+      "label": "Room 101",
+      "type": "room",
+      "searchable": true,
+      "floor": 1
+    },
+    {
+      "id": "isolated-1",
+      "x": 0.9,
+      "y": 0.9,
+      "label": "Isolated Room",
+      "type": "room",
+      "searchable": true,
+      "floor": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "sourceId": "entrance",
+      "targetId": "hall-1",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e2",
+      "sourceId": "hall-1",
+      "targetId": "junction-1",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e3",
+      "sourceId": "junction-1",
+      "targetId": "stairs-1",
+      "standardWeight": 0.2,
+      "accessibleWeight": 1e10,
+      "accessible": false,
+      "bidirectional": true
+    },
+    {
+      "id": "e4",
+      "sourceId": "stairs-1",
+      "targetId": "room-101",
+      "standardWeight": 0.2,
+      "accessibleWeight": 1e10,
+      "accessible": false,
+      "bidirectional": true
+    },
+    {
+      "id": "e5",
+      "sourceId": "junction-1",
+      "targetId": "elevator-1",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e6",
+      "sourceId": "elevator-1",
+      "targetId": "room-101",
+      "standardWeight": 0.4472135955,
+      "accessibleWeight": 0.4472135955,
+      "accessible": true,
+      "bidirectional": true
+    }
+  ],
+  "metadata": {
+    "buildingName": "Test Building",
+    "floor": 1,
+    "lastUpdated": "2026-01-01T00:00:00Z"
+  }
+}

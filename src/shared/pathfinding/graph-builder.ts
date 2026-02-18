@@ -26,9 +26,15 @@ export function buildGraph(navGraph: NavGraph): Graph<NavNodeData, NavEdgeData> 
   }
 
   for (const { id: _id, sourceId, targetId, ...data } of navGraph.edges) {
-    graph.addLink(sourceId, targetId, data)
-    if (data.bidirectional) {
-      graph.addLink(targetId, sourceId, data)
+    // Normalize accessibleWeight to Infinity for non-accessible edges.
+    // JSON cannot represent Infinity, so the serialized form uses a large
+    // finite number. The graph should carry the true semantic value.
+    const edgeData: NavEdgeData = data.accessible
+      ? data
+      : { ...data, accessibleWeight: Number.POSITIVE_INFINITY }
+    graph.addLink(sourceId, targetId, edgeData)
+    if (edgeData.bidirectional) {
+      graph.addLink(targetId, sourceId, edgeData)
     }
   }
 
