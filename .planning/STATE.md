@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 2 — Floor Plan Rendering (image display, progressive loading, grid)
+**Current focus:** Phase 2 complete — ready for Phase 3 (Graph Data Model & Pathfinding Engine)
 
 ## Current Position
 
-Phase: 2 of 10 (Floor Plan Rendering)
-Plan: 1 of 2 in current phase
-Status: Plan 02-01 complete
-Last activity: 2026-02-18 — Completed 02-01-PLAN.md
+Phase: 2 of 10 (Floor Plan Rendering) — COMPLETE
+Plan: 2 of 2 in current phase (all plans complete)
+Status: Phase 02 complete, ready for Phase 03
+Last activity: 2026-02-18 — Completed 02-02-PLAN.md
 
-Progress: [███░░░░░░░] 15%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 11 min
-- Total execution time: 0.6 hours
+- Total plans completed: 4
+- Average duration: 12 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-project-setup-foundation | 2/2 | 27 min | 13 min |
-| 02-floor-plan-rendering | 1/2 | 7 min | 7 min |
+| 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
 
 **Recent Trend:**
-- Last 5 plans: 12 min, 15 min, 7 min
+- Last 5 plans: 12 min, 15 min, 7 min, 15 min
 - Trend: improving
 
 *Updated after each plan completion*
@@ -57,6 +57,10 @@ Recent decisions affecting current work:
 - [02-01]: Sharp + SVG overlay for programmatic test floor plan image generation
 - [02-01]: useMemo for fit-to-screen rect to satisfy hooks-at-top-level lint rule
 - [02-01]: onImageRectChange callback for FloorPlanImage → FloorPlanCanvas communication
+- [02-02]: Direct Konva stage mutation (not React setState) for all viewport interactions — 60fps performance
+- [02-02]: Instant wheel zoom (no Tween) to prevent stacked animation jitter; animated Tween for button zoom
+- [02-02]: Konva.hitOnDragEnabled = true at module scope for multi-touch pinch during drag
+- [02-02]: HTML overlay for ZoomControls — stays fixed outside Konva transform space
 
 ### Pending Todos
 
@@ -69,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 02-01-PLAN.md
+Stopped at: Completed 02-02-PLAN.md — Phase 02 complete
 Resume file: None

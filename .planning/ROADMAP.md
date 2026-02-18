@@ -13,7 +13,7 @@ CampusNav delivers a campus wayfinding web app in 10 phases, progressing from pr
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Project Setup & Foundation** - Scaffold the monorepo, configure tooling, define core TypeScript types for the graph data model
-- [ ] **Phase 2: Floor Plan Rendering** - Interactive 2D floor plan canvas with pan, zoom, and mobile touch gestures
+- [x] **Phase 2: Floor Plan Rendering** - Interactive 2D floor plan canvas with pan, zoom, and mobile touch gestures (completed 2026-02-18)
 - [ ] **Phase 3: Graph Data Model & Pathfinding Engine** - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
 - [ ] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap
 - [ ] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search
@@ -195,7 +195,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project Setup & Foundation | 0/2 | Not started | - |
-| 2. Floor Plan Rendering | 0/2 | Planned | - |
+| 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 0/2 | Not started | - |
 | 4. Map Landmarks & Location Display | 0/2 | Not started | - |
 | 5. Search & Location Selection | 0/3 | Not started | - |
