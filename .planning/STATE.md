@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 3 in progress — Graph Data Model & Pathfinding Engine
+**Current focus:** Phase 3 complete — Graph Data Model & Pathfinding Engine
 
 ## Current Position
 
-Phase: 3 of 10 (Graph Data Model & Pathfinding Engine) — IN PROGRESS
-Plan: 1 of 2 in current phase
-Status: Plan 03-01 complete, ready for Plan 03-02
-Last activity: 2026-02-19 — Completed 03-01-PLAN.md
+Phase: 3 of 10 (Graph Data Model & Pathfinding Engine) — COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase 03 complete, ready for Phase 04
+Last activity: 2026-02-19 — Completed 03-02-PLAN.md
 
-Progress: [██▓░░░░░░░] 25%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 11 min
-- Total execution time: 0.9 hours
+- Total plans completed: 6
+- Average duration: 10 min
+- Total execution time: 1.0 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [██▓░░░░░░░] 25%
 |-------|-------|-------|----------|
 | 01-project-setup-foundation | 2/2 | 27 min | 13 min |
 | 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
-| 03-graph-data-model-pathfinding-engine | 1/2 | 5 min | 5 min |
+| 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 12 min, 15 min, 7 min, 15 min, 5 min
+- Last 5 plans: 15 min, 7 min, 15 min, 5 min, 3 min
 - Trend: improving
 
 *Updated after each plan completion*
@@ -64,6 +64,9 @@ Recent decisions affecting current work:
 - [02-02]: HTML overlay for ZoomControls — stays fixed outside Konva transform space
 - [03-01]: Normalize accessibleWeight to Infinity for non-accessible edges during buildGraph construction
 - [03-01]: Use 1e10 as sentinel value in JSON fixtures for non-accessible edge weights
+- [03-02]: Pathfinders created once in constructor, reused per query — avoids per-call overhead
+- [03-02]: Reverse ngraph.path output for source-first node ordering
+- [03-02]: Frozen NOT_FOUND constant spread for immutable failure responses
 
 ### Pending Todos
 
@@ -76,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 03-01-PLAN.md
-Resume file: .planning/phases/03-graph-data-model-pathfinding-engine/03-02-PLAN.md
+Stopped at: Completed 03-02-PLAN.md (Phase 03 complete)
+Resume file: None

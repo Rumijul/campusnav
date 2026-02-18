@@ -23,8 +23,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Routing & Directions
 
-- [ ] **ROUT-01**: App computes the shortest path between two points using graph-based pathfinding (Dijkstra/A*)
-- [ ] **ROUT-02**: App computes a wheelchair-accessible shortest path that excludes stairs and non-accessible edges
+- [x] **ROUT-01**: App computes the shortest path between two points using graph-based pathfinding (Dijkstra/A*)
+- [x] **ROUT-02**: App computes a wheelchair-accessible shortest path that excludes stairs and non-accessible edges
 - [ ] **ROUT-03**: App displays both standard and wheelchair-accessible routes simultaneously with distinct color coding
 - [ ] **ROUT-04**: App draws visual route paths on the floor plan map from start to destination
 - [ ] **ROUT-05**: App provides step-by-step text directions with landmark references (e.g., "Turn left at the cafeteria")
@@ -96,8 +96,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRCH-02 | Phase 5: Search & Location Selection | Pending |
 | SRCH-03 | Phase 5: Search & Location Selection | Pending |
 | SRCH-04 | Phase 5: Search & Location Selection | Pending |
-| ROUT-01 | Phase 3: Graph Data Model & Pathfinding Engine | Pending |
-| ROUT-02 | Phase 3: Graph Data Model & Pathfinding Engine | Pending |
+| ROUT-01 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |
+| ROUT-02 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |
 | ROUT-03 | Phase 6: Route Visualization & Directions | Pending |
 | ROUT-04 | Phase 6: Route Visualization & Directions | Pending |
 | ROUT-05 | Phase 6: Route Visualization & Directions | Pending |
