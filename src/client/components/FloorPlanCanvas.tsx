@@ -1,32 +1,56 @@
 import type Konva from 'konva'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
+import { useMapViewport } from '../hooks/useMapViewport'
 import { useViewportSize } from '../hooks/useViewportSize'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
+import ZoomControls from './ZoomControls'
 
 /**
  * Main floor plan canvas container.
  *
  * Full-viewport layout — the entire viewport is the map (no header).
  * Renders: grid background → floor plan image → loading/error overlays.
- * Canvas is ready for Plan 02 to add interactive pan/zoom/rotation.
+ * Interactive: pan (drag), zoom (scroll/buttons), pinch-zoom, rotation (mobile).
  */
 export default function FloorPlanCanvas() {
   const { width, height } = useViewportSize()
   const { image, isLoading, isFailed, isFullLoaded } = useFloorPlanImage()
   const stageRef = useRef<Konva.Stage>(null)
-  const [_imageRect, setImageRect] = useState({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-  })
+  const [imageRect, setImageRect] = useState<{
+    x: number
+    y: number
+    width: number
+    height: number
+  } | null>(null)
+
+  const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen } =
+    useMapViewport({ stageRef, imageRect })
+
+  // Re-fit floor plan when viewport size changes (e.g. orientation change)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — re-fit on viewport resize only when image is loaded
+  useEffect(() => {
+    if (image && imageRect) {
+      fitToScreen(width, height, true)
+    }
+  }, [width, height])
+
+  const interactionDisabled = isLoading || isFailed
 
   return (
     <div className="relative w-full h-full">
-      <Stage ref={stageRef} width={width} height={height}>
+      <Stage
+        ref={stageRef}
+        width={width}
+        height={height}
+        draggable={!interactionDisabled}
+        onWheel={handleWheel}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDragEnd={handleDragEnd}
+      >
         {/* Grid — static background, not transformed */}
         <Layer>
           <GridBackground width={width} height={height} />
@@ -71,7 +95,12 @@ export default function FloorPlanCanvas() {
           )}
         </Layer>
       </Stage>
-      {/* ZoomControls will be added here in Plan 02 */}
+
+      <ZoomControls
+        onZoomIn={() => zoomByButton(1)}
+        onZoomOut={() => zoomByButton(-1)}
+        disabled={interactionDisabled}
+      />
     </div>
   )
 }

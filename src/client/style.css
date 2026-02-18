@@ -9,3 +9,10 @@ body,
   height: 100%;
   overflow: hidden;
 }
+
+/* Prevent browser from intercepting touch gestures on the Konva canvas.
+   Without this, browser pinch-zoom and page scrolling compete with
+   canvas interactions on mobile devices. */
+.konvajs-content {
+  touch-action: none;
+}
