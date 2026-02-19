@@ -48,13 +48,22 @@ app.get('/api/floor-plan/thumbnail', async (c) => {
   }
 })
 
-/**
- * Placeholder type annotation to verify @shared/types path alias
- * resolves correctly from server code. Replaced with real endpoints
- * in later phases.
- */
-const _graphTypeCheck: NavGraph | null = null
-void _graphTypeCheck
+/** Serve the navigation graph as JSON for client-side pathfinding and map rendering. */
+app.get('/api/map', async (c) => {
+  try {
+    const filePath = resolve(__dirname, 'assets/campus-graph.json')
+    const raw = await readFile(filePath, 'utf-8')
+    const graph: NavGraph = JSON.parse(raw)
+    c.header('Cache-Control', 'public, max-age=60')
+    return c.json(graph)
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code
+    if (code === 'ENOENT') {
+      return c.json({ error: 'Graph data not found' }, 404)
+    }
+    return c.json({ error: 'Failed to load graph data' }, 500)
+  }
+})
 
 const port = 3001
 console.log(`Server running on http://localhost:${port}`)
