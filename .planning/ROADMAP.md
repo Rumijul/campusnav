@@ -80,11 +80,13 @@ Plans:
   2. Navigation-only nodes (ramps, staircases, hallway junctions) are NOT visible on the student-facing map
   3. User can tap/click a landmark to see its details (name, room number, type, description) in a panel or tooltip
   4. Landmarks are positioned correctly on the floor plan and stay aligned during pan/zoom
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Extend NavNodeData types, create campus-graph.json fixture (25 nodes), add GET /api/map endpoint
+- [ ] 04-02-PLAN.md — useGraphData hook, LandmarkMarker + LandmarkLayer components, stageScale sync, FloorPlanCanvas landmark integration
+- [ ] 04-03-PLAN.md — Install Vaul, LandmarkSheet bottom sheet component, wire into FloorPlanCanvas
+- [ ] 04-04-PLAN.md — Human verification: landmark rendering, hidden nodes, bottom sheet interaction
 
 ### Phase 5: Search & Location Selection
 **Goal**: Users can find and select locations through search or map interaction to set route start/destination
@@ -197,7 +199,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 1. Project Setup & Foundation | 0/2 | Not started | - |
 | 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
-| 4. Map Landmarks & Location Display | 0/2 | Not started | - |
+| 4. Map Landmarks & Location Display | 0/4 | Planned | - |
 | 5. Search & Location Selection | 0/3 | Not started | - |
 | 6. Route Visualization & Directions | 0/3 | Not started | - |
 | 7. API & Data Persistence | 0/3 | Not started | - |
