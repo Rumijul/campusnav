@@ -1,3 +1,4 @@
+import type { NavNode } from '@shared/types'
 import type Konva from 'konva'
 import { useEffect, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
@@ -6,6 +7,7 @@ import { useMapViewport } from '../hooks/useMapViewport'
 import { useViewportSize } from '../hooks/useViewportSize'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
+import { LandmarkLayer } from './LandmarkLayer'
 import ZoomControls from './ZoomControls'
 
 /**
@@ -25,9 +27,11 @@ export default function FloorPlanCanvas() {
     width: number
     height: number
   } | null>(null)
+  const [selectedNode, setSelectedNode] = useState<NavNode | null>(null)
+  const [stageScale, setStageScale] = useState<number>(1)
 
   const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen } =
-    useMapViewport({ stageRef, imageRect })
+    useMapViewport({ stageRef, imageRect, onScaleChange: setStageScale })
 
   // Re-fit floor plan when viewport size changes (e.g. orientation change)
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — re-fit on viewport resize only when image is loaded
@@ -50,6 +54,9 @@ export default function FloorPlanCanvas() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onDragEnd={handleDragEnd}
+        onClick={(e) => {
+          if (e.target === e.target.getStage()) setSelectedNode(null)
+        }}
       >
         {/* Grid — static background, not transformed */}
         <Layer>
@@ -68,6 +75,14 @@ export default function FloorPlanCanvas() {
             />
           )}
         </Layer>
+
+        {/* Landmarks — markers above floor plan image */}
+        <LandmarkLayer
+          imageRect={imageRect}
+          stageScale={stageScale}
+          selectedNodeId={selectedNode?.id ?? null}
+          onSelectNode={setSelectedNode}
+        />
 
         {/* UI overlay — loading/error states */}
         <Layer>

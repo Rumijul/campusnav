@@ -40,9 +40,10 @@ function getAngle(p1: { x: number; y: number }, p2: { x: number; y: number }): n
 interface UseMapViewportOptions {
   stageRef: RefObject<Konva.Stage | null>
   imageRect: { x: number; y: number; width: number; height: number } | null
+  onScaleChange?: (scale: number) => void
 }
 
-export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): {
+export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapViewportOptions): {
   handleWheel: (e: Konva.KonvaEventObject<WheelEvent>) => void
   handleTouchMove: (e: Konva.KonvaEventObject<TouchEvent>) => void
   handleTouchEnd: () => void
@@ -95,8 +96,9 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
         x: pointer.x - mousePointTo.x * newScale,
         y: pointer.y - mousePointTo.y * newScale,
       })
+      onScaleChange?.(newScale)
     },
-    [stageRef],
+    [stageRef, onScaleChange],
   )
 
   /**
@@ -154,6 +156,7 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
         x: center.x - pointTo.x * newScale + dx,
         y: center.y - pointTo.y * newScale + dy,
       })
+      onScaleChange?.(newScale)
 
       // Rotation: align map with walking direction
       if (lastAngle.current !== null) {
@@ -166,7 +169,7 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
       lastCenter.current = center
       lastAngle.current = angle
     },
-    [stageRef],
+    [stageRef, onScaleChange],
   )
 
   /**
@@ -274,11 +277,12 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
         x: newPos.x,
         y: newPos.y,
         easing: Konva.Easings.EaseInOut,
+        onFinish: () => onScaleChange?.(newScale),
       })
       tween.play()
       activeTween.current = tween
     },
-    [stageRef],
+    [stageRef, onScaleChange],
   )
 
   /**
@@ -304,6 +308,7 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
           y: 0,
           rotation: 0,
           easing: Konva.Easings.EaseInOut,
+          onFinish: () => onScaleChange?.(1),
         })
         tween.play()
         activeTween.current = tween
@@ -311,9 +316,10 @@ export function useMapViewport({ stageRef, imageRect }: UseMapViewportOptions): 
         stage.scale({ x: 1, y: 1 })
         stage.position({ x: 0, y: 0 })
         stage.rotation(0)
+        onScaleChange?.(1)
       }
     },
-    [stageRef, imageRect],
+    [stageRef, imageRect, onScaleChange],
   )
 
   return {
