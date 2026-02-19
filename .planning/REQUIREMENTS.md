@@ -11,8 +11,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **MAP-01**: User can view a 2D floor plan rendered from an uploaded image with pan and zoom controls
 - [x] **MAP-02**: User can interact with the map on mobile devices using touch gestures (pinch-zoom, drag-pan, tap-select)
-- [ ] **MAP-03**: User can see visible landmarks/nodes on the map for classrooms, rooms, offices, and other points of interest
-- [ ] **MAP-04**: Map hides navigation-only nodes (ramps, staircases, hallway junctions) from the student view
+- [x] **MAP-03**: User can see visible landmarks/nodes on the map for classrooms, rooms, offices, and other points of interest
+- [x] **MAP-04**: Map hides navigation-only nodes (ramps, staircases, hallway junctions) from the student view
 
 ### Search & Selection
 
@@ -90,8 +90,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | MAP-01 | Phase 2: Floor Plan Rendering | Complete |
 | MAP-02 | Phase 2: Floor Plan Rendering | Complete |
-| MAP-03 | Phase 4: Map Landmarks & Location Display | Pending |
-| MAP-04 | Phase 4: Map Landmarks & Location Display | Pending |
+| MAP-03 | Phase 4: Map Landmarks & Location Display | Complete |
+| MAP-04 | Phase 4: Map Landmarks & Location Display | Complete |
 | SRCH-01 | Phase 5: Search & Location Selection | Pending |
 | SRCH-02 | Phase 5: Search & Location Selection | Pending |
 | SRCH-03 | Phase 5: Search & Location Selection | Pending |
