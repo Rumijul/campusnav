@@ -14,6 +14,8 @@ interface LandmarkLayerProps {
   stageScale: number
   selectedNodeId: string | null
   onSelectNode: (node: NavNode) => void
+  /** Node IDs to exclude from rendering (e.g. start/dest nodes replaced by A/B pins) */
+  hiddenNodeIds?: string[]
 }
 
 /* ──────────────── Component ──────────────── */
@@ -23,6 +25,7 @@ export function LandmarkLayer({
   stageScale,
   selectedNodeId,
   onSelectNode,
+  hiddenNodeIds,
 }: LandmarkLayerProps) {
   const graphState = useGraphData()
 
@@ -32,7 +35,9 @@ export function LandmarkLayer({
   // Data not yet loaded or error — no markers; floor plan still usable
   if (graphState.status !== 'loaded') return null
 
-  const visibleNodes = graphState.data.nodes.filter((n) => VISIBLE_NODE_TYPES.includes(n.type))
+  const visibleNodes = graphState.data.nodes.filter(
+    (n) => VISIBLE_NODE_TYPES.includes(n.type) && !hiddenNodeIds?.includes(n.id),
+  )
 
   return (
     <Layer>

@@ -1,14 +1,14 @@
-import type { NavNode } from '@shared/types'
 import type Konva from 'konva'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
 import { useMapViewport } from '../hooks/useMapViewport'
+import { useRouteSelection } from '../hooks/useRouteSelection'
 import { useViewportSize } from '../hooks/useViewportSize'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
-import { LandmarkSheet } from './LandmarkSheet'
+import { SelectionMarkerLayer } from './SelectionMarkerLayer'
 import ZoomControls from './ZoomControls'
 
 /**
@@ -28,8 +28,17 @@ export default function FloorPlanCanvas() {
     width: number
     height: number
   } | null>(null)
-  const [selectedNode, setSelectedNode] = useState<NavNode | null>(null)
   const [stageScale, setStageScale] = useState<number>(1)
+
+  const routeSelection = useRouteSelection()
+
+  // Node IDs to hide from LandmarkLayer (replaced by A/B pins)
+  const hiddenNodeIds = useMemo(() => {
+    const ids: string[] = []
+    if (routeSelection.start) ids.push(routeSelection.start.id)
+    if (routeSelection.destination) ids.push(routeSelection.destination.id)
+    return ids
+  }, [routeSelection.start, routeSelection.destination])
 
   const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen } =
     useMapViewport({ stageRef, imageRect, onScaleChange: setStageScale })
@@ -55,9 +64,6 @@ export default function FloorPlanCanvas() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onDragEnd={handleDragEnd}
-        onClick={(e) => {
-          if (e.target === e.target.getStage()) setSelectedNode(null)
-        }}
       >
         {/* Grid — static background, not transformed */}
         <Layer>
@@ -81,8 +87,17 @@ export default function FloorPlanCanvas() {
         <LandmarkLayer
           imageRect={imageRect}
           stageScale={stageScale}
-          selectedNodeId={selectedNode?.id ?? null}
-          onSelectNode={setSelectedNode}
+          selectedNodeId={null}
+          onSelectNode={routeSelection.setFromTap}
+          hiddenNodeIds={hiddenNodeIds}
+        />
+
+        {/* Selection pins — A/B labeled markers above landmarks */}
+        <SelectionMarkerLayer
+          start={routeSelection.start}
+          destination={routeSelection.destination}
+          imageRect={imageRect}
+          stageScale={stageScale}
         />
 
         {/* UI overlay — loading/error states */}
@@ -117,7 +132,6 @@ export default function FloorPlanCanvas() {
         onZoomOut={() => zoomByButton(-1)}
         disabled={interactionDisabled}
       />
-      <LandmarkSheet node={selectedNode} onClose={() => setSelectedNode(null)} />
     </div>
   )
 }
