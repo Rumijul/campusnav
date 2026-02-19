@@ -88,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-04-PLAN.md
-Resume file: .planning/phases/04-map-landmarks-location-display/04-04-SUMMARY.md
+Stopped at: Phase 5 context gathered
+Resume file: .planning/phases/05-search-location-selection/05-CONTEXT.md
