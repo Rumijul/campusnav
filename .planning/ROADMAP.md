@@ -98,12 +98,12 @@ Plans:
   3. User can select start and destination from a searchable dropdown list without using the map
   4. User can search for the nearest point of interest by type (e.g., nearest restroom, nearest exit) from a selected location
   5. Selected start and destination are visually highlighted on the map with distinct markers
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Route selection state (useRouteSelection hook), A/B labeled pin markers, tap-to-select wiring
+- [ ] 05-02-PLAN.md — Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger
+- [ ] 05-03-PLAN.md — Human verification: search, tap-to-select, nearest POI, compact strip, auto-pan
 
 ### Phase 6: Route Visualization & Directions
 **Goal**: Users can see their route drawn on the map and read step-by-step walking directions
