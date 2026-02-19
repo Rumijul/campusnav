@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 4 of 10 (Map Landmarks & Location Display) — IN PROGRESS
-Plan: 2 of TBD in current phase
-Status: 04-02 complete — useGraphData hook, LandmarkMarker, LandmarkLayer, stageScale sync
-Last activity: 2026-02-19 — Completed 04-02 (landmark markers + counter-scaling)
+Plan: 3 of TBD in current phase
+Status: 04-03 complete — LandmarkSheet (Vaul bottom sheet), vaul@1.1.2, wired into FloorPlanCanvas
+Last activity: 2026-02-19 — Completed 04-03 (landmark bottom sheet + detail view)
 
 Progress: [████░░░░░░] 38%
 
@@ -74,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 04]: LandmarkLayer owns its own Layer — cleaner encapsulation, rendered directly in Stage without wrapper
 - [Phase 04]: onScaleChange callback pattern in useMapViewport — thin event bridge to React state preserving 60fps direct Konva mutations
 - [Phase 04]: Counter-scaling via Group scaleX/Y=1/stageScale for constant screen-pixel markers during zoom
+- [Phase 04-03]: modal=false on Vaul Drawer.Root — keeps Konva map interactive while sheet is peeked; no overlay blocking canvas
+- [Phase 04-03]: key={node?.id} on Drawer.Root resets snap to peek on node change without useEffect
 
 ### Pending Todos
 
@@ -86,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-02-PLAN.md
-Resume file: .planning/phases/04-map-landmarks-location-display/04-02-SUMMARY.md
+Stopped at: Completed 04-03-PLAN.md
+Resume file: .planning/phases/04-map-landmarks-location-display/04-03-SUMMARY.md
