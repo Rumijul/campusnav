@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Floor Plan Rendering** - Interactive 2D floor plan canvas with pan, zoom, and mobile touch gestures (completed 2026-02-18)
 - [ ] **Phase 3: Graph Data Model & Pathfinding Engine** - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
 - [x] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap (completed 2026-02-19)
-- [ ] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search
+- [x] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search (completed 2026-02-19)
 - [ ] **Phase 6: Route Visualization & Directions** - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
 - [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
@@ -200,7 +200,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
 | 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
-| 5. Search & Location Selection | 1/3 | In progress | - |
+| 5. Search & Location Selection | 3/3 | Complete   | 2026-02-19 |
 | 6. Route Visualization & Directions | 0/3 | Not started | - |
 | 7. API & Data Persistence | 0/3 | Not started | - |
 | 8. Admin Authentication | 0/2 | Not started | - |
