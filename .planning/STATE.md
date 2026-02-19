@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 4 of 10 (Map Landmarks & Location Display) — IN PROGRESS
-Plan: 1 of TBD in current phase
-Status: 04-01 complete — types, fixture, and /api/map endpoint done
-Last activity: 2026-02-19 — Completed 04-01 (NavNodeData display fields + GET /api/map)
+Plan: 2 of TBD in current phase
+Status: 04-02 complete — useGraphData hook, LandmarkMarker, LandmarkLayer, stageScale sync
+Last activity: 2026-02-19 — Completed 04-02 (landmark markers + counter-scaling)
 
-Progress: [████░░░░░░] 35%
+Progress: [████░░░░░░] 38%
 
 ## Performance Metrics
 
@@ -30,10 +30,10 @@ Progress: [████░░░░░░] 35%
 | 01-project-setup-foundation | 2/2 | 27 min | 13 min |
 | 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
-| 04-map-landmarks-location-display | 1/TBD | ~8 min | ~8 min |
+| 04-map-landmarks-location-display | 2/TBD | ~11 min | ~5 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 15 min, 5 min, 3 min, 8 min
+- Last 5 plans: 7 min, 15 min, 5 min, 3 min, 8 min, 3 min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Recent decisions affecting current work:
   - [04-01]: stairs and ramp moved to 'Invisible to students' in NavNodeType — routing infrastructure only, not student destinations
   - [04-01]: GET /api/map mirrors floor-plan route pattern; Cache-Control max-age=60 for near-real-time admin edits
   - [04-01]: campus-graph.json fixture covers all 9 NavNodeType values for downstream filtering test coverage
+- [Phase 04]: LandmarkLayer owns its own Layer — cleaner encapsulation, rendered directly in Stage without wrapper
+- [Phase 04]: onScaleChange callback pattern in useMapViewport — thin event bridge to React state preserving 60fps direct Konva mutations
+- [Phase 04]: Counter-scaling via Group scaleX/Y=1/stageScale for constant screen-pixel markers during zoom
 
 ### Pending Todos
 
@@ -83,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-01-PLAN.md
-Resume file: .planning/phases/04-map-landmarks-location-display/04-01-SUMMARY.md
+Stopped at: Completed 04-02-PLAN.md
+Resume file: .planning/phases/04-map-landmarks-location-display/04-02-SUMMARY.md

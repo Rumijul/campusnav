@@ -199,7 +199,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 1. Project Setup & Foundation | 0/2 | Not started | - |
 | 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
-| 4. Map Landmarks & Location Display | 0/4 | Planned | - |
+| 4. Map Landmarks & Location Display | 2/4 | In Progress|  |
 | 5. Search & Location Selection | 0/3 | Not started | - |
 | 6. Route Visualization & Directions | 0/3 | Not started | - |
 | 7. API & Data Persistence | 0/3 | Not started | - |
