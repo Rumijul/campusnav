@@ -17,7 +17,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Search & Selection
 
 - [ ] **SRCH-01**: User can search for rooms/locations by name or keyword with autocomplete suggestions
-- [ ] **SRCH-02**: User can tap/click on a location on the map to set it as start or destination
+- [x] **SRCH-02**: User can tap/click on a location on the map to set it as start or destination
 - [ ] **SRCH-03**: User can select start and destination from a searchable dropdown list
 - [ ] **SRCH-04**: User can find the nearest point of interest by type (e.g., nearest restroom, exit, elevator) from a selected location
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-03 | Phase 4: Map Landmarks & Location Display | Complete |
 | MAP-04 | Phase 4: Map Landmarks & Location Display | Complete |
 | SRCH-01 | Phase 5: Search & Location Selection | Pending |
-| SRCH-02 | Phase 5: Search & Location Selection | Pending |
+| SRCH-02 | Phase 5: Search & Location Selection | Complete |
 | SRCH-03 | Phase 5: Search & Location Selection | Pending |
 | SRCH-04 | Phase 5: Search & Location Selection | Pending |
 | ROUT-01 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |

@@ -200,7 +200,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
 | 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
-| 5. Search & Location Selection | 0/3 | Not started | - |
+| 5. Search & Location Selection | 1/3 | In progress | - |
 | 6. Route Visualization & Directions | 0/3 | Not started | - |
 | 7. API & Data Persistence | 0/3 | Not started | - |
 | 8. Admin Authentication | 0/2 | Not started | - |

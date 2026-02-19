@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 4 complete — ready for Phase 5: Routing & Pathfinding UI
+**Current focus:** Phase 5 in progress — Search & Location Selection
 
 ## Current Position
 
-Phase: 4 of 10 (Map Landmarks & Location Display) — COMPLETE
-Plan: 4 of 4 in current phase
-Status: 04-04 complete — Human verification passed (all 7 truths confirmed: markers, hidden nodes, counter-scaling, bottom sheet, dismissal, map interaction)
-Last activity: 2026-02-19 — Completed 04-04 (human verification checkpoint)
+Phase: 5 of 10 (Search & Location Selection) — IN PROGRESS
+Plan: 2 of 3 in current phase
+Status: 05-01 complete — useRouteSelection hook and A/B pin markers created
+Last activity: 2026-02-19 — Completed 05-01-PLAN.md
 
-Progress: [████░░░░░░] 40%
+Progress: [████▌░░░░░] 45%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 10 min
-- Total execution time: 1.0 hours
+- Total plans completed: 8
+- Average duration: 9 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: [████░░░░░░] 40%
 | 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
+| 05-search-location-selection | 1/3 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 15 min, 5 min, 3 min, 8 min, 3 min
-- Trend: stable
+- Last 5 plans: 15 min, 5 min, 3 min, 8 min, 3 min, 3 min
+- Trend: stable, fast
 
 *Updated after each plan completion*
 
@@ -76,6 +77,10 @@ Recent decisions affecting current work:
 - [Phase 04]: Counter-scaling via Group scaleX/Y=1/stageScale for constant screen-pixel markers during zoom
 - [Phase 04-03]: modal=false on Vaul Drawer.Root — keeps Konva map interactive while sheet is peeked; no overlay blocking canvas
 - [Phase 04-04]: Human approved all 7 must-have truths — landmark display complete; use-image was pre-existing missing dep fixed with npm install
+- [Phase 05-01]: Landmark tap feeds into route selection via setFromTap instead of opening detail sheet — LandmarkSheet removed from render tree
+- [Phase 05-01]: A/B pins use counter-scaled Groups matching LandmarkMarker pattern for zoom consistency
+- [Phase 05-01]: hiddenNodeIds filtering in LandmarkLayer prevents duplicate markers at selected positions
+- [Phase 05-01]: Background tap does NOT clear route selections — only search bar X buttons will clear (Plan 02)
 
 ### Pending Todos
 
@@ -88,5 +93,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-search-location-selection/05-CONTEXT.md
+Stopped at: Completed 05-01-PLAN.md — route selection state & A/B pin markers
+Resume file: .planning/phases/05-search-location-selection/05-02-PLAN.md
+Next action: Execute 05-02 (Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger)
