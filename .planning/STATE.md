@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plans 1, 2 & 3 of 5 complete)
+**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plans 1, 2, 3 & 4 of 5 complete)
 
 ## Current Position
 
 Phase: 6 of 10 (Route Visualization & Directions) — IN PROGRESS
-Plan: 3 of 5 in current phase
-Status: Phase 6 Plan 03 complete — DirectionsSheet Vaul bottom sheet with Standard/Accessible tabs
-Last activity: 2026-02-19 — Completed 06-03-PLAN.md (DirectionsSheet component)
+Plan: 4 of 5 in current phase
+Status: Phase 6 Plan 04 complete — FloorPlanCanvas wired with RouteLayer, DirectionsSheet, legend, activeMode
+Last activity: 2026-02-19 — Completed 06-04-PLAN.md (FloorPlanCanvas integration)
 
-Progress: [██████░░░░] 56%
+Progress: [███████░░░] 63%
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [██████░░░░] 56%
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
-| 06-route-visualization-directions | 3/5 | ~9 min | ~3 min |
+| 06-route-visualization-directions | 4/5 | ~11 min | ~3 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min
@@ -40,7 +40,7 @@ Progress: [██████░░░░] 56%
 
 *Updated after each plan completion*
 | Phase 06-route-visualization-directions P01 | 4 min | 2 tasks | 2 files |
-| Phase 06-route-visualization-directions P03 | 2 min | 1 task | 1 file |
+| Phase 06-route-visualization-directions P04 | 2 min | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -93,8 +93,9 @@ Recent decisions affecting current work:
 - [Phase 06-02]: tension=0 on Konva Line — ensures straight segments through node waypoints, not spline interpolation
 - [Phase 06-01]: Screen-space bearing: atan2(dx,-dy) gives clockwise-from-north in canvas coords (y-down)
 - [Phase 06-01]: generateDirections exported as pure function for direct unit testing without React wrapper
-- [Phase 06-03]: exactOptionalPropertyTypes compliance — spread conditional object pattern ({...condition ? {prop: val} : {}}) instead of prop={val | undefined}
-- [Phase 06-03]: DirectionsSheet tab state is stateless (activeMode/onTabChange via props); only snapPoint is local state
+- [Phase 06-04]: RouteLayer sits inside Stage between FloorPlanImage Layer and LandmarkLayer — canvas-space positioning
+- [Phase 06-04]: buildRoutePoints uses useCallback (not useMemo) since it's a function; activeRoutePoints uses useMemo for the computed array
+- [Phase 06-04]: Sheet auto-opens at 35% peek on route computed; back arrow closes fully; clearing selections also closes
 
 ### Pending Todos
 
@@ -107,6 +108,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 06-03-PLAN.md — DirectionsSheet Vaul bottom sheet created
+Stopped at: Completed 06-04-PLAN.md — FloorPlanCanvas wired with route visualization
 Resume file: None
-Next action: Execute 06-04-PLAN.md (wire DirectionsSheet into FloorPlanCanvas)
+Next action: Execute 06-05-PLAN.md (end-to-end verification)
