@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 5 of 10 (Search & Location Selection) — IN PROGRESS
-Plan: 2 of 3 in current phase
-Status: 05-01 complete — useRouteSelection hook and A/B pin markers created
-Last activity: 2026-02-19 — Completed 05-01-PLAN.md
+Plan: 3 of 3 in current phase
+Status: 05-02 complete — search UI with autocomplete, nearest-POI, auto-pan, route trigger
+Last activity: 2026-02-19 — Completed 05-02-PLAN.md
 
-Progress: [████▌░░░░░] 45%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 9 min
-- Total execution time: 1.1 hours
+- Total execution time: 1.3 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [████▌░░░░░] 45%
 | 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
-| 05-search-location-selection | 1/3 | 3 min | 3 min |
+| 05-search-location-selection | 2/3 | 17 min | 9 min |
 
 **Recent Trend:**
-- Last 5 plans: 15 min, 5 min, 3 min, 8 min, 3 min, 3 min
-- Trend: stable, fast
+- Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -81,6 +81,10 @@ Recent decisions affecting current work:
 - [Phase 05-01]: A/B pins use counter-scaled Groups matching LandmarkMarker pattern for zoom consistency
 - [Phase 05-01]: hiddenNodeIds filtering in LandmarkLayer prevents duplicate markers at selected positions
 - [Phase 05-01]: Background tap does NOT clear route selections — only search bar X buttons will clear (Plan 02)
+- [Phase 05-02]: setActiveField added to RouteSelection interface — SearchOverlay needs explicit control of which field receives selections
+- [Phase 05-02]: Konva.Tween (0.4s, EaseInOut) for auto-pan with 15% bounding-box padding
+- [Phase 05-02]: Biome a11y compliance — compact strip uses sibling button elements, no role="button" on divs, no nested buttons
+- [Phase 05-02]: routeResult state stored but not consumed — Phase 6 will render route path overlay
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 05-01-PLAN.md — route selection state & A/B pin markers
-Resume file: .planning/phases/05-search-location-selection/05-02-PLAN.md
-Next action: Execute 05-02 (Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger)
+Stopped at: Completed 05-02-PLAN.md — search UI with autocomplete, nearest-POI, auto-pan, route trigger
+Resume file: .planning/phases/05-search-location-selection/05-03-PLAN.md
+Next action: Execute 05-03 (remaining Phase 5 plan)

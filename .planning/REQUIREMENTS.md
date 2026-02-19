@@ -16,10 +16,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Search & Selection
 
-- [ ] **SRCH-01**: User can search for rooms/locations by name or keyword with autocomplete suggestions
+- [x] **SRCH-01**: User can search for rooms/locations by name or keyword with autocomplete suggestions
 - [x] **SRCH-02**: User can tap/click on a location on the map to set it as start or destination
-- [ ] **SRCH-03**: User can select start and destination from a searchable dropdown list
-- [ ] **SRCH-04**: User can find the nearest point of interest by type (e.g., nearest restroom, exit, elevator) from a selected location
+- [x] **SRCH-03**: User can select start and destination from a searchable dropdown list
+- [x] **SRCH-04**: User can find the nearest point of interest by type (e.g., nearest restroom, exit, elevator) from a selected location
 
 ### Routing & Directions
 
@@ -92,10 +92,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MAP-02 | Phase 2: Floor Plan Rendering | Complete |
 | MAP-03 | Phase 4: Map Landmarks & Location Display | Complete |
 | MAP-04 | Phase 4: Map Landmarks & Location Display | Complete |
-| SRCH-01 | Phase 5: Search & Location Selection | Pending |
+| SRCH-01 | Phase 5: Search & Location Selection | Complete |
 | SRCH-02 | Phase 5: Search & Location Selection | Complete |
-| SRCH-03 | Phase 5: Search & Location Selection | Pending |
-| SRCH-04 | Phase 5: Search & Location Selection | Pending |
+| SRCH-03 | Phase 5: Search & Location Selection | Complete |
+| SRCH-04 | Phase 5: Search & Location Selection | Complete |
 | ROUT-01 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |
 | ROUT-02 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |
 | ROUT-03 | Phase 6: Route Visualization & Directions | Pending |
