@@ -1,5 +1,6 @@
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
+import type { NavNode } from '@shared/types'
 import type Konva from 'konva'
 import KonvaModule from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -7,11 +8,14 @@ import { Layer, Stage, Text } from 'react-konva'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
 import { useGraphData } from '../hooks/useGraphData'
 import { useMapViewport } from '../hooks/useMapViewport'
+import { routesAreIdentical, useRouteDirections } from '../hooks/useRouteDirections'
 import { useRouteSelection } from '../hooks/useRouteSelection'
 import { useViewportSize } from '../hooks/useViewportSize'
+import { DirectionsSheet } from './DirectionsSheet'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
+import { RouteLayer } from './RouteLayer'
 import { SearchOverlay } from './SearchOverlay'
 import { SelectionMarkerLayer } from './SelectionMarkerLayer'
 import ZoomControls from './ZoomControls'
@@ -43,13 +47,13 @@ export default function FloorPlanCanvas() {
     height: number
   } | null>(null)
   const [stageScale, setStageScale] = useState<number>(1)
+  const [activeMode, setActiveMode] = useState<'standard' | 'accessible'>('standard')
+  const [sheetOpen, setSheetOpen] = useState<boolean>(false)
 
   const routeSelection = useRouteSelection()
   const graphState = useGraphData()
 
-  // Route computation result — consumed by Phase 6 for visualization
-  // @ts-expect-error routeResult will be consumed by Phase 6 route visualization layer
-  // biome-ignore lint/correctness/noUnusedVariables: stored for Phase 6 consumption
+  // Route computation result — fully consumed by RouteLayer and DirectionsSheet
   const [routeResult, setRouteResult] = useState<RouteResult | null>(null)
 
   // Toast state
@@ -61,6 +65,23 @@ export default function FloorPlanCanvas() {
     if (graphState.status === 'loaded') return graphState.data.nodes
     return []
   }, [graphState])
+
+  // Node map for direction step lookup
+  const nodeMap = useMemo<Map<string, NavNode>>(() => {
+    if (graphState.status !== 'loaded') return new Map()
+    return new Map(graphState.data.nodes.map((n) => [n.id, n]))
+  }, [graphState])
+
+  // Compute turn-by-turn directions for each mode
+  const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard')
+  const accessibleDirections = useRouteDirections(
+    routeResult?.accessible ?? null,
+    nodeMap,
+    'accessible',
+  )
+  const routesIdentical = routeResult
+    ? routesAreIdentical(routeResult.standard, routeResult.accessible)
+    : false
 
   // Memoize PathfindingEngine from loaded NavGraph
   const engine = useMemo(() => {
@@ -172,18 +193,50 @@ export default function FloorPlanCanvas() {
     setRouteResult({ standard, accessible })
 
     if (standard.found || accessible.found) {
+      setSheetOpen(true)
+      setActiveMode('standard')
       showToast('Route calculated')
     } else {
       showToast('No route found', true)
     }
   }, [routeSelection.start, routeSelection.destination, engine, fitToBounds, showToast])
 
-  // Clear route result when selections change (start or dest cleared)
+  // Clear route result and close sheet when selections change (start or dest cleared)
   useEffect(() => {
     if (!routeSelection.start || !routeSelection.destination) {
       setRouteResult(null)
+      setSheetOpen(false)
     }
   }, [routeSelection.start, routeSelection.destination])
+
+  /** Close directions sheet and return to A/B pin compact strip */
+  const handleSheetBack = useCallback(() => {
+    setSheetOpen(false)
+  }, [])
+
+  /** Convert node IDs to flat pixel coordinate array for RouteLayer */
+  const buildRoutePoints = useCallback(
+    (nodeIds: string[]): number[] => {
+      if (!imageRect) return []
+      const pts: number[] = []
+      for (const id of nodeIds) {
+        const n = nodeMap.get(id)
+        if (!n) continue
+        pts.push(imageRect.x + n.x * imageRect.width, imageRect.y + n.y * imageRect.height)
+      }
+      return pts
+    },
+    [imageRect, nodeMap],
+  )
+
+  const activeRoutePoints = useMemo(() => {
+    if (!routeResult) return []
+    const result = activeMode === 'standard' ? routeResult.standard : routeResult.accessible
+    if (!result.found) return []
+    return buildRoutePoints(result.nodeIds)
+  }, [routeResult, activeMode, buildRoutePoints])
+
+  const activeRouteColor = activeMode === 'standard' ? '#3b82f6' : '#22c55e'
 
   const interactionDisabled = isLoading || isFailed
 
@@ -219,6 +272,13 @@ export default function FloorPlanCanvas() {
             />
           )}
         </Layer>
+
+        {/* Route path — animated dashed line for active route */}
+        <RouteLayer
+          points={activeRoutePoints}
+          color={activeRouteColor}
+          visible={sheetOpen && activeRoutePoints.length >= 4}
+        />
 
         {/* Landmarks — markers above floor plan image */}
         <LandmarkLayer
@@ -269,6 +329,44 @@ export default function FloorPlanCanvas() {
         onZoomOut={() => zoomByButton(-1)}
         disabled={interactionDisabled}
       />
+
+      <DirectionsSheet
+        open={sheetOpen}
+        standard={routeResult?.standard ?? null}
+        accessible={routeResult?.accessible ?? null}
+        standardDirections={standardDirections}
+        accessibleDirections={accessibleDirections}
+        routesIdentical={routesIdentical}
+        activeMode={activeMode}
+        onTabChange={setActiveMode}
+        onBack={handleSheetBack}
+        startNode={routeSelection.start}
+        destNode={routeSelection.destination}
+      />
+
+      {/* Canvas legend — color key for route lines */}
+      {sheetOpen && routeResult && (routeResult.standard.found || routeResult.accessible.found) && (
+        <div className="absolute bottom-40 right-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs">
+          {routeResult.standard.found && (
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
+              <span className="text-slate-700">Standard</span>
+            </div>
+          )}
+          {routeResult.accessible.found && !routesIdentical && (
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-1.5 rounded-full bg-green-500 inline-block" />
+              <span className="text-slate-700">Accessible</span>
+            </div>
+          )}
+          {routesIdentical && (
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
+              <span className="text-slate-700">Standard (accessible)</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Toast notification */}
       {toast && (
