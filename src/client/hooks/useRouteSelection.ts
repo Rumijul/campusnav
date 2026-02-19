@@ -10,6 +10,7 @@ export interface RouteSelection {
   bothSelected: boolean
   setStart: (node: NavNode | null) => void
   setDestination: (node: NavNode | null) => void
+  setActiveField: (field: 'start' | 'destination') => void
   setFromTap: (node: NavNode) => void
   swap: () => void
   clearStart: () => void
@@ -102,6 +103,7 @@ export function useRouteSelection(): RouteSelection {
     bothSelected,
     setStart,
     setDestination,
+    setActiveField,
     setFromTap,
     swap,
     clearStart,
