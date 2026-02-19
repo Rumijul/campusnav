@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plan 2 of 5 complete)
+**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plans 1 & 2 of 5 complete)
 
 ## Current Position
 
@@ -32,13 +32,14 @@ Progress: [█████░░░░░] 52%
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
-| 06-route-visualization-directions | 2/5 | ~3 min | ~2 min |
+| 06-route-visualization-directions | 2/5 | ~7 min | ~4 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min
 - Trend: stable
 
 *Updated after each plan completion*
+| Phase 06-route-visualization-directions P01 | 4 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase 05-03]: Human approved all 8 must-have truths — search & location selection complete; no gap closure needed
 - [Phase 06-02]: Konva.Animation with dashOffset imperative mutation (not React setState) for 60fps-safe route line animation
 - [Phase 06-02]: tension=0 on Konva Line — ensures straight segments through node waypoints, not spline interpolation
+- [Phase 06-01]: Screen-space bearing: atan2(dx,-dy) gives clockwise-from-north in canvas coords (y-down)
+- [Phase 06-01]: generateDirections exported as pure function for direct unit testing without React wrapper
+- [Phase 06-01]: noUncheckedIndexedAccess: undefined guards instead of ! assertions for Map.get() and array indexing
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 06-02-PLAN.md — RouteLayer animated dashed line component created
+Stopped at: Completed 06-01-PLAN.md — useRouteDirections TDD complete (23 tests pass)
 Resume file: None
-Next action: Execute 06-03-PLAN.md (useRouteDirections hook — TDD GREEN phase)
+Next action: Execute 06-03-PLAN.md (DirectionsSheet)

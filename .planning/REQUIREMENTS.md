@@ -27,8 +27,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ROUT-02**: App computes a wheelchair-accessible shortest path that excludes stairs and non-accessible edges
 - [x] **ROUT-03**: App displays both standard and wheelchair-accessible routes simultaneously with distinct color coding
 - [x] **ROUT-04**: App draws visual route paths on the floor plan map from start to destination
-- [ ] **ROUT-05**: App provides step-by-step text directions with landmark references (e.g., "Turn left at the cafeteria")
-- [ ] **ROUT-06**: App shows estimated walking time for both standard and wheelchair-accessible routes
+- [x] **ROUT-05**: App provides step-by-step text directions with landmark references (e.g., "Turn left at the cafeteria")
+- [x] **ROUT-06**: App shows estimated walking time for both standard and wheelchair-accessible routes
 - [x] **ROUT-07**: User can tap a location to see its details (name, room number, type, description)
 
 ### Admin — Authentication
@@ -100,8 +100,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-02 | Phase 3: Graph Data Model & Pathfinding Engine | Complete |
 | ROUT-03 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-04 | Phase 6: Route Visualization & Directions | Complete |
-| ROUT-05 | Phase 6: Route Visualization & Directions | Pending |
-| ROUT-06 | Phase 6: Route Visualization & Directions | Pending |
+| ROUT-05 | Phase 6: Route Visualization & Directions | Complete |
+| ROUT-06 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-07 | Phase 4: Map Landmarks & Location Display | Complete |
 | ADMN-01 | Phase 8: Admin Authentication | Pending |
 | ADMN-02 | Phase 7: API & Data Persistence | Pending |
