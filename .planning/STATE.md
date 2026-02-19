@@ -5,22 +5,22 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 5 complete — ready for Phase 6 Route Visualization & Directions
+**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plan 2 of 5 complete)
 
 ## Current Position
 
-Phase: 5 of 10 (Search & Location Selection) — COMPLETE
-Plan: 3 of 3 in current phase (all complete)
-Status: Phase 5 complete — all search & location selection features human-verified
-Last activity: 2026-02-19 — Completed 05-03-PLAN.md (human verification approved)
+Phase: 6 of 10 (Route Visualization & Directions) — IN PROGRESS
+Plan: 2 of 5 in current phase
+Status: Phase 6 Plan 02 complete — RouteLayer animated dashed line component created
+Last activity: 2026-02-19 — Completed 06-02-PLAN.md (RouteLayer component)
 
-Progress: [█████░░░░░] 50%
+Progress: [█████░░░░░] 52%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 8 min
+- Total plans completed: 12
+- Average duration: 7 min
 - Total execution time: 1.3 hours
 
 **By Phase:**
@@ -32,6 +32,7 @@ Progress: [█████░░░░░] 50%
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
+| 06-route-visualization-directions | 2/5 | ~3 min | ~2 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min
@@ -86,6 +87,8 @@ Recent decisions affecting current work:
 - [Phase 05-02]: Biome a11y compliance — compact strip uses sibling button elements, no role="button" on divs, no nested buttons
 - [Phase 05-02]: routeResult state stored but not consumed — Phase 6 will render route path overlay
 - [Phase 05-03]: Human approved all 8 must-have truths — search & location selection complete; no gap closure needed
+- [Phase 06-02]: Konva.Animation with dashOffset imperative mutation (not React setState) for 60fps-safe route line animation
+- [Phase 06-02]: tension=0 on Konva Line — ensures straight segments through node waypoints, not spline interpolation
 
 ### Pending Todos
 
@@ -98,6 +101,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 05-03-PLAN.md — Phase 5 complete, all search & location selection features human-verified
+Stopped at: Completed 06-02-PLAN.md — RouteLayer animated dashed line component created
 Resume file: None
-Next action: Plan Phase 6 (Route Visualization & Directions)
+Next action: Execute 06-03-PLAN.md (useRouteDirections hook — TDD GREEN phase)
