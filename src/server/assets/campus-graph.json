@@ -1,0 +1,578 @@
+{
+  "nodes": [
+    {
+      "id": "entrance-main",
+      "x": 0.5,
+      "y": 0.95,
+      "label": "Main Entrance",
+      "type": "entrance",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "E-01",
+      "description": "Main building entrance with automatic sliding doors",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Automatic sliding doors, level threshold, accessible ramp on left side"
+    },
+    {
+      "id": "entrance-side",
+      "x": 0.92,
+      "y": 0.6,
+      "label": "Side Entrance",
+      "type": "entrance",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "E-02",
+      "description": "East side entrance near faculty parking",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Push-button automatic door opener available"
+    },
+    {
+      "id": "elevator-north",
+      "x": 0.2,
+      "y": 0.2,
+      "label": "Elevator North",
+      "type": "elevator",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "ELV-N",
+      "description": "North wing elevator serving all floors",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Fully accessible, audio announcements, Braille controls"
+    },
+    {
+      "id": "elevator-south",
+      "x": 0.8,
+      "y": 0.2,
+      "label": "Elevator South",
+      "type": "elevator",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "ELV-S",
+      "description": "South wing elevator serving all floors",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Fully accessible, audio announcements, Braille controls"
+    },
+    {
+      "id": "restroom-male",
+      "x": 0.15,
+      "y": 0.5,
+      "label": "Restroom (Male)",
+      "type": "restroom",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "WC-M",
+      "description": "Men's restroom, north corridor",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Standard stalls only, no accessible stall"
+    },
+    {
+      "id": "restroom-female",
+      "x": 0.15,
+      "y": 0.6,
+      "label": "Restroom (Female)",
+      "type": "restroom",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "WC-F",
+      "description": "Women's restroom, north corridor",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Standard stalls only, no accessible stall"
+    },
+    {
+      "id": "restroom-accessible",
+      "x": 0.15,
+      "y": 0.7,
+      "label": "Accessible Restroom",
+      "type": "restroom",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "WC-A",
+      "description": "Gender-neutral accessible restroom",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Fully accessible, wide door, grab bars, lowered sink"
+    },
+    {
+      "id": "landmark-cafeteria",
+      "x": 0.5,
+      "y": 0.75,
+      "label": "Cafeteria",
+      "type": "landmark",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "CAF-01",
+      "description": "Main cafeteria — open 7am–8pm weekdays",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Level access, accessible seating available throughout"
+    },
+    {
+      "id": "landmark-library",
+      "x": 0.5,
+      "y": 0.15,
+      "label": "Library",
+      "type": "landmark",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "LIB-01",
+      "description": "Science library with study rooms — open 8am–10pm",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Fully accessible, screen readers on 2 terminals"
+    },
+    {
+      "id": "landmark-info-desk",
+      "x": 0.5,
+      "y": 0.85,
+      "label": "Info Desk",
+      "type": "landmark",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "INFO",
+      "description": "Main information and reception desk",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Lowered counter section for wheelchair users"
+    },
+    {
+      "id": "room-cs-lab",
+      "x": 0.35,
+      "y": 0.3,
+      "label": "CS Lab",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "101",
+      "description": "Computer Science lab with 40 workstations",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "2 adjustable-height workstations near entrance"
+    },
+    {
+      "id": "room-lecture-a",
+      "x": 0.65,
+      "y": 0.3,
+      "label": "Lecture Hall A",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "102A",
+      "description": "Large lecture hall, capacity 150 seats",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Wheelchair spaces in front row, induction loop installed"
+    },
+    {
+      "id": "room-lecture-b",
+      "x": 0.65,
+      "y": 0.5,
+      "label": "Lecture Hall B",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "102B",
+      "description": "Medium lecture hall, capacity 80 seats",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Wheelchair spaces on left aisle, induction loop installed"
+    },
+    {
+      "id": "room-office-204",
+      "x": 0.3,
+      "y": 0.15,
+      "label": "Faculty Office 204",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "204",
+      "description": "Dr. Smith — Computer Science department",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Accessible doorway width"
+    },
+    {
+      "id": "room-office-205",
+      "x": 0.45,
+      "y": 0.15,
+      "label": "Faculty Office 205",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "205",
+      "description": "Dr. Patel — Mathematics department",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Accessible doorway width"
+    },
+    {
+      "id": "room-lounge",
+      "x": 0.35,
+      "y": 0.75,
+      "label": "Student Lounge",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "106",
+      "description": "Student lounge with seating and vending machines",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Fully accessible, lowered vending machine controls"
+    },
+    {
+      "id": "room-print",
+      "x": 0.65,
+      "y": 0.75,
+      "label": "Print Room",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "107",
+      "description": "Self-service printing and copying",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "One printer at accessible height"
+    },
+    {
+      "id": "room-storage",
+      "x": 0.08,
+      "y": 0.35,
+      "label": "Storage Room",
+      "type": "room",
+      "searchable": true,
+      "floor": 1,
+      "roomNumber": "108",
+      "description": "Equipment storage — staff access only",
+      "buildingName": "Science Building",
+      "accessibilityNotes": "Accessible entry via wide door"
+    },
+    {
+      "id": "junction-a",
+      "x": 0.5,
+      "y": 0.55,
+      "label": "Junction A",
+      "type": "junction",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "junction-b",
+      "x": 0.5,
+      "y": 0.35,
+      "label": "Junction B",
+      "type": "junction",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "junction-c",
+      "x": 0.25,
+      "y": 0.55,
+      "label": "Junction C",
+      "type": "junction",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "hallway-1",
+      "x": 0.5,
+      "y": 0.2,
+      "label": "Hallway 1",
+      "type": "hallway",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "hallway-2",
+      "x": 0.75,
+      "y": 0.55,
+      "label": "Hallway 2",
+      "type": "hallway",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "stairs-north",
+      "x": 0.08,
+      "y": 0.2,
+      "label": "Stairs North",
+      "type": "stairs",
+      "searchable": false,
+      "floor": 1
+    },
+    {
+      "id": "ramp-west",
+      "x": 0.08,
+      "y": 0.78,
+      "label": "Ramp West",
+      "type": "ramp",
+      "searchable": false,
+      "floor": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-01",
+      "sourceId": "entrance-main",
+      "targetId": "landmark-info-desk",
+      "standardWeight": 0.1,
+      "accessibleWeight": 0.1,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-02",
+      "sourceId": "landmark-info-desk",
+      "targetId": "junction-a",
+      "standardWeight": 0.12,
+      "accessibleWeight": 0.12,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-03",
+      "sourceId": "junction-a",
+      "targetId": "landmark-cafeteria",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-04",
+      "sourceId": "junction-a",
+      "targetId": "room-lounge",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-05",
+      "sourceId": "junction-a",
+      "targetId": "room-print",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-06",
+      "sourceId": "junction-a",
+      "targetId": "junction-c",
+      "standardWeight": 0.25,
+      "accessibleWeight": 0.25,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-07",
+      "sourceId": "junction-a",
+      "targetId": "junction-b",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-08",
+      "sourceId": "junction-a",
+      "targetId": "hallway-2",
+      "standardWeight": 0.25,
+      "accessibleWeight": 0.25,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-09",
+      "sourceId": "junction-b",
+      "targetId": "room-cs-lab",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-10",
+      "sourceId": "junction-b",
+      "targetId": "room-lecture-a",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-11",
+      "sourceId": "junction-b",
+      "targetId": "hallway-1",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-12",
+      "sourceId": "hallway-1",
+      "targetId": "landmark-library",
+      "standardWeight": 0.05,
+      "accessibleWeight": 0.05,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-13",
+      "sourceId": "hallway-1",
+      "targetId": "room-office-204",
+      "standardWeight": 0.2,
+      "accessibleWeight": 0.2,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-14",
+      "sourceId": "hallway-1",
+      "targetId": "room-office-205",
+      "standardWeight": 0.05,
+      "accessibleWeight": 0.05,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-15",
+      "sourceId": "hallway-1",
+      "targetId": "elevator-north",
+      "standardWeight": 0.3,
+      "accessibleWeight": 0.3,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-16",
+      "sourceId": "hallway-2",
+      "targetId": "room-lecture-b",
+      "standardWeight": 0.05,
+      "accessibleWeight": 0.05,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-17",
+      "sourceId": "hallway-2",
+      "targetId": "entrance-side",
+      "standardWeight": 0.05,
+      "accessibleWeight": 0.05,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-18",
+      "sourceId": "hallway-2",
+      "targetId": "elevator-south",
+      "standardWeight": 0.3,
+      "accessibleWeight": 0.3,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-19",
+      "sourceId": "junction-c",
+      "targetId": "restroom-male",
+      "standardWeight": 0.1,
+      "accessibleWeight": 0.1,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-20",
+      "sourceId": "junction-c",
+      "targetId": "restroom-female",
+      "standardWeight": 0.1,
+      "accessibleWeight": 0.1,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-21",
+      "sourceId": "junction-c",
+      "targetId": "restroom-accessible",
+      "standardWeight": 0.12,
+      "accessibleWeight": 0.12,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-22",
+      "sourceId": "junction-c",
+      "targetId": "room-storage",
+      "standardWeight": 0.27,
+      "accessibleWeight": 0.27,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-23",
+      "sourceId": "junction-c",
+      "targetId": "stairs-north",
+      "standardWeight": 0.17,
+      "accessibleWeight": 1e10,
+      "accessible": false,
+      "bidirectional": true
+    },
+    {
+      "id": "e-24",
+      "sourceId": "room-storage",
+      "targetId": "stairs-north",
+      "standardWeight": 0.15,
+      "accessibleWeight": 1e10,
+      "accessible": false,
+      "bidirectional": true
+    },
+    {
+      "id": "e-25",
+      "sourceId": "elevator-north",
+      "targetId": "stairs-north",
+      "standardWeight": 0.12,
+      "accessibleWeight": 1e10,
+      "accessible": false,
+      "bidirectional": true
+    },
+    {
+      "id": "e-26",
+      "sourceId": "ramp-west",
+      "targetId": "junction-c",
+      "standardWeight": 0.25,
+      "accessibleWeight": 0.25,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-27",
+      "sourceId": "ramp-west",
+      "targetId": "landmark-cafeteria",
+      "standardWeight": 0.25,
+      "accessibleWeight": 0.25,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-28",
+      "sourceId": "room-lounge",
+      "targetId": "landmark-cafeteria",
+      "standardWeight": 0.15,
+      "accessibleWeight": 0.15,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-29",
+      "sourceId": "room-print",
+      "targetId": "hallway-2",
+      "standardWeight": 0.1,
+      "accessibleWeight": 0.1,
+      "accessible": true,
+      "bidirectional": true
+    },
+    {
+      "id": "e-30",
+      "sourceId": "room-lecture-a",
+      "targetId": "hallway-2",
+      "standardWeight": 0.25,
+      "accessibleWeight": 0.25,
+      "accessible": true,
+      "bidirectional": true
+    }
+  ],
+  "metadata": {
+    "buildingName": "Science Building",
+    "floor": 1,
+    "lastUpdated": "2026-02-19T00:00:00.000Z"
+  }
+}

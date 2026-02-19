@@ -28,12 +28,12 @@
  * - `room` — Classroom, office, lab
  * - `entrance` — Building entrance/exit
  * - `elevator` — Elevator (also an accessibility waypoint)
- * - `ramp` — Ramp (also an accessibility waypoint)
  * - `restroom` — Restroom
  * - `landmark` — Named point of interest (cafeteria, library)
  *
- * **Invisible to students** (routing infrastructure):
- * - `stairs` — Stairwell (navigation waypoint, visible on map but not searchable)
+ * **Invisible to students** (routing infrastructure only):
+ * - `stairs` — Stairwell navigation waypoint, HIDDEN from student map (routing infrastructure only)
+ * - `ramp` — Ramp navigation waypoint, HIDDEN from student map (routing infrastructure only)
  * - `junction` — Hallway intersection
  * - `hallway` — Mid-hallway point
  */
@@ -66,6 +66,14 @@ export interface NavNodeData {
   searchable: boolean
   /** Floor number (1-based). Enables multi-floor routing in later phases. */
   floor: number
+  /** Room/office number identifier (e.g. "204", "A-102") */
+  roomNumber?: string
+  /** Human-readable description shown in location detail sheet */
+  description?: string
+  /** Building name for multi-building campuses */
+  buildingName?: string
+  /** Accessibility information shown in detail sheet */
+  accessibilityNotes?: string
 }
 
 // ============================================================
