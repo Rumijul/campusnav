@@ -8,6 +8,7 @@ import { useViewportSize } from '../hooks/useViewportSize'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
+import { LandmarkSheet } from './LandmarkSheet'
 import ZoomControls from './ZoomControls'
 
 /**
@@ -116,6 +117,7 @@ export default function FloorPlanCanvas() {
         onZoomOut={() => zoomByButton(-1)}
         disabled={interactionDisabled}
       />
+      <LandmarkSheet node={selectedNode} onClose={() => setSelectedNode(null)} />
     </div>
   )
 }
