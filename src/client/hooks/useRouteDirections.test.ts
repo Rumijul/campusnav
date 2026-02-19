@@ -191,20 +191,16 @@ describe('generateDirections — right turn path', () => {
 
 describe('generateDirections — sharp turns', () => {
   it('sharp-right: bearing delta >= 120° positive', () => {
-    // a(0,0) → b(0.5,0) → c(0,0) (roughly 180°, going back)
-    // prev→curr = east (90°), curr→next = west (270° or -90°)
-    // delta = -90 - 90 = -180° or normalize to 180 → could be sharp either way
-    // Use precise: a(0,0.5) → b(0.5,0.5) → c(0.4,1)
-    // prev→curr: east (90°), curr→next: atan2(0.5, -0.1) ≈ south-west (≈259°)
-    // delta ≈ 259-90 = 169° (normalize: still big positive → sharp-right)
+    // a(0,0.5) → b(0.5,0.5) → c(0.356,0.705)
+    // prev→curr bearing = east (90°)
+    // curr→next bearing ≈ 215° (SSW) → delta ≈ 125° → sharp-right
     const a = makeNode('a', 0, 0.5)
     const b = makeNode('b', 0.5, 0.5)
-    const c = makeNode('c', 0.4, 1.0) // almost behind: going back-south
+    const c = makeNode('c', 0.356, 0.705) // bearing from b ≈ 215°, delta ≈ 125°
     const nodeMap = makeMap([a, b, c])
     const result = generateDirections(['a', 'b', 'c'], nodeMap, 'standard')
     const step = result.steps[0] as DirectionStep
-    // Going east then turning sharply to south/south-west — large positive delta
-    expect(['sharp-right', 'sharp-left']).toContain(step.icon)
+    expect(step.icon).toBe('sharp-right')
   })
 })
 
