@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plans 1 & 2 of 5 complete)
+**Current focus:** Phase 6 in progress — Route Visualization & Directions (Plans 1, 2 & 3 of 5 complete)
 
 ## Current Position
 
 Phase: 6 of 10 (Route Visualization & Directions) — IN PROGRESS
-Plan: 2 of 5 in current phase
-Status: Phase 6 Plan 02 complete — RouteLayer animated dashed line component created
-Last activity: 2026-02-19 — Completed 06-02-PLAN.md (RouteLayer component)
+Plan: 3 of 5 in current phase
+Status: Phase 6 Plan 03 complete — DirectionsSheet Vaul bottom sheet with Standard/Accessible tabs
+Last activity: 2026-02-19 — Completed 06-03-PLAN.md (DirectionsSheet component)
 
-Progress: [█████░░░░░] 52%
+Progress: [██████░░░░] 56%
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [█████░░░░░] 52%
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
-| 06-route-visualization-directions | 2/5 | ~7 min | ~4 min |
+| 06-route-visualization-directions | 3/5 | ~9 min | ~3 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min
@@ -40,6 +40,7 @@ Progress: [█████░░░░░] 52%
 
 *Updated after each plan completion*
 | Phase 06-route-visualization-directions P01 | 4 min | 2 tasks | 2 files |
+| Phase 06-route-visualization-directions P03 | 2 min | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -92,7 +93,8 @@ Recent decisions affecting current work:
 - [Phase 06-02]: tension=0 on Konva Line — ensures straight segments through node waypoints, not spline interpolation
 - [Phase 06-01]: Screen-space bearing: atan2(dx,-dy) gives clockwise-from-north in canvas coords (y-down)
 - [Phase 06-01]: generateDirections exported as pure function for direct unit testing without React wrapper
-- [Phase 06-01]: noUncheckedIndexedAccess: undefined guards instead of ! assertions for Map.get() and array indexing
+- [Phase 06-03]: exactOptionalPropertyTypes compliance — spread conditional object pattern ({...condition ? {prop: val} : {}}) instead of prop={val | undefined}
+- [Phase 06-03]: DirectionsSheet tab state is stateless (activeMode/onTabChange via props); only snapPoint is local state
 
 ### Pending Todos
 
@@ -105,6 +107,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 06-01-PLAN.md — useRouteDirections TDD complete (23 tests pass)
+Stopped at: Completed 06-03-PLAN.md — DirectionsSheet Vaul bottom sheet created
 Resume file: None
-Next action: Execute 06-03-PLAN.md (DirectionsSheet)
+Next action: Execute 06-04-PLAN.md (wire DirectionsSheet into FloorPlanCanvas)
