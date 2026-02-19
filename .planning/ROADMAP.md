@@ -115,12 +115,14 @@ Plans:
   3. Step-by-step text directions are displayed with landmark references (e.g., "Turn left at the cafeteria")
   4. Estimated walking time is shown for both the standard route and the wheelchair-accessible route
   5. If only one route exists (e.g., standard and accessible routes are the same), the display handles this gracefully
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md — useRouteDirections hook: turn-by-turn step generation with landmark references and time estimates (TDD)
+- [ ] 06-02-PLAN.md — RouteLayer: animated dashed Konva route line (blue/green per mode)
+- [ ] 06-03-PLAN.md — DirectionsSheet: Vaul bottom sheet with Standard/Accessible tabs, step list, time estimates
+- [ ] 06-04-PLAN.md — FloorPlanCanvas wiring: RouteLayer + DirectionsSheet integration, legend, activeMode control
+- [ ] 06-05-PLAN.md — Human verification: animated route line, directions sheet, tab switching, legend, back arrow
 
 ### Phase 7: API & Data Persistence
 **Goal**: Graph data and floor plan images are persisted on the server and served to the student app
