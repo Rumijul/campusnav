@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Project Setup & Foundation** - Scaffold the monorepo, configure tooling, define core TypeScript types for the graph data model
 - [x] **Phase 2: Floor Plan Rendering** - Interactive 2D floor plan canvas with pan, zoom, and mobile touch gestures (completed 2026-02-18)
 - [ ] **Phase 3: Graph Data Model & Pathfinding Engine** - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
-- [ ] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap
+- [x] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap (completed 2026-02-19)
 - [ ] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search
 - [ ] **Phase 6: Route Visualization & Directions** - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
 - [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
@@ -199,7 +199,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 1. Project Setup & Foundation | 0/2 | Not started | - |
 | 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
-| 4. Map Landmarks & Location Display | 2/4 | In Progress|  |
+| 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
 | 5. Search & Location Selection | 0/3 | Not started | - |
 | 6. Route Visualization & Directions | 0/3 | Not started | - |
 | 7. API & Data Persistence | 0/3 | Not started | - |

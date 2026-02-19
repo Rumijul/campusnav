@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 4 executing — Map Landmarks & Location Display
+**Current focus:** Phase 4 complete — ready for Phase 5: Routing & Pathfinding UI
 
 ## Current Position
 
-Phase: 4 of 10 (Map Landmarks & Location Display) — IN PROGRESS
-Plan: 3 of TBD in current phase
-Status: 04-03 complete — LandmarkSheet (Vaul bottom sheet), vaul@1.1.2, wired into FloorPlanCanvas
-Last activity: 2026-02-19 — Completed 04-03 (landmark bottom sheet + detail view)
+Phase: 4 of 10 (Map Landmarks & Location Display) — COMPLETE
+Plan: 4 of 4 in current phase
+Status: 04-04 complete — Human verification passed (all 7 truths confirmed: markers, hidden nodes, counter-scaling, bottom sheet, dismissal, map interaction)
+Last activity: 2026-02-19 — Completed 04-04 (human verification checkpoint)
 
-Progress: [████░░░░░░] 38%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: 10 min
 - Total execution time: 1.0 hours
 
@@ -30,7 +30,7 @@ Progress: [████░░░░░░] 38%
 | 01-project-setup-foundation | 2/2 | 27 min | 13 min |
 | 02-floor-plan-rendering | 2/2 | 22 min | 11 min |
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
-| 04-map-landmarks-location-display | 2/TBD | ~11 min | ~5 min |
+| 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 
 **Recent Trend:**
 - Last 5 plans: 7 min, 15 min, 5 min, 3 min, 8 min, 3 min
@@ -75,7 +75,7 @@ Recent decisions affecting current work:
 - [Phase 04]: onScaleChange callback pattern in useMapViewport — thin event bridge to React state preserving 60fps direct Konva mutations
 - [Phase 04]: Counter-scaling via Group scaleX/Y=1/stageScale for constant screen-pixel markers during zoom
 - [Phase 04-03]: modal=false on Vaul Drawer.Root — keeps Konva map interactive while sheet is peeked; no overlay blocking canvas
-- [Phase 04-03]: key={node?.id} on Drawer.Root resets snap to peek on node change without useEffect
+- [Phase 04-04]: Human approved all 7 must-have truths — landmark display complete; use-image was pre-existing missing dep fixed with npm install
 
 ### Pending Todos
 
@@ -88,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 04-03-PLAN.md
-Resume file: .planning/phases/04-map-landmarks-location-display/04-03-SUMMARY.md
+Stopped at: Completed 04-04-PLAN.md
+Resume file: .planning/phases/04-map-landmarks-location-display/04-04-SUMMARY.md
