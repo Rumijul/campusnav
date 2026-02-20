@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 5.1 complete (UAT blockers fixed) — ready to resume Phase 6 Plan 05
+**Current focus:** Phase 6 plan 06 complete — UAT gaps fixed (back arrow, legend position, canvas pan)
 
 ## Current Position
 
-Phase: 5.1 of 10 (Issues Needed to Be Fixed) — COMPLETE
-Plan: 1 of 1 in current phase (phase complete)
-Status: Phase 5.1 Plan 01 complete — Vaul backdrop fix + campus-graph corridor alignment
-Last activity: 2026-02-20 — Completed 05.1-01-PLAN.md (UAT blocker fixes)
+Phase: 06 of 10 (Route Visualization + Directions) — In Progress
+Plan: 6 of 7 in current phase
+Status: Phase 06-06 complete — back arrow, legend position, canvas pan all fixed
+Last activity: 2026-02-20 — Completed 06-06-PLAN.md (UAT gap closure: 3 confirmed issues fixed)
 
 Progress: [███████░░░] 63%
 
@@ -32,8 +32,8 @@ Progress: [███████░░░] 63%
 | 03-graph-data-model-pathfinding-engine | 2/2 | 8 min | 4 min |
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
-| 05.1-issues-needed-to-be-fixed | 1/1 | 4 min | 4 min |
-| 06-route-visualization-directions | 4/5 | ~11 min | ~3 min |
+| 05.1-issues-needed-to-be-fixed | 2/2 | ~29 min | ~15 min |
+| 06-route-visualization-directions | 5/7 | ~14 min | ~3 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min, 4 min
@@ -43,6 +43,8 @@ Progress: [███████░░░] 63%
 | Phase 06-route-visualization-directions P01 | 4 min | 2 tasks | 2 files |
 | Phase 06-route-visualization-directions P04 | 2 min | 1 task | 1 file |
 | Phase 05.1-issues-needed-to-be-fixed P01 | 4 min | 2 tasks | 4 files |
+| Phase 05.1-issues-needed-to-be-fixed P02 | ~25 min | 3 tasks | 3 files |
+| Phase 06-route-visualization-directions P06 | 3 | 5 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -98,8 +100,13 @@ Recent decisions affecting current work:
 - [Phase 06-04]: RouteLayer sits inside Stage between FloorPlanImage Layer and LandmarkLayer — canvas-space positioning
 - [Phase 06-04]: buildRoutePoints uses useCallback (not useMemo) since it's a function; activeRoutePoints uses useMemo for the computed array
 - [Phase 06-04]: Sheet auto-opens at 35% peek on route computed; back arrow closes fully; clearing selections also closes
-- [Phase 05.1-01]: Drawer.Overlay pointer-events-none — explicit Overlay suppresses Vaul's auto-injected backdrop that blocks Konva canvas at opacity:0
-- [Phase 05.1-01]: Corridor-aligned graph coords — junction/hallway nodes on y=0.5, x=0.32, x=0.68 centerlines so route lines stay in hallways
+- [Phase 05.1-02]: Vaul v1.1.2 replaced with custom CSS bottom sheet — modal={false}+snapPoints was fundamentally broken; custom height-transition sheet has zero pointer-event conflicts
+- [Phase 05.1-02]: handleSheetBack calls routeSelection.clearAll() — back = exit route mode entirely (SUPERSEDED by 06-06: back now only closes sheet)
+- [Phase 05.1-02]: SearchOverlay sheetOpen prop collapses compact strip to pill — prevents screen-space conflict with directions sheet
+- [Phase 05.1-02]: Clear (✕) button in compact strip — direct route discard without entering search UI
+- [Phase 06-06]: routeVisible state decoupled from sheetOpen — back arrow closes sheet while route line stays visible
+- [Phase 06-06]: handleSheetBack calls setSheetOpen(false) not clearAll() — back = hide sheet, X = exit route mode
+- [Phase 06-06]: useMapViewport: preventDefault only on touches.length >= 2 to unblock single-finger canvas pan after route
 
 ### Pending Todos
 
@@ -116,6 +123,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 05.1-01-PLAN.md — Vaul backdrop fix + campus-graph corridor alignment
+Stopped at: Completed 06-06-PLAN.md — back arrow closes sheet without clearing route, legend above sheet, canvas pan unblocked
 Resume file: None
-Next action: Execute 06-05-PLAN.md (end-to-end verification)
+Next action: Execute 06-07-PLAN.md (remaining route visualization work or UAT)

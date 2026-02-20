@@ -17,6 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Graph Data Model & Pathfinding Engine** - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
 - [x] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap (completed 2026-02-19)
 - [x] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search (completed 2026-02-19)
+- [x] **Phase 5.1: Issues needed to be fixed** - Urgent fixes discovered mid-milestone (INSERTED) (completed 2026-02-20)
 - [ ] **Phase 6: Route Visualization & Directions** - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
 - [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
@@ -104,6 +105,20 @@ Plans:
 - [ ] 05-01-PLAN.md — Route selection state (useRouteSelection hook), A/B labeled pin markers, tap-to-select wiring
 - [ ] 05-02-PLAN.md — Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger
 - [ ] 05-03-PLAN.md — Human verification: search, tap-to-select, nearest POI, compact strip, auto-pan
+
+### Phase 05.1: Issues needed to be fixed (INSERTED)
+
+**Goal:** Fix two UAT blockers — Vaul backdrop blocks Konva canvas pan after route selection, and campus-graph node coordinates don't align with floor plan corridors causing routes to visually cut through walls
+**Depends on:** Phase 5
+**Requirements**: FIX-01 (map pan unblocked after route selection), FIX-02 (route line follows floor plan corridors)
+**Success Criteria** (what must be TRUE):
+  1. After selecting a route and the directions sheet peeks open, the map can still be panned and zoomed freely
+  2. Route lines follow the hallway corridors of the floor plan image — no lines cut through walls
+**Plans:** 2 plans
+
+Plans:
+- [x] 05.1-01-PLAN.md — Fix Vaul overlay blocking canvas pan (DirectionsSheet.tsx) + realign campus-graph.json node coordinates to corridor centerlines
+- [x] 05.1-02-PLAN.md — Human verification: map pans with sheet open, route follows corridors
 
 ### Phase 6: Route Visualization & Directions
 **Goal**: Users can see their route drawn on the map and read step-by-step walking directions
@@ -193,7 +208,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 → 8 → 9 → 10
 Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 
 | Phase | Plans Complete | Status | Completed |
@@ -203,7 +218,8 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
 | 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
 | 5. Search & Location Selection | 3/3 | Complete   | 2026-02-19 |
-| 6. Route Visualization & Directions | 0/3 | Not started | - |
+| 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete   | 2026-02-20 |
+| 6. Route Visualization & Directions | 5/7 | In Progress|  |
 | 7. API & Data Persistence | 0/3 | Not started | - |
 | 8. Admin Authentication | 0/2 | Not started | - |
 | 9. Admin Map Editor — Visual | 0/4 | Not started | - |
