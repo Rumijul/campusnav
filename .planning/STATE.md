@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 7 IN PROGRESS — Plan 01 complete; DB schema + client ready; Plan 02 next
+**Current focus:** Phase 7 IN PROGRESS — Plans 01 and 03 complete; loading states + double-fetch fix done; Plan 04 next
 
 ## Current Position
 
 Phase: 07 of 10 (API & Data Persistence) — IN PROGRESS
-Plan: 1 of 4 in current phase (Plan 01 complete)
-Status: Phase 07-01 complete — Drizzle schema, DB client, migration file, .gitignore all done
-Last activity: 2026-02-20 — Completed 07-01-PLAN.md (Drizzle ORM setup + SQLite schema)
+Plan: 3 of 4 in current phase (Plans 01 and 03 complete)
+Status: Phase 07-03 complete — useGraphData retry logic, HTML spinner overlay, LandmarkLayer prop refactor
+Last activity: 2026-02-21 — Completed 07-03-PLAN.md (loading states + double-fetch elimination)
 
-Progress: [████████░░] 72%
+Progress: [████████░░] 74%
 
 ## Performance Metrics
 
@@ -47,6 +47,8 @@ Progress: [████████░░] 72%
 | Phase 06-route-visualization-directions P06 | 3 min | 5 tasks | 2 files |
 | Phase 06-route-visualization-directions P07 | 15 min | 2 tasks | 2 files |
 | Phase 07-api-data-persistence P01 | 2 min | 2 tasks | 8 files |
+| Phase 07-api-data-persistence P03 | 5 min | 2 tasks | 3 files |
+| Phase 07-api-data-persistence P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -115,6 +117,9 @@ Recent decisions affecting current work:
 - [Phase 07-01]: Migration-first approach — drizzle-kit generate creates committed SQL files (not push)
 - [Phase 07-01]: mkdirSync({ recursive: true }) in client.ts auto-creates data/ on first run
 - [Phase 07-01]: 1e10 sentinel for non-accessible edges stored as REAL — never Infinity (JSON.stringify(Infinity) = null)
+- [Phase 07-03]: AbortController replaces cancelled boolean — signal threads through retry loop enabling true fetch abort on unmount
+- [Phase 07-03]: HTML overlay (not Konva Text) for graph loading/error states — z-10 + pointer-events-none keeps canvas pannable during load
+- [Phase 07-03]: Prop-lifting pattern: LandmarkLayer converted to pure display component, nodes passed from FloorPlanCanvas to eliminate duplicate GET /api/map
 
 ### Pending Todos
 
@@ -130,7 +135,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-20
-Stopped at: Completed 07-01-PLAN.md — Drizzle schema, DB client singleton, migration file, .gitignore updated
+Last session: 2026-02-21
+Stopped at: Completed 07-03-PLAN.md — useGraphData retry logic, HTML spinner overlay, LandmarkLayer refactored to prop-driven component
 Resume file: None
-Next action: Execute 07-02-PLAN.md (startup seeder + /api/map handler rewrite)
+Next action: Execute 07-04-PLAN.md (admin API endpoints)
