@@ -111,9 +111,12 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
       const stage = stageRef.current
       if (!stage) return
 
-      e.evt.preventDefault()
-
       const touches = e.evt.touches
+      // Only prevent default for multi-touch (pinch/rotate) — single-finger
+      // drag must reach Konva's draggable handler via native touch events
+      if (touches.length >= 2) {
+        e.evt.preventDefault()
+      }
       if (touches.length < 2) return
 
       // Hand off from single-finger drag to two-finger pinch

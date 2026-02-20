@@ -49,6 +49,9 @@ export default function FloorPlanCanvas() {
   const [stageScale, setStageScale] = useState<number>(1)
   const [activeMode, setActiveMode] = useState<'standard' | 'accessible'>('standard')
   const [sheetOpen, setSheetOpen] = useState<boolean>(false)
+  // routeVisible tracks whether the route line should be drawn — decoupled from sheetOpen
+  // so the line stays visible after pressing Back (sheet closes but route remains)
+  const [routeVisible, setRouteVisible] = useState<boolean>(false)
 
   const routeSelection = useRouteSelection()
   const graphState = useGraphData()
@@ -194,6 +197,7 @@ export default function FloorPlanCanvas() {
 
     if (standard.found || accessible.found) {
       setSheetOpen(true)
+      setRouteVisible(true)
       setActiveMode('standard')
       showToast('Route calculated')
     } else {
@@ -206,14 +210,14 @@ export default function FloorPlanCanvas() {
     if (!routeSelection.start || !routeSelection.destination) {
       setRouteResult(null)
       setSheetOpen(false)
+      setRouteVisible(false)
     }
   }, [routeSelection.start, routeSelection.destination])
 
-  /** Back arrow in directions sheet — clear selections entirely so user starts fresh */
+  /** Back arrow in directions sheet — close sheet only, keep route line visible */
   const handleSheetBack = useCallback(() => {
-    routeSelection.clearAll()
-    // sheetOpen and routeResult are cleared by the useEffect watcher above
-  }, [routeSelection])
+    setSheetOpen(false)
+  }, [])
 
   /** Convert node IDs to flat pixel coordinate array for RouteLayer */
   const buildRoutePoints = useCallback(
@@ -283,7 +287,7 @@ export default function FloorPlanCanvas() {
         <RouteLayer
           points={activeRoutePoints}
           color={activeRouteColor}
-          visible={sheetOpen && activeRoutePoints.length >= 4}
+          visible={routeVisible && activeRoutePoints.length >= 4}
         />
 
         {/* Landmarks — markers above floor plan image */}
@@ -350,9 +354,12 @@ export default function FloorPlanCanvas() {
         destNode={routeSelection.destination}
       />
 
-      {/* Canvas legend — color key for route lines */}
-      {sheetOpen && routeResult && (routeResult.standard.found || routeResult.accessible.found) && (
-        <div className="absolute bottom-40 right-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs">
+      {/* Canvas legend — color key for route lines, floats above sheet when open */}
+      {routeVisible && routeResult && (routeResult.standard.found || routeResult.accessible.found) && (
+        <div
+          className="absolute right-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
+          style={{ bottom: sheetOpen ? '276px' : '16px' }}
+        >
           {routeResult.standard.found && (
             <div className="flex items-center gap-2">
               <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
