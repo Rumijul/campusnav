@@ -34,6 +34,8 @@ interface SearchOverlayProps {
   selection: RouteSelection
   nodes: NavNode[]
   onRouteTrigger: () => void
+  /** When true (sheet is open), compact strip collapses to a minimal pill */
+  sheetOpen?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -44,7 +46,12 @@ interface SearchOverlayProps {
  * Rendered as an HTML overlay above the Konva canvas. Uses absolute/fixed
  * positioning with z-index to float above the map.
  */
-export function SearchOverlay({ selection, nodes, onRouteTrigger }: SearchOverlayProps) {
+export function SearchOverlay({
+  selection,
+  nodes,
+  onRouteTrigger,
+  sheetOpen = false,
+}: SearchOverlayProps) {
   const { query, results, search, searchNearest, clearSearch } = useLocationSearch(nodes)
   const [focusedField, setFocusedField] = useState<'start' | 'destination' | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -143,6 +150,26 @@ export function SearchOverlay({ selection, nodes, onRouteTrigger }: SearchOverla
 
   // Compact strip mode
   if (isCompact) {
+    // When the directions sheet is open, collapse to a minimal pill so it
+    // doesn't compete for screen space with the sheet.
+    if (sheetOpen) {
+      return (
+        <div className="absolute top-2 left-2 z-30 pointer-events-auto">
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 flex items-center gap-2">
+            <span className="text-xs text-slate-500 font-medium">Route active</span>
+            <button
+              type="button"
+              className="p-0.5 text-slate-400 hover:text-slate-700"
+              onClick={() => selection.clearAll()}
+              aria-label="Clear route"
+            >
+              <ClearIcon />
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="absolute top-2 left-2 right-2 z-30 pointer-events-auto">
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 flex items-center gap-2">
@@ -174,11 +201,11 @@ export function SearchOverlay({ selection, nodes, onRouteTrigger }: SearchOverla
           </button>
           <button
             type="button"
-            className="p-1 text-slate-500 hover:text-slate-700"
-            onClick={() => setFocusedField('start')}
-            aria-label="Expand search"
+            className="p-1 text-slate-400 hover:text-slate-700"
+            onClick={() => selection.clearAll()}
+            aria-label="Clear route"
           >
-            <ExpandIcon />
+            <ClearIcon />
           </button>
         </div>
       </div>
@@ -394,21 +421,6 @@ function BackIcon() {
       <title>Back</title>
       <path
         d="M12 4L6 10L12 16"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-function ExpandIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Expand</title>
-      <path
-        d="M4 6L8 10L12 6"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"

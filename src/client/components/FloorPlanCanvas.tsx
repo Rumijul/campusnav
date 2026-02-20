@@ -209,10 +209,11 @@ export default function FloorPlanCanvas() {
     }
   }, [routeSelection.start, routeSelection.destination])
 
-  /** Close directions sheet and return to A/B pin compact strip */
+  /** Back arrow in directions sheet — clear selections entirely so user starts fresh */
   const handleSheetBack = useCallback(() => {
-    setSheetOpen(false)
-  }, [])
+    routeSelection.clearAll()
+    // sheetOpen and routeResult are cleared by the useEffect watcher above
+  }, [routeSelection])
 
   /** Convert node IDs to flat pixel coordinate array for RouteLayer */
   const buildRoutePoints = useCallback(
@@ -243,7 +244,12 @@ export default function FloorPlanCanvas() {
   return (
     <div className="relative w-full h-full">
       {/* Search overlay — HTML sibling above Stage in DOM */}
-      <SearchOverlay selection={routeSelection} nodes={nodes} onRouteTrigger={handleRouteTrigger} />
+      <SearchOverlay
+        selection={routeSelection}
+        nodes={nodes}
+        onRouteTrigger={handleRouteTrigger}
+        sheetOpen={sheetOpen}
+      />
 
       <Stage
         ref={stageRef}

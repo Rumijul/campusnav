@@ -1,7 +1,6 @@
 import type { PathResult } from '@shared/pathfinding/types'
 import type { NavNode } from '@shared/types'
-import { useEffect, useState } from 'react'
-import { Drawer } from 'vaul'
+import { useEffect, useRef, useState } from 'react'
 import type { DirectionStep, DirectionsResult, StepIcon } from '../hooks/useRouteDirections'
 
 // ============================================================
@@ -309,8 +308,15 @@ function BackArrowIcon() {
 }
 
 // ============================================================
-// Main component
+// Main component — custom bottom sheet (no Vaul)
+//
+// Renders as position:fixed bottom-0 — only covers the visible
+// peek/expanded area. No full-viewport overlay. No pointer-event
+// blocking above the sheet.
 // ============================================================
+
+const PEEK_HEIGHT = 260 // px — header + handle + first step hint
+const EXPANDED_MAX = 0.92 // fraction of window height
 
 export function DirectionsSheet({
   open,
@@ -325,13 +331,33 @@ export function DirectionsSheet({
   startNode,
   destNode,
 }: DirectionsSheetProps) {
-  const [snapPoint, setSnapPoint] = useState<number | string | null>(0.35)
+  const [expanded, setExpanded] = useState(false)
+  const sheetRef = useRef<HTMLElement>(null)
 
-  // Reset to peek snap point every time the sheet opens
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — reset snap only on open transition
+  // Reset to peek whenever sheet opens
   useEffect(() => {
-    if (open) setSnapPoint(0.35)
+    if (open) setExpanded(false)
   }, [open])
+
+  // Drag state
+  const dragStartY = useRef<number | null>(null)
+  const dragStartExpanded = useRef(false)
+
+  function onDragStart(clientY: number) {
+    dragStartY.current = clientY
+    dragStartExpanded.current = expanded
+  }
+
+  function onDragMove(clientY: number) {
+    if (dragStartY.current === null) return
+    const dy = dragStartY.current - clientY // positive = dragging up
+    if (dy > 40) setExpanded(true)
+    if (dy < -40) setExpanded(false)
+  }
+
+  function onDragEnd() {
+    dragStartY.current = null
+  }
 
   // Determine which directions to show
   const activeDirections = activeMode === 'standard' ? standardDirections : accessibleDirections
@@ -347,115 +373,133 @@ export function DirectionsSheet({
       ? formatDuration(standardDirections.totalDurationSec)
       : formatDuration(accessibleDirections.totalDurationSec)
 
+  const expandedHeight = `${Math.round(window.innerHeight * EXPANDED_MAX)}px`
+  const currentHeight = expanded ? expandedHeight : `${PEEK_HEIGHT}px`
+
+  if (!open) return null
+
   return (
-    <Drawer.Root
-      open={open}
-      snapPoints={[0.35, 0.92]}
-      activeSnapPoint={snapPoint}
-      setActiveSnapPoint={setSnapPoint}
-      modal={false}
-      dismissible={false}
+    <section
+      ref={sheetRef}
+      aria-label="Route directions"
+      className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-white shadow-2xl"
+      style={{
+        height: currentHeight,
+        transition: 'height 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+      }}
     >
-      <Drawer.Portal>
-        {/* Suppress Vaul's auto-injected backdrop — it blocks Konva canvas pan/touch even at opacity:0 */}
-        <Drawer.Overlay className="pointer-events-none" />
-        {/*
-          Issue 1 fix: pointer-events-none on the full-height Drawer.Content wrapper so the
-          transparent area above the peek strip doesn't block canvas pan/drag. The inner
-          content div restores pointer-events-auto so the visible sheet is still interactive.
-        */}
-        <Drawer.Content
-          className="fixed inset-x-0 bottom-0 z-50 flex flex-col outline-none pointer-events-none"
-          style={{ maxHeight: '92vh' }}
-          aria-label="Route directions"
+      {/* Drag handle */}
+      <div
+        className="shrink-0 flex justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing touch-none"
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId)
+          onDragStart(e.clientY)
+        }}
+        onPointerMove={(e) => onDragMove(e.clientY)}
+        onPointerUp={() => onDragEnd()}
+        onPointerCancel={() => onDragEnd()}
+      >
+        <div className="h-1.5 w-10 rounded-full bg-gray-300" />
+      </div>
+
+      {/* Header row: back arrow + route summary */}
+      <div className="flex items-center gap-2 px-4 pt-2 pb-2 border-b border-slate-100 shrink-0">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="Back to search"
+          className="p-1 text-slate-500 hover:text-slate-700"
         >
-          {/* Visible sheet — restores pointer events for all interactive elements */}
-          <div
-            className="flex flex-col rounded-t-2xl bg-white shadow-2xl pointer-events-auto overflow-hidden"
-            style={{ maxHeight: '92vh' }}
-          >
-            {/* Drag handle */}
-            <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-gray-300 shrink-0" />
+          <BackArrowIcon />
+        </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-800 truncate">
+            {startNode?.label ?? '—'} → {destNode?.label ?? '—'}
+          </p>
+          {!neitherFound && <p className="text-xs text-slate-500">{durationText}</p>}
+        </div>
+        {/* Expand / collapse toggle */}
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          aria-label={expanded ? 'Collapse directions' : 'Expand directions'}
+          className="p-1 text-slate-400 hover:text-slate-600 transition-transform"
+          style={{ transform: expanded ? 'rotate(180deg)' : 'none' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <title>Toggle</title>
+            <path
+              d="M4 6L8 10L12 6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
 
-            {/* Header row: back arrow + route summary */}
-            <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-slate-100 shrink-0">
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label="Back to search"
-                className="p-1 text-slate-500 hover:text-slate-700"
-              >
-                <BackArrowIcon />
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">
-                  {startNode?.label ?? '—'} → {destNode?.label ?? '—'}
-                </p>
-                {!neitherFound && <p className="text-xs text-slate-500">{durationText}</p>}
-              </div>
-            </div>
-
-            {/* Case 1: No route found */}
-            {neitherFound && (
-              <div className="px-5 py-8 text-center text-slate-500">
-                <p className="text-lg font-medium">No route found</p>
-                <p className="text-sm mt-1">No path connects the selected locations.</p>
-              </div>
-            )}
-
-            {/* Case 2: Routes identical — single tab chip */}
-            {!neitherFound && routesIdentical && (
-              <>
-                <div className="px-4 pt-2 pb-1 shrink-0">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-                    Standard (accessible)
-                  </span>
-                </div>
-                <div className="flex-1 overflow-y-auto pb-10">
-                  {standardDirections.steps.map((step, i) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
-                    <StepItem key={i} step={step} />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Case 3: Two distinct routes */}
-            {!neitherFound && !routesIdentical && (
-              <>
-                <div className="flex gap-2 px-4 pt-3 pb-2 shrink-0">
-                  <TabButton
-                    mode="standard"
-                    activeMode={activeMode}
-                    found={standard?.found ?? false}
-                    color="#3b82f6"
-                    label="Standard"
-                    onTabChange={onTabChange}
-                  />
-                  <TabButton
-                    mode="accessible"
-                    activeMode={activeMode}
-                    found={accessible?.found ?? false}
-                    color="#22c55e"
-                    label="Accessible"
-                    onTabChange={onTabChange}
-                    {...(accessible?.found === false
-                      ? { disabledTitle: 'No accessible route available' }
-                      : {})}
-                  />
-                </div>
-                <div className="flex-1 overflow-y-auto pb-10">
-                  {activeDirections.steps.map((step, i) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
-                    <StepItem key={i} step={step} />
-                  ))}
-                </div>
-              </>
-            )}
+      {/* Scrollable content — only visible when expanded */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Case 1: No route found */}
+        {neitherFound && (
+          <div className="px-5 py-8 text-center text-slate-500">
+            <p className="text-lg font-medium">No route found</p>
+            <p className="text-sm mt-1">No path connects the selected locations.</p>
           </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+        )}
+
+        {/* Case 2: Routes identical — single tab chip */}
+        {!neitherFound && routesIdentical && (
+          <>
+            <div className="px-4 pt-2 pb-1 shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+                Standard (accessible)
+              </span>
+            </div>
+            <div className="pb-10">
+              {standardDirections.steps.map((step, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
+                <StepItem key={i} step={step} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Case 3: Two distinct routes */}
+        {!neitherFound && !routesIdentical && (
+          <>
+            <div className="flex gap-2 px-4 pt-3 pb-2 shrink-0">
+              <TabButton
+                mode="standard"
+                activeMode={activeMode}
+                found={standard?.found ?? false}
+                color="#3b82f6"
+                label="Standard"
+                onTabChange={onTabChange}
+              />
+              <TabButton
+                mode="accessible"
+                activeMode={activeMode}
+                found={accessible?.found ?? false}
+                color="#22c55e"
+                label="Accessible"
+                onTabChange={onTabChange}
+                {...(accessible?.found === false
+                  ? { disabledTitle: 'No accessible route available' }
+                  : {})}
+              />
+            </div>
+            <div className="pb-10">
+              {activeDirections.steps.map((step, i) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
+                <StepItem key={i} step={step} />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   )
 }
