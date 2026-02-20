@@ -1,10 +1,14 @@
+import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { readFile } from 'node:fs/promises'
 import { serve } from '@hono/node-server'
 import type { NavGraph } from '@shared/types'
-import { Hono } from 'hono'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import { Hono } from 'hono'
+import { csrf } from 'hono/csrf'
+import { jwt } from 'hono/jwt'
+import { JWT_SECRET } from './auth/credentials'
+import { authRoutes } from './auth/routes'
 import { db } from './db/client'
 import { edges, graphMetadata, nodes } from './db/schema'
 import { seedIfEmpty } from './db/seed'
@@ -18,6 +22,9 @@ seedIfEmpty()
 // ────────────────────────────────────────────────────────────────────────────
 
 const app = new Hono()
+
+// ── Global CSRF protection ───────────────────────────────────────────────────
+app.use(csrf())
 
 /** Health check endpoint — verifies the server is running. */
 app.get('/api/health', (c) => {
@@ -106,6 +113,16 @@ app.get('/api/map', (c) => {
     return c.json({ error: 'Failed to load graph data' }, 500)
   }
 })
+
+// ── Auth routes (public — login/logout/me) ────────────────────────────────────
+app.route('/api/auth', authRoutes)
+
+// ── JWT guard for all admin API routes ────────────────────────────────────────
+app.use('/api/admin/*', jwt({ secret: JWT_SECRET, alg: 'HS256', cookie: 'admin_token' }))
+
+// ── Admin routes (protected) ──────────────────────────────────────────────────
+/** Placeholder admin endpoint for testing JWT guard. */
+app.get('/api/admin/ping', (c) => c.json({ ok: true, message: 'Admin access granted' }))
 
 const port = 3001
 console.log(`Server running on http://localhost:${port}`)
