@@ -257,6 +257,26 @@ export default function FloorPlanCanvas() {
         onOpenSheet={() => setSheetOpen(true)}
       />
 
+      {/* Graph data loading overlay — shows while useGraphData fetches from server */}
+      {graphState.status === 'loading' && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <div className="flex flex-col items-center gap-3 bg-white/80 backdrop-blur-sm rounded-xl px-6 py-4 shadow">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm text-slate-600 font-medium">Loading map data…</span>
+          </div>
+        </div>
+      )}
+
+      {/* Graph data error overlay — shows after all retries exhausted */}
+      {graphState.status === 'error' && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <div className="flex flex-col items-center gap-2 bg-white/90 backdrop-blur-sm rounded-xl px-6 py-4 shadow border border-red-200">
+            <span className="text-red-500 font-semibold text-sm">Failed to load map data</span>
+            <span className="text-slate-500 text-xs">Please refresh the page to try again</span>
+          </div>
+        </div>
+      )}
+
       <Stage
         ref={stageRef}
         width={width}
@@ -294,6 +314,7 @@ export default function FloorPlanCanvas() {
 
         {/* Landmarks — markers above floor plan image */}
         <LandmarkLayer
+          nodes={nodes}
           imageRect={imageRect}
           stageScale={stageScale}
           selectedNodeId={null}
