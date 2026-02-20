@@ -1,5 +1,5 @@
 ---
-status: diagnosed
+status: complete
 phase: 07-api-data-persistence
 source: 07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md
 started: 2026-02-21T00:00:00Z
@@ -56,6 +56,6 @@ skipped: 0
       issue: "StrictMode wraps App — causes double-invoke of effects in dev"
     - path: "src/client/hooks/useGraphData.ts"
       issue: "useEffect with AbortController cleanup is correct shape that StrictMode exercises"
-  missing:
-    - "Decide: accept dev-only double-fetch (recommended), remove StrictMode, or add request deduplication"
+  missing: []
+  resolution: "Accepted — dev-only StrictMode behavior, no fix needed. Production unaffected."
   debug_session: ".planning/debug/double-fetch-api-map.md"
