@@ -36,6 +36,10 @@ interface SearchOverlayProps {
   onRouteTrigger: () => void
   /** When true (sheet is open), compact strip collapses to a minimal pill */
   sheetOpen?: boolean
+  /** Called when user taps the compact A→B strip to reopen the directions sheet */
+  onOpenSheet?: () => void
+  /** True when a route result is available (sheet can be reopened) */
+  hasRoute?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -51,6 +55,8 @@ export function SearchOverlay({
   nodes,
   onRouteTrigger,
   sheetOpen = false,
+  onOpenSheet,
+  hasRoute = false,
 }: SearchOverlayProps) {
   const { query, results, search, searchNearest, clearSearch } = useLocationSearch(nodes)
   const [focusedField, setFocusedField] = useState<'start' | 'destination' | null>(null)
@@ -177,8 +183,12 @@ export function SearchOverlay({
             type="button"
             className="flex-1 min-w-0 flex items-center gap-1 text-sm text-left"
             onClick={() => {
-              setFocusedField(null)
-              prevBothRef.current = selection.bothSelected
+              if (hasRoute && onOpenSheet) {
+                onOpenSheet()
+              } else {
+                setFocusedField(null)
+                prevBothRef.current = selection.bothSelected
+              }
             }}
           >
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-500 text-white text-xs font-bold shrink-0">

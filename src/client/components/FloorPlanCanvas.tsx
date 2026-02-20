@@ -253,6 +253,8 @@ export default function FloorPlanCanvas() {
         nodes={nodes}
         onRouteTrigger={handleRouteTrigger}
         sheetOpen={sheetOpen}
+        hasRoute={routeResult !== null}
+        onOpenSheet={() => setSheetOpen(true)}
       />
 
       <Stage
@@ -357,7 +359,7 @@ export default function FloorPlanCanvas() {
       {/* Canvas legend — color key for route lines, floats above sheet when open */}
       {routeVisible && routeResult && (routeResult.standard.found || routeResult.accessible.found) && (
         <div
-          className="absolute right-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
+          className="absolute left-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
           style={{ bottom: sheetOpen ? '276px' : '16px' }}
         >
           {routeResult.standard.found && (
