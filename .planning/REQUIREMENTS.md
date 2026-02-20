@@ -33,7 +33,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin — Authentication
 
-- [ ] **ADMN-01**: Admin can log in with credentials to access the map editor
+- [x] **ADMN-01**: Admin can log in with credentials to access the map editor
 - [x] **ADMN-02**: Student-facing wayfinding requires no login or authentication
 
 ### Admin — Map Editor
@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-05 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-06 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-07 | Phase 4: Map Landmarks & Location Display | Complete |
-| ADMN-01 | Phase 8: Admin Authentication | Pending |
+| ADMN-01 | Phase 8: Admin Authentication | Complete |
 | ADMN-02 | Phase 7: API & Data Persistence | Complete |
 | EDIT-01 | Phase 9: Admin Map Editor — Visual | Pending |
 | EDIT-02 | Phase 9: Admin Map Editor — Visual | Pending |

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 8 IN PROGRESS — Plan 01 complete; server-side auth layer done; Plan 02 (admin login UI) next
+**Current focus:** Phase 8 IN PROGRESS — Plans 01 and 02 complete; full client auth UI done; Plan 03 (admin map editor) next
 
 ## Current Position
 
 Phase: 08 of 10 (Admin Authentication) — IN PROGRESS
-Plan: 1 of N in current phase (Plan 01 complete)
-Status: Phase 08-01 complete — bcrypt login, JWT httpOnly cookie, rate limiting, CSRF, /api/admin/* guard
-Last activity: 2026-02-21 — Completed 08-01-PLAN.md (server-side auth layer)
+Plan: 2 of N in current phase (Plans 01-02 complete)
+Status: Phase 08-02 complete — React Router setup, login page, protected route, useAuth hook, admin shell with logout
+Last activity: 2026-02-21 — Completed 08-02-PLAN.md (client-side auth UI)
 
 Progress: [████████░░] 76%
 
@@ -50,6 +50,7 @@ Progress: [████████░░] 76%
 | Phase 07-api-data-persistence P03 | 5 min | 2 tasks | 3 files |
 | Phase 07-api-data-persistence P02 | 5 | 2 tasks | 2 files |
 | Phase 08-admin-authentication P01 | 5 min | 2 tasks | 7 files |
+| Phase 08-admin-authentication P02 | 3 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,8 @@ Recent decisions affecting current work:
 - [Phase 08-01]: Import-time throw for missing JWT_SECRET — server cannot function securely without it; graceful warn for missing admin credentials
 - [Phase 08-01]: CSRF applied globally (before auth routes) — consistent protection across all state-changing endpoints
 - [Phase 08-01]: app.use('/api/admin/*', jwt(...)) pattern — all future admin routes protected automatically without per-route configuration
+- [Phase 08-02]: Navigate component (not useNavigate in render) for authenticated-user redirect on LoginPage — correct React Router v6 declarative pattern
+- [Phase 08-02]: BrowserRouter inside App.tsx, not main.tsx — StrictMode in main stays unchanged; router is App concern
 
 ### Pending Todos
 
@@ -145,6 +148,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 08-01-PLAN.md — bcrypt login, JWT httpOnly cookie, CSRF, rate limiting, /api/admin/* guard established
+Stopped at: Completed 08-02-PLAN.md — client-side auth UI: login page, protected routes, useAuth hook, admin shell with logout
 Resume file: None
-Next action: Execute 08-02-PLAN.md (admin login UI page)
+Next action: Execute 08-03-PLAN.md (admin map editor — Phase 9)
