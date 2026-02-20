@@ -21,6 +21,8 @@
   "dependencies": {
     "@hono/node-server": "^1.19.9",
     "@tailwindcss/vite": "^4.1.18",
+    "better-sqlite3": "^12.6.2",
+    "drizzle-orm": "^0.45.1",
     "hono": "^4.11.9",
     "konva": "^10.2.0",
     "ngraph.graph": "^20.1.2",
@@ -35,11 +37,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.2",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.2.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "concurrently": "^9.2.1",
+    "drizzle-kit": "^0.31.9",
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
