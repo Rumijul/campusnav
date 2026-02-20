@@ -148,12 +148,13 @@ Plans:
   2. Graph data (nodes, edges, metadata) is stored in SQLite and served as a JSON blob via GET endpoint
   3. Floor plan image is served as a static file from the server
   4. The app works end-to-end with server-persisted data instead of hardcoded/seed data
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
-- [ ] 07-03: TBD
+- [ ] 07-01-PLAN.md — Drizzle schema, DB client singleton, drizzle.config.ts, migration generation, .gitignore update
+- [ ] 07-02-PLAN.md — Idempotent startup seeder + rewrite GET /api/map handler to query SQLite
+- [ ] 07-03-PLAN.md — useGraphData retry logic, HTML loading spinner overlay, fix double-fetch (LandmarkLayer nodes prop)
+- [ ] 07-04-PLAN.md — Human verification: server startup, public API, spinner, landmarks, routing, single fetch
 
 ### Phase 8: Admin Authentication
 **Goal**: Only authenticated admins can access the map editor; students use the app without any login
