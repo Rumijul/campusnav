@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 07-api-data-persistence
 source: 07-01-SUMMARY.md, 07-02-SUMMARY.md, 07-03-SUMMARY.md
 started: 2026-02-21T00:00:00Z
@@ -50,5 +50,12 @@ skipped: 0
   reason: "User reported: there are two maps"
   severity: major
   test: 3
-  artifacts: []
-  missing: []
+  root_cause: "React StrictMode in src/client/main.tsx intentionally double-invokes useEffect in dev — mount→cleanup(abort)→remount causes 2 fetches. Only one call site exists (FloorPlanCanvas.tsx:57). Production builds are unaffected — only 1 fetch fires in prod."
+  artifacts:
+    - path: "src/client/main.tsx"
+      issue: "StrictMode wraps App — causes double-invoke of effects in dev"
+    - path: "src/client/hooks/useGraphData.ts"
+      issue: "useEffect with AbortController cleanup is correct shape that StrictMode exercises"
+  missing:
+    - "Decide: accept dev-only double-fetch (recommended), remove StrictMode, or add request deduplication"
+  debug_session: ".planning/debug/double-fetch-api-map.md"
