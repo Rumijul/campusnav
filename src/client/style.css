@@ -16,3 +16,15 @@ body,
 .konvajs-content {
   touch-action: none;
 }
+
+/* Vaul drawer overrides — allow Konva canvas pan/touch to work while sheet is open.
+   Problem 1: Vaul injects touch-action:none on [data-vaul-drawer] (the Content element),
+   which eats all touch events across the full fixed positioned element.
+   Problem 2: [data-vaul-drawer]::after extends 200% above the drawer, covering the map.
+   Fix: restore touch-action to auto and suppress the ::after pseudo-element. */
+[data-vaul-drawer] {
+  touch-action: auto !important;
+}
+[data-vaul-drawer]::after {
+  display: none !important;
+}
