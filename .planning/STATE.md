@@ -120,6 +120,9 @@ Recent decisions affecting current work:
 - [Phase 07-03]: AbortController replaces cancelled boolean — signal threads through retry loop enabling true fetch abort on unmount
 - [Phase 07-03]: HTML overlay (not Konva Text) for graph loading/error states — z-10 + pointer-events-none keeps canvas pannable during load
 - [Phase 07-03]: Prop-lifting pattern: LandmarkLayer converted to pure display component, nodes passed from FloorPlanCanvas to eliminate duplicate GET /api/map
+- [Phase 07-02]: GET /api/map is a plain synchronous handler — better-sqlite3 is synchronous, no async/await needed
+- [Phase 07-02]: 1e10 sentinel preserved through full DB round-trip — stored as REAL in SQLite, returned as 10000000000 in JSON (never Infinity)
+- [Phase 07-02]: campus-graph.json kept in place as canonical seed source — seeder reads it, does not delete it
 
 ### Pending Todos
 
