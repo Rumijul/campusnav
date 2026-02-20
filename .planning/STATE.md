@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 6 COMPLETE — all 7 plans executed; UAT verified; ready for Phase 7
+**Current focus:** Phase 7 IN PROGRESS — Plan 01 complete; DB schema + client ready; Plan 02 next
 
 ## Current Position
 
-Phase: 06 of 10 (Route Visualization + Directions) — COMPLETE
-Plan: 7 of 7 in current phase
-Status: Phase 06-07 complete — UAT verified, sheet reopen fixed, legend repositioned
-Last activity: 2026-02-20 — Completed 06-07-PLAN.md (UAT closure: sheet reopen + legend overlap fixed)
+Phase: 07 of 10 (API & Data Persistence) — IN PROGRESS
+Plan: 1 of 4 in current phase (Plan 01 complete)
+Status: Phase 07-01 complete — Drizzle schema, DB client, migration file, .gitignore all done
+Last activity: 2026-02-20 — Completed 07-01-PLAN.md (Drizzle ORM setup + SQLite schema)
 
-Progress: [████████░░] 70%
+Progress: [████████░░] 72%
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [████████░░] 70%
 | Phase 05.1-issues-needed-to-be-fixed P02 | ~25 min | 3 tasks | 3 files |
 | Phase 06-route-visualization-directions P06 | 3 min | 5 tasks | 2 files |
 | Phase 06-route-visualization-directions P07 | 15 min | 2 tasks | 2 files |
+| Phase 07-api-data-persistence P01 | 2 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,10 @@ Recent decisions affecting current work:
 - [Phase 06-06]: useMapViewport: preventDefault only on touches.length >= 2 to unblock single-finger canvas pan after route
 - [Phase 06-07]: onOpenSheet/hasRoute props bridge FloorPlanCanvas sheet state to SearchOverlay tap target — compact strip reopens sheet when route available
 - [Phase 06-07]: Canvas legend moved to bottom-left (left-3) to eliminate overlap with ZoomControls at bottom-right
+- [Phase 07-01]: DB file at data/campus.db (project root), gitignored via data/ entry
+- [Phase 07-01]: Migration-first approach — drizzle-kit generate creates committed SQL files (not push)
+- [Phase 07-01]: mkdirSync({ recursive: true }) in client.ts auto-creates data/ on first run
+- [Phase 07-01]: 1e10 sentinel for non-accessible edges stored as REAL — never Infinity (JSON.stringify(Infinity) = null)
 
 ### Pending Todos
 
@@ -126,6 +131,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 06-07-PLAN.md — Phase 6 complete; UAT verified; sheet reopen + legend overlap fixed
+Stopped at: Completed 07-01-PLAN.md — Drizzle schema, DB client singleton, migration file, .gitignore updated
 Resume file: None
-Next action: Execute Phase 7 (first plan in next phase)
+Next action: Execute 07-02-PLAN.md (startup seeder + /api/map handler rewrite)
