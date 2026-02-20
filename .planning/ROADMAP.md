@@ -219,7 +219,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
 | 5. Search & Location Selection | 3/3 | Complete   | 2026-02-19 |
 | 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete   | 2026-02-20 |
-| 6. Route Visualization & Directions | 5/7 | In Progress|  |
+| 6. Route Visualization & Directions | 6/7 | In Progress|  |
 | 7. API & Data Persistence | 0/3 | Not started | - |
 | 8. Admin Authentication | 0/2 | Not started | - |
 | 9. Admin Map Editor — Visual | 0/4 | Not started | - |

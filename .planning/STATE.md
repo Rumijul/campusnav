@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 6 plan 06 complete — UAT gaps fixed (back arrow, legend position, canvas pan)
+**Current focus:** Phase 6 COMPLETE — all 7 plans executed; UAT verified; ready for Phase 7
 
 ## Current Position
 
-Phase: 06 of 10 (Route Visualization + Directions) — In Progress
-Plan: 6 of 7 in current phase
-Status: Phase 06-06 complete — back arrow, legend position, canvas pan all fixed
-Last activity: 2026-02-20 — Completed 06-06-PLAN.md (UAT gap closure: 3 confirmed issues fixed)
+Phase: 06 of 10 (Route Visualization + Directions) — COMPLETE
+Plan: 7 of 7 in current phase
+Status: Phase 06-07 complete — UAT verified, sheet reopen fixed, legend repositioned
+Last activity: 2026-02-20 — Completed 06-07-PLAN.md (UAT closure: sheet reopen + legend overlap fixed)
 
-Progress: [███████░░░] 63%
+Progress: [████████░░] 70%
 
 ## Performance Metrics
 
@@ -33,7 +33,7 @@ Progress: [███████░░░] 63%
 | 04-map-landmarks-location-display | 4/4 | ~11 min | ~3 min |
 | 05-search-location-selection | 3/3 | 17 min | 6 min |
 | 05.1-issues-needed-to-be-fixed | 2/2 | ~29 min | ~15 min |
-| 06-route-visualization-directions | 5/7 | ~14 min | ~3 min |
+| 06-route-visualization-directions | 7/7 | ~29 min | ~4 min |
 
 **Recent Trend:**
 - Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min, 4 min
@@ -44,7 +44,8 @@ Progress: [███████░░░] 63%
 | Phase 06-route-visualization-directions P04 | 2 min | 1 task | 1 file |
 | Phase 05.1-issues-needed-to-be-fixed P01 | 4 min | 2 tasks | 4 files |
 | Phase 05.1-issues-needed-to-be-fixed P02 | ~25 min | 3 tasks | 3 files |
-| Phase 06-route-visualization-directions P06 | 3 | 5 tasks | 2 files |
+| Phase 06-route-visualization-directions P06 | 3 min | 5 tasks | 2 files |
+| Phase 06-route-visualization-directions P07 | 15 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,8 @@ Recent decisions affecting current work:
 - [Phase 06-06]: routeVisible state decoupled from sheetOpen — back arrow closes sheet while route line stays visible
 - [Phase 06-06]: handleSheetBack calls setSheetOpen(false) not clearAll() — back = hide sheet, X = exit route mode
 - [Phase 06-06]: useMapViewport: preventDefault only on touches.length >= 2 to unblock single-finger canvas pan after route
+- [Phase 06-07]: onOpenSheet/hasRoute props bridge FloorPlanCanvas sheet state to SearchOverlay tap target — compact strip reopens sheet when route available
+- [Phase 06-07]: Canvas legend moved to bottom-left (left-3) to eliminate overlap with ZoomControls at bottom-right
 
 ### Pending Todos
 
@@ -123,6 +126,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 06-06-PLAN.md — back arrow closes sheet without clearing route, legend above sheet, canvas pan unblocked
+Stopped at: Completed 06-07-PLAN.md — Phase 6 complete; UAT verified; sheet reopen + legend overlap fixed
 Resume file: None
-Next action: Execute 06-07-PLAN.md (remaining route visualization work or UAT)
+Next action: Execute Phase 7 (first plan in next phase)
