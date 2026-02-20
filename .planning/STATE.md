@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 7 IN PROGRESS — Plans 01 and 03 complete; loading states + double-fetch fix done; Plan 04 next
+**Current focus:** Phase 8 IN PROGRESS — Plan 01 complete; server-side auth layer done; Plan 02 (admin login UI) next
 
 ## Current Position
 
-Phase: 07 of 10 (API & Data Persistence) — IN PROGRESS
-Plan: 3 of 4 in current phase (Plans 01 and 03 complete)
-Status: Phase 07-03 complete — useGraphData retry logic, HTML spinner overlay, LandmarkLayer prop refactor
-Last activity: 2026-02-21 — Completed 07-03-PLAN.md (loading states + double-fetch elimination)
+Phase: 08 of 10 (Admin Authentication) — IN PROGRESS
+Plan: 1 of N in current phase (Plan 01 complete)
+Status: Phase 08-01 complete — bcrypt login, JWT httpOnly cookie, rate limiting, CSRF, /api/admin/* guard
+Last activity: 2026-02-21 — Completed 08-01-PLAN.md (server-side auth layer)
 
-Progress: [████████░░] 74%
+Progress: [████████░░] 76%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: 7 min
-- Total execution time: 1.3 hours
+- Total execution time: ~1.4 hours
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [████████░░] 74%
 | 06-route-visualization-directions | 7/7 | ~29 min | ~4 min |
 
 **Recent Trend:**
-- Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min, 4 min
+- Last 5 plans: 5 min, 3 min, 8 min, 3 min, 3 min, 14 min, 4 min, 5 min
 - Trend: stable
 
 *Updated after each plan completion*
@@ -49,6 +49,7 @@ Progress: [████████░░] 74%
 | Phase 07-api-data-persistence P01 | 2 min | 2 tasks | 8 files |
 | Phase 07-api-data-persistence P03 | 5 min | 2 tasks | 3 files |
 | Phase 07-api-data-persistence P02 | 5 | 2 tasks | 2 files |
+| Phase 08-admin-authentication P01 | 5 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -123,6 +124,11 @@ Recent decisions affecting current work:
 - [Phase 07-02]: GET /api/map is a plain synchronous handler — better-sqlite3 is synchronous, no async/await needed
 - [Phase 07-02]: 1e10 sentinel preserved through full DB round-trip — stored as REAL in SQLite, returned as 10000000000 in JSON (never Infinity)
 - [Phase 07-02]: campus-graph.json kept in place as canonical seed source — seeder reads it, does not delete it
+- [Phase 08-01]: httpOnly cookie (not Authorization header) for JWT storage — XSS-safe, browser handles automatically
+- [Phase 08-01]: PLACEHOLDER_HASH in routes.ts — always run bcrypt.compare() even on email mismatch to prevent timing attacks
+- [Phase 08-01]: Import-time throw for missing JWT_SECRET — server cannot function securely without it; graceful warn for missing admin credentials
+- [Phase 08-01]: CSRF applied globally (before auth routes) — consistent protection across all state-changing endpoints
+- [Phase 08-01]: app.use('/api/admin/*', jwt(...)) pattern — all future admin routes protected automatically without per-route configuration
 
 ### Pending Todos
 
@@ -139,6 +145,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 07-03-PLAN.md — useGraphData retry logic, HTML spinner overlay, LandmarkLayer refactored to prop-driven component
+Stopped at: Completed 08-01-PLAN.md — bcrypt login, JWT httpOnly cookie, CSRF, rate limiting, /api/admin/* guard established
 Resume file: None
-Next action: Execute 07-04-PLAN.md (admin API endpoints)
+Next action: Execute 08-02-PLAN.md (admin login UI page)

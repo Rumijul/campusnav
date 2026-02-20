@@ -223,6 +223,6 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete   | 2026-02-20 |
 | 6. Route Visualization & Directions | 6/7 | In Progress|  |
 | 7. API & Data Persistence | 3/4 | In Progress|  |
-| 8. Admin Authentication | 0/3 | Not started | - |
+| 8. Admin Authentication | 1/3 | In Progress | - |
 | 9. Admin Map Editor — Visual | 0/4 | Not started | - |
 | 10. Admin Map Editor — Management | 0/3 | Not started | - |
