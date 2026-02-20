@@ -165,11 +165,12 @@ Plans:
   2. Unauthenticated users are redirected to a login page when trying to access admin routes
   3. Student-facing wayfinding pages remain fully accessible without any login prompt
   4. Admin session persists across browser refreshes (token stored securely)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Server-side auth: JWT login/logout/me endpoints, rate limiter, CSRF, credential validation, admin route guard
+- [ ] 08-02-PLAN.md — Client-side auth: React Router setup, login page, useAuth hook, ProtectedRoute, admin shell with logout
+- [ ] 08-03-PLAN.md — Human verification: full auth flow (login, session persistence, protected routes, logout, student access)
 
 ### Phase 9: Admin Map Editor — Visual
 **Goal**: Admin can build the navigation graph visually by uploading a floor plan and placing nodes and edges on it
@@ -222,6 +223,6 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete   | 2026-02-20 |
 | 6. Route Visualization & Directions | 6/7 | In Progress|  |
 | 7. API & Data Persistence | 3/4 | In Progress|  |
-| 8. Admin Authentication | 0/2 | Not started | - |
+| 8. Admin Authentication | 0/3 | Not started | - |
 | 9. Admin Map Editor — Visual | 0/4 | Not started | - |
 | 10. Admin Map Editor — Management | 0/3 | Not started | - |
