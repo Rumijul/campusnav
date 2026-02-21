@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 8 COMPLETE — auth stack verified; ready for Phase 9 (admin map editor)
+**Current focus:** Phase 9 IN PROGRESS — data layer (useEditorState hook + admin API endpoints) complete; building visual editor components
 
 ## Current Position
 
-Phase: 08 of 10 (Admin Authentication) — COMPLETE
-Plan: 3 of 3 (all plans + UAT complete)
-Status: Phase 08 fully verified — login, protected routes, session persistence, logout all passing
-Last activity: 2026-02-21 — Completed Phase 8 UAT (5/5 tests passed); fixed .env loading + bcrypt hash bugs
+Phase: 09 of 10 (Admin Map Editor Visual) — IN PROGRESS
+Plan: 1 of 4 complete
+Status: Phase 09 Plan 01 complete — useEditorState hook + POST /api/admin/graph + POST /api/admin/floor-plan
+Last activity: 2026-02-21 — Completed Phase 09 Plan 01 (editor data layer)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 80%
 | Phase 07-api-data-persistence P02 | 5 | 2 tasks | 2 files |
 | Phase 08-admin-authentication P01 | 5 min | 2 tasks | 7 files |
 | Phase 08-admin-authentication P02 | 3 | 2 tasks | 7 files |
+| Phase 09-admin-map-editor-visual P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,8 @@ Recent decisions affecting current work:
 - [Phase 08-01]: app.use('/api/admin/*', jwt(...)) pattern — all future admin routes protected automatically without per-route configuration
 - [Phase 08-02]: Navigate component (not useNavigate in render) for authenticated-user redirect on LoginPage — correct React Router v6 declarative pattern
 - [Phase 08-02]: BrowserRouter inside App.tsx, not main.tsx — StrictMode in main stays unchanged; router is App concern
+- [Phase 09-admin-map-editor-visual]: useEditorState undo/redo stored in useRef (not useState) — avoids double renders; lightweight historyInfo useState triggers re-renders only for canUndo/canRedo
+- [Phase 09-admin-map-editor-visual]: db.$client accesses underlying better-sqlite3 Database for synchronous .transaction() API — Drizzle's own transaction is async but better-sqlite3 is sync-only
 
 ### Pending Todos
 
@@ -148,6 +151,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 8 complete — all UAT passed; .env loading fixed; ready for Phase 9
+Stopped at: Completed 09-admin-map-editor-visual-01-PLAN.md — useEditorState hook + admin graph/floor-plan API endpoints
 Resume file: None
-Next action: Plan/execute Phase 9 (admin map editor)
+Next action: Execute Phase 09 Plan 02 (admin editor visual components)
