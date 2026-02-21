@@ -2,6 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import type { NavGraph } from '@shared/types'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 import { Hono } from 'hono'
@@ -12,8 +13,6 @@ import { authRoutes } from './auth/routes'
 import { db } from './db/client'
 import { edges, graphMetadata, nodes } from './db/schema'
 import { seedIfEmpty } from './db/seed'
-import { serveStatic } from '@hono/node-server/serve-static'
-import { readFile } from 'node:fs/promises'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
