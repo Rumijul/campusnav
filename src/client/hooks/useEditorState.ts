@@ -28,6 +28,8 @@ export type EditorAction =
   | { type: 'CREATE_EDGE'; edge: NavEdge }
   | { type: 'UPDATE_EDGE'; id: string; changes: Partial<NavEdge> }
   | { type: 'SELECT_EDGE'; id: string | null }
+  | { type: 'DELETE_NODE'; id: string }
+  | { type: 'DELETE_EDGE'; id: string }
   | { type: 'MARK_SAVED' }
   | { type: 'RESTORE_SNAPSHOT'; snapshot: EditorState }
 
@@ -127,6 +129,24 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         selectedEdgeId: action.id,
         selectedNodeId: null,
+      }
+
+    case 'DELETE_NODE':
+      return {
+        ...state,
+        nodes: state.nodes.filter((n) => n.id !== action.id),
+        edges: state.edges.filter((e) => e.sourceId !== action.id && e.targetId !== action.id),
+        selectedNodeId: state.selectedNodeId === action.id ? null : state.selectedNodeId,
+        pendingEdgeSourceId: state.pendingEdgeSourceId === action.id ? null : state.pendingEdgeSourceId,
+        isDirty: true,
+      }
+
+    case 'DELETE_EDGE':
+      return {
+        ...state,
+        edges: state.edges.filter((e) => e.id !== action.id),
+        selectedEdgeId: state.selectedEdgeId === action.id ? null : state.selectedEdgeId,
+        isDirty: true,
       }
 
     case 'MARK_SAVED':
