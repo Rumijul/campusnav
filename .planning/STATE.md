@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 8 IN PROGRESS — Plans 01 and 02 complete; full client auth UI done; Plan 03 (admin map editor) next
+**Current focus:** Phase 8 COMPLETE — auth stack verified; ready for Phase 9 (admin map editor)
 
 ## Current Position
 
-Phase: 08 of 10 (Admin Authentication) — IN PROGRESS
-Plan: 2 of N in current phase (Plans 01-02 complete)
-Status: Phase 08-02 complete — React Router setup, login page, protected route, useAuth hook, admin shell with logout
-Last activity: 2026-02-21 — Completed 08-02-PLAN.md (client-side auth UI)
+Phase: 08 of 10 (Admin Authentication) — COMPLETE
+Plan: 3 of 3 (all plans + UAT complete)
+Status: Phase 08 fully verified — login, protected routes, session persistence, logout all passing
+Last activity: 2026-02-21 — Completed Phase 8 UAT (5/5 tests passed); fixed .env loading + bcrypt hash bugs
 
-Progress: [████████░░] 76%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -148,6 +148,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 08-02-PLAN.md — client-side auth UI: login page, protected routes, useAuth hook, admin shell with logout
+Stopped at: Phase 8 complete — all UAT passed; .env loading fixed; ready for Phase 9
 Resume file: None
-Next action: Execute 08-03-PLAN.md (admin map editor — Phase 9)
+Next action: Plan/execute Phase 9 (admin map editor)
