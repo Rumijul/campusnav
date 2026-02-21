@@ -3,9 +3,12 @@ import type Konva from 'konva'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
 import useImage from 'use-image'
+import { DataTabToolbar } from '../../components/admin/DataTabToolbar'
+import { EdgeDataTable } from '../../components/admin/EdgeDataTable'
 import EdgeLayer from '../../components/admin/EdgeLayer'
 import EditorSidePanel from '../../components/admin/EditorSidePanel'
 import EditorToolbar from '../../components/admin/EditorToolbar'
+import { NodeDataTable } from '../../components/admin/NodeDataTable'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
 import FloorPlanImage from '../../components/FloorPlanImage'
 import {
@@ -33,6 +36,9 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const stageRef = useRef<Konva.Stage>(null)
   const floorPlanLayerRef = useRef<Konva.Layer>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [activeTab, setActiveTab] = useState<'map' | 'data'>('map')
+  const [activeSubTab, setActiveSubTab] = useState<'nodes' | 'edges'>('nodes')
 
   const [imageRect, setImageRect] = useState<{
     x: number
@@ -289,20 +295,46 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   })()
 
   return (
-    <div className="relative w-full h-full">
-      <EditorToolbar
-        mode={state.mode}
-        onModeChange={(m) => dispatch({ type: 'SET_MODE', mode: m })}
-        onUpload={handleUploadClick}
-        onSave={handleSave}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        isDirty={state.isDirty}
-        onLogout={onLogout}
-      />
-      <div style={{ paddingTop: '52px', width, height: editorHeight }} className="relative">
+    <div className="relative flex h-full w-full flex-col">
+      {/* Toolbar — only shown on Map tab */}
+      <div className={activeTab !== 'map' ? 'hidden' : ''}>
+        <EditorToolbar
+          mode={state.mode}
+          onModeChange={(m) => dispatch({ type: 'SET_MODE', mode: m })}
+          onUpload={handleUploadClick}
+          onSave={handleSave}
+          onUndo={handleUndo}
+          onRedo={handleRedo}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          isDirty={state.isDirty}
+          onLogout={onLogout}
+        />
+      </div>
+
+      {/* Tab bar — always visible */}
+      <div className="flex gap-2 border-b border-gray-200 bg-white px-4 py-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab('map')}
+          className={`rounded px-4 py-1.5 text-sm font-medium ${activeTab === 'map' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+        >
+          Map
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('data')}
+          className={`rounded px-4 py-1.5 text-sm font-medium ${activeTab === 'data' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+        >
+          Data
+        </button>
+      </div>
+
+      {/* Map panel — mounted but hidden when Data tab is active */}
+      <div
+        className={activeTab !== 'map' ? 'hidden' : 'relative flex-1'}
+        style={{ width, height: editorHeight - 52 }}
+      >
         <Stage
           ref={stageRef}
           width={width}
@@ -354,7 +386,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         </Stage>
 
         {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
-        <div className="absolute right-0 top-0 h-full pointer-events-none">
+        <div className="pointer-events-none absolute right-0 top-0 h-full">
           <div className="pointer-events-auto h-full">
             <EditorSidePanel
               selectedNode={
@@ -386,6 +418,51 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             />
           </div>
         </div>
+      </div>
+
+      {/* Data panel — mounted but hidden when Map tab is active */}
+      <div className={activeTab !== 'data' ? 'hidden' : 'flex-1 overflow-auto'}>
+        <DataTabToolbar
+          nodes={state.nodes}
+          edges={state.edges}
+          activeSubTab={activeSubTab}
+          onSubTabChange={setActiveSubTab}
+          onImportGraph={(nodes, edges) => {
+            dispatch({ type: 'LOAD_GRAPH', nodes, edges })
+            recordHistory()
+          }}
+        />
+        {activeSubTab === 'nodes' ? (
+          <NodeDataTable
+            nodes={state.nodes}
+            selectedNodeId={state.selectedNodeId}
+            onUpdateNode={(id, updates) => {
+              dispatch({ type: 'UPDATE_NODE', id, changes: updates })
+              recordHistory()
+            }}
+            onDeleteNode={(id) => {
+              dispatch({ type: 'DELETE_NODE', id })
+              recordHistory()
+            }}
+            onSelectNode={(id) => dispatch({ type: 'SELECT_NODE', id })}
+          />
+        ) : (
+          <EdgeDataTable
+            edges={state.edges}
+            nodes={state.nodes}
+            selectedEdgeId={state.selectedEdgeId}
+            onUpdateEdge={(id, updates) => {
+              dispatch({ type: 'UPDATE_EDGE', id, changes: updates })
+              recordHistory()
+            }}
+            onDeleteEdge={(id) => {
+              dispatch({ type: 'DELETE_EDGE', id })
+              recordHistory()
+            }}
+            onSelectEdge={(id) => dispatch({ type: 'SELECT_EDGE', id })}
+            recordHistory={recordHistory}
+          />
+        )}
       </div>
 
       {/* Hidden file input for floor plan upload */}
