@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 10 IN PROGRESS — Plan 01 complete (node/edge deletion); EDIT-06 verified; 2 plans remaining
+**Current focus:** Phase 10 IN PROGRESS — Plan 02 complete (data tab, tables, import/export); EDIT-07, EDIT-08 verified; 1 plan remaining
 
 ## Current Position
 
 Phase: 10 of 10 (Admin Map Editor Management) — IN PROGRESS
-Plan: 1 of 3 complete
-Status: Phase 10 Plan 01 complete — DELETE_NODE/DELETE_EDGE reducer, keyboard delete with input focus guard, EditorSidePanel Delete buttons; EDIT-06 verified
-Last activity: 2026-02-21 — Completed Phase 10 Plan 01 (node and edge deletion)
+Plan: 2 of 3 complete
+Status: Phase 10 Plan 02 complete — Data tab with NodeDataTable/EdgeDataTable, JSON/CSV import/export via PapaParse+Zod; EDIT-07, EDIT-08 verified
+Last activity: 2026-02-21 — Completed Phase 10 Plan 02 (data tables + import/export)
 
 Progress: [█████████░] 90%
 
@@ -56,6 +56,7 @@ Progress: [█████████░] 90%
 | Phase 09 P03 | 4 | 2 tasks | 3 files |
 | Phase 09 P04 | 0 | 1 task (human-verify) | 0 files |
 | Phase 10-admin-map-editor-management P01 | 3 | 2 tasks | 3 files |
+| Phase 10 P02 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,9 @@ Recent decisions affecting current work:
 - [Phase 10-01]: DELETE_NODE filters both nodes and edges in a single returned state object — no intermediate state with dangling edges possible
 - [Phase 10-01]: isInputFocused guard checks document.activeElement tagName against INPUT/TEXTAREA/SELECT before Delete/Backspace — prevents accidental deletion while typing in side panel fields
 - [Phase 10-01]: recordHistory() called after every delete dispatch — all deletions are undoable via Ctrl+Z
+- [Phase 10]: hidden-not-unmounted for tab switching — Konva Stage wrapper gets className=hidden to preserve undo history and canvas state during Data tab view
+- [Phase 10]: importExport.ts is a single utility module — all six import/export functions centralized with no logic scattered across components
+- [Phase 10]: CSV header detection heuristic — firstLine.includes('label') && firstLine.includes('type') distinguishes nodes.csv from edges.csv for single Import CSV button
 
 ### Pending Todos
 
@@ -165,6 +169,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 10-admin-map-editor-management-01-PLAN.md — DELETE_NODE/DELETE_EDGE reducer cases, keyboard delete with input focus guard, EditorSidePanel Delete buttons; EDIT-06 verified
+Stopped at: Completed 10-admin-map-editor-management-02-PLAN.md — Data tab with NodeDataTable/EdgeDataTable, JSON/CSV import/export via PapaParse+Zod; EDIT-07, EDIT-08 verified
 Resume file: None
-Next action: Phase 10 Plan 02 (node data table, JSON/CSV import/export or next management plan)
+Next action: Phase 10 Plan 03 (if any; otherwise Phase 10 is complete)
