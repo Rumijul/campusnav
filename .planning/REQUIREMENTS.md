@@ -43,7 +43,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **EDIT-03**: Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) via drag-and-drop
 - [x] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
 - [x] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
-- [ ] **EDIT-06**: Admin can rename, edit properties of, and delete any node
+- [x] **EDIT-06**: Admin can rename, edit properties of, and delete any node
 - [ ] **EDIT-07**: Admin can view and edit all nodes in a sortable, filterable data table
 - [ ] **EDIT-08**: Admin can import and export graph data in JSON or CSV format
 
@@ -110,7 +110,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-03 | Phase 9: Admin Map Editor — Visual | Complete |
 | EDIT-04 | Phase 9: Admin Map Editor — Visual | Complete |
 | EDIT-05 | Phase 9: Admin Map Editor — Visual | Complete |
-| EDIT-06 | Phase 10: Admin Map Editor — Management | Pending |
+| EDIT-06 | Phase 10: Admin Map Editor — Management | Complete |
 | EDIT-07 | Phase 10: Admin Map Editor — Management | Pending |
 | EDIT-08 | Phase 10: Admin Map Editor — Management | Pending |
 
