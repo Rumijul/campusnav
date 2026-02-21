@@ -200,12 +200,12 @@ Plans:
   3. Admin can export the complete graph data as JSON or CSV for backup or migration
   4. Admin can import graph data from JSON or CSV to populate or update the map
   5. Changes made in the data table are reflected on the visual map editor and vice versa
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
-- [ ] 10-03: TBD
+- [ ] 10-01-PLAN.md — Extend useEditorState with DELETE_NODE/DELETE_EDGE actions; wire keyboard delete (with input focus guard) + side panel Delete button
+- [ ] 10-02-PLAN.md — Tab switcher (Map/Data) with mounted canvas; NodeDataTable + EdgeDataTable with sort/filter/inline-edit; importExport.ts utility + DataTabToolbar with JSON/CSV import-export
+- [ ] 10-03-PLAN.md — Human verification: deletion, data tables, inline editing, import/export end-to-end
 
 ## Progress
 
