@@ -64,8 +64,8 @@ export default function NodeMarkerLayer({
             scaleX={scale}
             scaleY={scale}
             draggable={mode === 'select'}
-            onClick={() => onNodeClick(node.id)}
-            onTap={() => onNodeClick(node.id)}
+            onClick={(e) => { e.cancelBubble = true; onNodeClick(node.id) }}
+            onTap={(e) => { e.cancelBubble = true; onNodeClick(node.id) }}
             onDragEnd={(e) => {
               const pixX = e.target.x()
               const pixY = e.target.y()

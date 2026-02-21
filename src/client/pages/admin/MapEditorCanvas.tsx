@@ -120,8 +120,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       const layer = floorPlanLayerRef.current
 
       if (state.mode === 'add-node') {
-        // Only place node on empty canvas click (not on a shape)
-        if (e.target !== stage) return
+        // Place node on any canvas click (floor plan image is a shape, not the stage)
+        // NodeMarkerLayer stops propagation for clicks on existing nodes
         if (!layer || !imageRect) return
 
         const pos = layer.getRelativePointerPosition()
