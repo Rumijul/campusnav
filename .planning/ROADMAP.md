@@ -23,6 +23,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
 - [x] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata (completed 2026-02-21)
 - [x] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export (completed 2026-02-21)
+- [ ] **Phase 11: Fix Data Tab Visibility** - Fix Tailwind CSS layout issue preventing Data tab from rendering in admin map editor
+- [ ] **Phase 12: Retroactive Phase Verifications** - Create formal VERIFICATION.md files for Phases 7, 8, and 9 to close documentation gaps
+- [ ] **Phase 13: Restore Location Detail View** - Reintroduce location detail display when a student taps a landmark on the map
+- [ ] **Phase 14: Documentation Cleanup** - Fix stale ROADMAP.md progress table and handleSheetBack documentation mismatch
 
 ## Phase Details
 
@@ -207,22 +211,86 @@ Plans:
 - [ ] 10-02-PLAN.md — Tab switcher (Map/Data) with mounted canvas; NodeDataTable + EdgeDataTable with sort/filter/inline-edit; importExport.ts utility + DataTabToolbar with JSON/CSV import-export
 - [ ] 10-03-PLAN.md — Human verification: deletion, data tables, inline editing, import/export end-to-end
 
+### Phase 11: Fix Data Tab Visibility
+**Goal**: The Data tab in the admin map editor renders correctly in the browser and displays NodeDataTable and EdgeDataTable
+**Depends on**: Phase 10
+**Requirements**: EDIT-07, EDIT-08
+**Gap Closure**: Closes admin-data-tab flow gap from v1.0 audit
+**Success Criteria** (what must be TRUE):
+  1. Clicking the Data tab in the admin map editor reveals the NodeDataTable and EdgeDataTable
+  2. Both tables display rows, are sortable/filterable, and support inline editing
+  3. The Map tab canvas remains functional when switching back from Data tab
+**Plans**: 2 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Fix Tailwind flex layout (min-h-0) in MapEditorCanvas.tsx; browser-verify Data tab renders
+- [ ] 11-02-PLAN.md — Human verification: Data tab visible, tables display and are interactive
+
+### Phase 12: Retroactive Phase Verifications
+**Goal**: Create formal VERIFICATION.md files for Phases 7, 8, and 9, closing documentation gaps for 7 orphaned requirements
+**Depends on**: Phase 11
+**Requirements**: ADMN-02, ADMN-01, EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05
+**Gap Closure**: Closes orphaned requirements from v1.0 audit (missing VERIFICATION.md for Phases 7, 8, 9)
+**Success Criteria** (what must be TRUE):
+  1. A VERIFICATION.md exists for Phase 7 confirming ADMN-02 (public API, SQLite persistence, spinner)
+  2. A VERIFICATION.md exists for Phase 8 confirming ADMN-01 (JWT login, protected routes, student access)
+  3. A VERIFICATION.md exists for Phase 9 confirming EDIT-01 through EDIT-05 (floor plan upload, node/edge placement, accessibility marking)
+**Plans**: 3 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Retroactive verification for Phase 7: verify ADMN-02 against existing code and SUMMARYs
+- [ ] 12-02-PLAN.md — Retroactive verification for Phase 8: verify ADMN-01 against existing code and SUMMARYs
+- [ ] 12-03-PLAN.md — Retroactive verification for Phase 9: verify EDIT-01 through EDIT-05 against existing code and SUMMARYs
+
+### Phase 13: Restore Location Detail View
+**Goal**: Students can tap any landmark to view its full details (name, room number, type, description, accessibility notes)
+**Depends on**: Phase 12
+**Requirements**: ROUT-07
+**Gap Closure**: Closes ROUT-07 partial gap — detail panel was removed in Phase 5 when tap-to-route-pin was introduced
+**Success Criteria** (what must be TRUE):
+  1. Tapping a landmark on the map shows a detail panel with: name, roomNumber, type, description, buildingName, accessibilityNotes
+  2. The detail panel does not interfere with tap-to-select-route-pin behavior (the Phase 5 flow still works)
+  3. Detail panel is dismissible and does not block the map canvas
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Design and implement location detail display (tooltip or bottom sheet) alongside route selection flow
+- [ ] 13-02-PLAN.md — Wire detail display into FloorPlanCanvas landmark tap handler without breaking Phase 5 route selection
+- [ ] 13-03-PLAN.md — Human verification: tap shows details, route selection still works, panel dismissible
+
+### Phase 14: Documentation Cleanup
+**Goal**: Fix stale progress tracking and misleading documentation so the project record accurately reflects the built state
+**Depends on**: Phase 12
+**Requirements**: (none — tech debt cleanup)
+**Gap Closure**: Closes tracking gaps from v1.0 audit (stale ROADMAP.md progress table, handleSheetBack SUMMARY mismatch)
+**Success Criteria** (what must be TRUE):
+  1. ROADMAP.md progress table shows all completed phases as Complete with correct dates
+  2. Phase 05.1 SUMMARY is corrected so handleSheetBack behavior matches what is documented
+**Plans**: 1 plan
+
+Plans:
+- [ ] 14-01-PLAN.md — Update ROADMAP.md progress table; correct Phase 05.1 handleSheetBack SUMMARY documentation
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 → 8 → 9 → 10
-Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 5.1 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14
+Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phases 13 and 14 can execute in parallel (both depend on Phase 12).
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Project Setup & Foundation | 0/2 | Not started | - |
-| 2. Floor Plan Rendering | 2/2 | Complete   | 2026-02-18 |
-| 3. Graph Data Model & Pathfinding Engine | 1/2 | In progress | - |
-| 4. Map Landmarks & Location Display | 4/4 | Complete   | 2026-02-19 |
-| 5. Search & Location Selection | 3/3 | Complete   | 2026-02-19 |
-| 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete   | 2026-02-20 |
-| 6. Route Visualization & Directions | 6/7 | In Progress|  |
-| 7. API & Data Persistence | 3/4 | In Progress|  |
-| 8. Admin Authentication | 2/3 | In Progress|  |
-| 9. Admin Map Editor — Visual | 4/4 | Complete   | 2026-02-21 |
-| 10. Admin Map Editor — Management | 3/3 | Complete    | 2026-02-21 |
+| 1. Project Setup & Foundation | 2/2 | Complete | 2026-02-18 |
+| 2. Floor Plan Rendering | 2/2 | Complete | 2026-02-18 |
+| 3. Graph Data Model & Pathfinding Engine | 2/2 | Complete | 2026-02-18 |
+| 4. Map Landmarks & Location Display | 4/4 | Complete | 2026-02-19 |
+| 5. Search & Location Selection | 3/3 | Complete | 2026-02-19 |
+| 5.1. Issues needed to be fixed (INSERTED) | 2/2 | Complete | 2026-02-20 |
+| 6. Route Visualization & Directions | 5/5 | Complete | 2026-02-20 |
+| 7. API & Data Persistence | 3/4 | Complete | 2026-02-20 |
+| 8. Admin Authentication | 3/3 | Complete | 2026-02-21 |
+| 9. Admin Map Editor — Visual | 4/4 | Complete | 2026-02-21 |
+| 10. Admin Map Editor — Management | 3/3 | Complete | 2026-02-21 |
+| 11. Fix Data Tab Visibility | 0/2 | Not started | - |
+| 12. Retroactive Phase Verifications | 0/3 | Not started | - |
+| 13. Restore Location Detail View | 0/3 | Not started | - |
+| 14. Documentation Cleanup | 0/1 | Not started | - |
