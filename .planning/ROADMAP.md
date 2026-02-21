@@ -182,13 +182,13 @@ Plans:
   3. Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) on the floor plan by dragging and dropping
   4. Admin can create connections (edges) between two nodes by clicking them sequentially, with distance/weight auto-calculated or manually set
   5. Admin can mark any edge as wheelchair-accessible or not-accessible during creation or editing
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
-- [ ] 09-03: TBD
-- [ ] 09-04: TBD
+- [ ] 09-01-PLAN.md — useEditorState hook (useReducer + undo/redo) + POST /api/admin/graph and POST /api/admin/floor-plan endpoints
+- [ ] 09-02-PLAN.md — MapEditorCanvas + EditorToolbar + NodeMarkerLayer (floor plan rendering, node placement, mode switching)
+- [ ] 09-03-PLAN.md — EdgeLayer (rubber-band preview + edge rendering) + EditorSidePanel (OSM-style property editor)
+- [ ] 09-04-PLAN.md — Human verification: floor plan upload, node placement, edge creation, accessibility marking, save/persist
 
 ### Phase 10: Admin Map Editor — Management
 **Goal**: Admin can manage all graph data through editing, tabular views, and bulk import/export
