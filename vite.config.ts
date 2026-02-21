@@ -11,6 +11,9 @@ export default defineConfig({
       '@client': resolve(__dirname, 'src/client'),
     },
   },
+  build: {
+    outDir: 'dist/client',
+  },
   server: {
     port: 5173,
     proxy: {

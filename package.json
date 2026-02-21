@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "dev:server": "tsx watch --env-file=.env src/server/index.ts",
     "build": "tsc --noEmit && vite build",
+    "start": "tsx --env-file=.env src/server/index.ts",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

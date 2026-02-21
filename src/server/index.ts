@@ -12,6 +12,8 @@ import { authRoutes } from './auth/routes'
 import { db } from './db/client'
 import { edges, graphMetadata, nodes } from './db/schema'
 import { seedIfEmpty } from './db/seed'
+import { serveStatic } from '@hono/node-server/serve-static'
+import { readFile } from 'node:fs/promises'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -221,6 +223,13 @@ app.post('/api/admin/floor-plan', async (c) => {
     console.error('Floor plan upload failed:', err)
     return c.json({ error: 'Failed to upload floor plan' }, 500)
   }
+})
+
+app.use('/*', serveStatic({ root: './dist/client' }))
+
+app.get('/*', async (c) => {
+  const html = await readFile('./dist/client/index.html', 'utf-8')
+  return c.html(html)
 })
 
 const port = 3001
