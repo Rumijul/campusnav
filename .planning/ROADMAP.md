@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
 - [x] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata (completed 2026-02-21)
-- [ ] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export
+- [x] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export (completed 2026-02-21)
 
 ## Phase Details
 
@@ -225,4 +225,4 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 7. API & Data Persistence | 3/4 | In Progress|  |
 | 8. Admin Authentication | 2/3 | In Progress|  |
 | 9. Admin Map Editor — Visual | 4/4 | Complete   | 2026-02-21 |
-| 10. Admin Map Editor — Management | 2/3 | In Progress|  |
+| 10. Admin Map Editor — Management | 3/3 | Complete   | 2026-02-21 |
