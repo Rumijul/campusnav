@@ -1,12 +1,19 @@
-import type { NavGraph, NavNode } from '@shared/types'
+import type { NavEdge, NavGraph, NavNode } from '@shared/types'
 import type Konva from 'konva'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
 import useImage from 'use-image'
+import EdgeLayer from '../../components/admin/EdgeLayer'
+import EditorSidePanel from '../../components/admin/EditorSidePanel'
 import EditorToolbar from '../../components/admin/EditorToolbar'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
 import FloorPlanImage from '../../components/FloorPlanImage'
-import { generateNodeId, useEditorState } from '../../hooks/useEditorState'
+import {
+  calcDistance,
+  generateEdgeId,
+  generateNodeId,
+  useEditorState,
+} from '../../hooks/useEditorState'
 import { useMapViewport } from '../../hooks/useMapViewport'
 import { useViewportSize } from '../../hooks/useViewportSize'
 
@@ -35,6 +42,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   } | null>(null)
   const [stageScale, setStageScale] = useState<number>(1)
   const [floorPlanUrl, setFloorPlanUrl] = useState<string>('/api/floor-plan/image')
+  const [cursorCanvasPos, setCursorCanvasPos] = useState<{ x: number; y: number } | null>(null)
 
   // Compute editor viewport height (full height minus toolbar ~52px)
   const editorHeight = height
@@ -78,12 +86,32 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         dispatch({ type: 'SET_PENDING_EDGE_SOURCE', id: null })
         dispatch({ type: 'SELECT_NODE', id: null })
         dispatch({ type: 'SELECT_EDGE', id: null })
+        setCursorCanvasPos(null)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleUndo, handleRedo, dispatch])
+
+  // Handle mouse move — track cursor position for rubber-band preview
+  const handleMouseMove = useCallback(() => {
+    const stage = stageRef.current
+    if (!stage) return
+
+    if (state.mode === 'add-edge' && state.pendingEdgeSourceId !== null) {
+      const pos = stage.getPointerPosition()
+      if (!pos) return
+
+      const stagePosition = stage.position()
+      const scale = stage.scaleX()
+      const canvasX = (pos.x - stagePosition.x) / scale
+      const canvasY = (pos.y - stagePosition.y) / scale
+      setCursorCanvasPos({ x: canvasX, y: canvasY })
+    } else {
+      setCursorCanvasPos(null)
+    }
+  }, [state.mode, state.pendingEdgeSourceId])
 
   // Handle stage click for node placement and selection clearing
   const handleStageClick = useCallback(
@@ -121,8 +149,13 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           dispatch({ type: 'SELECT_NODE', id: null })
           dispatch({ type: 'SELECT_EDGE', id: null })
         }
+      } else if (state.mode === 'add-edge') {
+        // Clicking empty canvas cancels the pending edge
+        if (e.target === stage) {
+          dispatch({ type: 'SET_PENDING_EDGE_SOURCE', id: null })
+          setCursorCanvasPos(null)
+        }
       }
-      // add-edge mode: handled in Plan 03
     },
     [state.mode, imageRect, dispatch, recordHistory],
   )
@@ -132,10 +165,46 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     (nodeId: string) => {
       if (state.mode === 'select') {
         dispatch({ type: 'SELECT_NODE', id: nodeId })
+      } else if (state.mode === 'add-edge') {
+        if (state.pendingEdgeSourceId === null) {
+          // First click: set pending source
+          dispatch({ type: 'SET_PENDING_EDGE_SOURCE', id: nodeId })
+        } else if (state.pendingEdgeSourceId !== nodeId) {
+          // Second click: create edge between source and target
+          const sourceId = state.pendingEdgeSourceId
+          const targetId = nodeId
+          const source = state.nodes.find((n) => n.id === sourceId)
+          const target = state.nodes.find((n) => n.id === targetId)
+
+          if (source && target) {
+            const dist = calcDistance(source, target)
+            const newEdge: NavEdge = {
+              id: generateEdgeId(sourceId, targetId),
+              sourceId,
+              targetId,
+              standardWeight: dist,
+              accessibleWeight: dist,
+              accessible: true,
+              bidirectional: true,
+            }
+            dispatch({ type: 'CREATE_EDGE', edge: newEdge })
+            recordHistory()
+            dispatch({ type: 'SELECT_EDGE', id: newEdge.id })
+            setCursorCanvasPos(null)
+          }
+        }
+        // Same node clicked: ignore (no self-loops)
       }
-      // add-edge mode: handled in Plan 03
     },
-    [state.mode, dispatch],
+    [state.mode, state.pendingEdgeSourceId, state.nodes, dispatch, recordHistory],
+  )
+
+  // Handle edge click
+  const handleEdgeClick = useCallback(
+    (edgeId: string) => {
+      dispatch({ type: 'SELECT_EDGE', id: edgeId })
+    },
+    [dispatch],
   )
 
   // Handle node drag end — normalize position and record history
@@ -192,6 +261,20 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     })
   }, [])
 
+  // Compute selected edge with source/target names for side panel
+  const selectedEdgeWithNames = (() => {
+    if (!state.selectedEdgeId) return null
+    const edge = state.edges.find((e) => e.id === state.selectedEdgeId)
+    if (!edge) return null
+    const sourceNode = state.nodes.find((n) => n.id === edge.sourceId)
+    const targetNode = state.nodes.find((n) => n.id === edge.targetId)
+    return {
+      ...edge,
+      sourceName: sourceNode?.label ?? edge.sourceId,
+      targetName: targetNode?.label ?? edge.targetId,
+    }
+  })()
+
   return (
     <div className="relative w-full h-full">
       <EditorToolbar
@@ -206,13 +289,14 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         isDirty={state.isDirty}
         onLogout={onLogout}
       />
-      <div style={{ paddingTop: '52px', width, height: editorHeight }}>
+      <div style={{ paddingTop: '52px', width, height: editorHeight }} className="relative">
         <Stage
           ref={stageRef}
           width={width}
           height={editorHeight - 52}
           draggable={state.mode === 'select'}
           onClick={handleStageClick}
+          onMouseMove={handleMouseMove}
           onWheel={handleWheel}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -232,7 +316,19 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             )}
           </Layer>
 
-          {/* Layer 2: Node markers */}
+          {/* Layer 2: Edges (between floor plan and nodes so nodes render on top) */}
+          <EdgeLayer
+            edges={state.edges}
+            nodes={state.nodes}
+            selectedEdgeId={state.selectedEdgeId}
+            pendingEdgeSourceId={state.pendingEdgeSourceId}
+            cursorPosition={cursorCanvasPos}
+            imageRect={imageRect}
+            mode={state.mode}
+            onEdgeClick={handleEdgeClick}
+          />
+
+          {/* Layer 3: Node markers */}
           <NodeMarkerLayer
             nodes={state.nodes}
             selectedNodeId={state.selectedNodeId}
@@ -243,6 +339,32 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             onNodeDragEnd={handleNodeDragEnd}
           />
         </Stage>
+
+        {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
+        <div className="absolute right-0 top-0 h-full pointer-events-none">
+          <div className="pointer-events-auto h-full">
+            <EditorSidePanel
+              selectedNode={
+                state.selectedNodeId
+                  ? (state.nodes.find((n) => n.id === state.selectedNodeId) ?? null)
+                  : null
+              }
+              selectedEdge={selectedEdgeWithNames}
+              onUpdateNode={(id, changes) => {
+                dispatch({ type: 'UPDATE_NODE', id, changes })
+                recordHistory()
+              }}
+              onUpdateEdge={(id, changes) => {
+                dispatch({ type: 'UPDATE_EDGE', id, changes })
+                recordHistory()
+              }}
+              onClose={() => {
+                dispatch({ type: 'SELECT_NODE', id: null })
+                dispatch({ type: 'SELECT_EDGE', id: null })
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Hidden file input for floor plan upload */}

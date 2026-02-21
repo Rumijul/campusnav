@@ -1,0 +1,285 @@
+import type { NavEdge, NavNode, NavNodeType } from '@shared/types'
+
+/* ──────────────── Helpers ──────────────── */
+
+const LANDMARK_TYPES = new Set<NavNodeType>([
+  'room',
+  'entrance',
+  'elevator',
+  'restroom',
+  'landmark',
+])
+
+function isLandmarkType(type: NavNodeType): boolean {
+  return LANDMARK_TYPES.has(type)
+}
+
+const NODE_TYPE_LABELS: Record<NavNodeType, string> = {
+  room: 'Room',
+  entrance: 'Entrance',
+  elevator: 'Elevator',
+  restroom: 'Restroom',
+  landmark: 'Landmark',
+  stairs: 'Stairs',
+  ramp: 'Ramp',
+  junction: 'Hallway Junction',
+  hallway: 'Hallway',
+}
+
+/* ──────────────── Props ──────────────── */
+
+interface EditorSidePanelProps {
+  selectedNode: NavNode | null
+  selectedEdge: (NavEdge & { sourceName: string; targetName: string }) | null
+  onUpdateNode: (id: string, changes: Partial<NavNode>) => void
+  onUpdateEdge: (id: string, changes: Partial<NavEdge>) => void
+  onClose: () => void
+}
+
+/* ──────────────── Component ──────────────── */
+
+export default function EditorSidePanel({
+  selectedNode,
+  selectedEdge,
+  onUpdateNode,
+  onUpdateEdge,
+  onClose,
+}: EditorSidePanelProps) {
+  if (!selectedNode && !selectedEdge) return null
+
+  return (
+    <div className="absolute right-0 top-0 h-full w-72 bg-white border-l shadow-lg overflow-y-auto z-10 flex flex-col">
+      {/* Panel Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
+        <span className="font-semibold text-gray-800 text-sm">
+          {selectedNode ? 'Node Properties' : 'Edge Properties'}
+        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-800 focus:outline-none text-lg leading-none"
+          aria-label="Close panel"
+        >
+          x
+        </button>
+      </div>
+
+      {/* Node Editing Form */}
+      {selectedNode && (
+        <div className="p-4 flex flex-col gap-4">
+          {/* Name */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="node-name"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Name
+            </label>
+            <input
+              id="node-name"
+              type="text"
+              value={selectedNode.label}
+              onChange={(e) => onUpdateNode(selectedNode.id, { label: e.target.value })}
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Type */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="node-type"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Type
+            </label>
+            <select
+              id="node-type"
+              value={selectedNode.type}
+              onChange={(e) => {
+                const newType = e.target.value as NavNodeType
+                onUpdateNode(selectedNode.id, {
+                  type: newType,
+                  searchable: isLandmarkType(newType),
+                })
+              }}
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <optgroup label="Visible to Students">
+                <option value="room">Room</option>
+                <option value="entrance">Entrance</option>
+                <option value="elevator">Elevator</option>
+                <option value="restroom">Restroom</option>
+                <option value="landmark">Landmark</option>
+              </optgroup>
+              <optgroup label="Navigation Only (Hidden)">
+                <option value="stairs">Stairs</option>
+                <option value="ramp">Ramp</option>
+                <option value="junction">Junction</option>
+                <option value="hallway">Hallway</option>
+              </optgroup>
+            </select>
+          </div>
+
+          {/* Category (read-only display, no input to associate) */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Category
+            </span>
+            <p className="text-sm text-gray-700 px-2 py-1.5 bg-gray-50 rounded border">
+              {NODE_TYPE_LABELS[selectedNode.type]}
+            </p>
+          </div>
+
+          {/* Room Number */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="node-room-number"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Room Number <span className="text-gray-400 normal-case font-normal">(optional)</span>
+            </label>
+            <input
+              id="node-room-number"
+              type="text"
+              value={selectedNode.roomNumber ?? ''}
+              onChange={(e) => onUpdateNode(selectedNode.id, { roomNumber: e.target.value })}
+              placeholder="e.g. 204"
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="node-description"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Description <span className="text-gray-400 normal-case font-normal">(optional)</span>
+            </label>
+            <textarea
+              id="node-description"
+              value={selectedNode.description ?? ''}
+              onChange={(e) => onUpdateNode(selectedNode.id, { description: e.target.value })}
+              placeholder="Brief description..."
+              rows={3}
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+            />
+          </div>
+
+          {/* Searchable indicator */}
+          <div className="text-xs text-gray-500 bg-gray-50 rounded p-2">
+            {isLandmarkType(selectedNode.type) ? (
+              <span className="text-green-700">Visible to students in search results</span>
+            ) : (
+              <span className="text-gray-500">Hidden from students (navigation only)</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Edge Editing Form */}
+      {selectedEdge && (
+        <div className="p-4 flex flex-col gap-4">
+          {/* Source → Target (read-only display) */}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Connection
+            </span>
+            <p className="text-sm text-gray-700 px-2 py-1.5 bg-gray-50 rounded border">
+              {selectedEdge.sourceName} &rarr; {selectedEdge.targetName}
+            </p>
+          </div>
+
+          {/* Distance / Weight */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="edge-weight"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Distance (weight)
+            </label>
+            <input
+              id="edge-weight"
+              type="number"
+              step="0.001"
+              value={selectedEdge.standardWeight}
+              onChange={(e) => {
+                const val = Number.parseFloat(e.target.value)
+                if (Number.isNaN(val)) return
+                const changes: Partial<NavEdge> = { standardWeight: val }
+                if (selectedEdge.accessible) {
+                  changes.accessibleWeight = val
+                }
+                onUpdateEdge(selectedEdge.id, changes)
+              }}
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Wheelchair Accessible */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Wheelchair Accessible
+            </span>
+            <label htmlFor="edge-accessible" className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="edge-accessible"
+                type="checkbox"
+                checked={selectedEdge.accessible}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    onUpdateEdge(selectedEdge.id, {
+                      accessible: true,
+                      accessibleWeight: selectedEdge.standardWeight,
+                    })
+                  } else {
+                    onUpdateEdge(selectedEdge.id, {
+                      accessible: false,
+                      accessibleWeight: 1e10,
+                    })
+                  }
+                }}
+                className="w-4 h-4 accent-green-600"
+              />
+              <span className="text-sm text-gray-700">
+                {selectedEdge.accessible ? 'Accessible' : 'Not accessible'}
+              </span>
+            </label>
+          </div>
+
+          {/* Accessibility Notes */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="edge-a11y-notes"
+              className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+            >
+              Accessibility Notes{' '}
+              <span className="text-gray-400 normal-case font-normal">(optional)</span>
+            </label>
+            <input
+              id="edge-a11y-notes"
+              type="text"
+              value={selectedEdge.accessibilityNotes ?? ''}
+              onChange={(e) =>
+                onUpdateEdge(selectedEdge.id, { accessibilityNotes: e.target.value })
+              }
+              placeholder='e.g. "3 steps", "narrow doorway"'
+              className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Accessibility status indicator */}
+          <div className="text-xs rounded p-2 bg-gray-50">
+            {selectedEdge.accessible ? (
+              <span className="text-green-700">
+                Accessible weight: {selectedEdge.accessibleWeight.toFixed(3)}
+              </span>
+            ) : (
+              <span className="text-red-600">Blocked for wheelchair routing (weight = 1e10)</span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
