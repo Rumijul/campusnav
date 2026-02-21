@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
@@ -121,8 +121,107 @@ app.route('/api/auth', authRoutes)
 app.use('/api/admin/*', jwt({ secret: JWT_SECRET, alg: 'HS256', cookie: 'admin_token' }))
 
 // ── Admin routes (protected) ──────────────────────────────────────────────────
-/** Placeholder admin endpoint for testing JWT guard. */
-app.get('/api/admin/ping', (c) => c.json({ ok: true, message: 'Admin access granted' }))
+
+/**
+ * POST /api/admin/graph
+ * Replaces the entire navigation graph in SQLite atomically.
+ * Receives a full NavGraph JSON body; wraps delete+insert in a SQLite transaction.
+ */
+app.post('/api/admin/graph', async (c) => {
+  try {
+    const graph = (await c.req.json()) as NavGraph
+    // Basic validation: must have nodes array and edges array
+    if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) {
+      return c.json({ error: 'Invalid graph data' }, 400)
+    }
+
+    // Use the raw better-sqlite3 connection for synchronous transaction
+    const sqlite = db.$client
+    const txn = sqlite.transaction(() => {
+      // Delete all existing data
+      db.delete(graphMetadata).run()
+      db.delete(edges).run()
+      db.delete(nodes).run()
+
+      // Insert nodes
+      for (const n of graph.nodes) {
+        db.insert(nodes)
+          .values({
+            id: n.id,
+            x: n.x,
+            y: n.y,
+            label: n.label,
+            type: n.type,
+            searchable: n.searchable,
+            floor: n.floor,
+            roomNumber: n.roomNumber ?? null,
+            description: n.description ?? null,
+            buildingName: n.buildingName ?? null,
+            accessibilityNotes: n.accessibilityNotes ?? null,
+          })
+          .run()
+      }
+
+      // Insert edges
+      for (const e of graph.edges) {
+        db.insert(edges)
+          .values({
+            id: e.id,
+            sourceId: e.sourceId,
+            targetId: e.targetId,
+            standardWeight: e.standardWeight,
+            accessibleWeight: e.accessibleWeight, // 1e10 for non-accessible (never Infinity)
+            accessible: e.accessible,
+            bidirectional: e.bidirectional,
+            accessibilityNotes: e.accessibilityNotes ?? null,
+          })
+          .run()
+      }
+
+      // Insert metadata
+      if (graph.metadata) {
+        db.insert(graphMetadata)
+          .values({
+            buildingName: graph.metadata.buildingName,
+            floor: graph.metadata.floor,
+            lastUpdated: graph.metadata.lastUpdated,
+          })
+          .run()
+      }
+    })
+    txn() // execute the transaction
+
+    return c.json({ ok: true })
+  } catch (err) {
+    console.error('Graph save failed:', err)
+    return c.json({ error: 'Failed to save graph' }, 500)
+  }
+})
+
+/**
+ * POST /api/admin/floor-plan
+ * Accepts a multipart image upload and writes it to the server assets directory.
+ * The uploaded image replaces the existing floor-plan.png.
+ */
+app.post('/api/admin/floor-plan', async (c) => {
+  try {
+    const body = await c.req.parseBody()
+    const file = body.image
+    if (!file || !(file instanceof File)) {
+      return c.json({ error: 'No image file provided' }, 400)
+    }
+    if (!file.type.startsWith('image/')) {
+      return c.json({ error: 'File must be an image' }, 400)
+    }
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const dest = resolve(__dirname, 'assets/floor-plan.png')
+    await writeFile(dest, buffer)
+    return c.json({ ok: true })
+  } catch (err) {
+    console.error('Floor plan upload failed:', err)
+    return c.json({ error: 'Failed to upload floor plan' }, 500)
+  }
+})
 
 const port = 3001
 console.log(`Server running on http://localhost:${port}`)
