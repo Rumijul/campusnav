@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 09 of 10 (Admin Map Editor Visual) — IN PROGRESS
-Plan: 2 of 4 complete
-Status: Phase 09 Plan 02 complete — MapEditorCanvas + EditorToolbar + NodeMarkerLayer + AdminShell updated
-Last activity: 2026-02-21 — Completed Phase 09 Plan 02 (visual editor components)
+Plan: 3 of 4 complete
+Status: Phase 09 Plan 03 complete — EdgeLayer + EditorSidePanel + MapEditorCanvas edge creation wired
+Last activity: 2026-02-21 — Completed Phase 09 Plan 03 (edge creation + properties side panel)
 
 Progress: [████████░░] 82%
 
@@ -53,6 +53,7 @@ Progress: [████████░░] 82%
 | Phase 08-admin-authentication P02 | 3 | 2 tasks | 7 files |
 | Phase 09-admin-map-editor-visual P01 | 4 | 2 tasks | 2 files |
 | Phase 09-admin-map-editor-visual P02 | 3 | 2 tasks | 4 files |
+| Phase 09 P03 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,9 @@ Recent decisions affecting current work:
 - [Phase 09-02]: EditorToolbar is absolute-positioned HTML overlay (z-10) above Konva Stage — matches SearchOverlay/ZoomControls pattern; keeps toolbar outside Konva transform space
 - [Phase 09-02]: Stage height = viewportHeight - 52px (toolbar offset) — Stage fills remaining viewport below toolbar
 - [Phase 09-02]: Blob URL from URL.createObjectURL() used after floor plan upload for instant preview + cache-bust
+- [Phase 09-03]: EdgeLayer sits between floor plan Layer and NodeMarkerLayer — edges render under nodes for clean visual hierarchy
+- [Phase 09-03]: Rubber-band preview Line has listening=false — prevents interception of click events during edge creation flow
+- [Phase 09-03]: exactOptionalPropertyTypes-safe field updates — pass string values directly, never string|undefined for optional NavNode/NavEdge fields
 
 ### Pending Todos
 
@@ -156,6 +160,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 09-admin-map-editor-visual-02-PLAN.md — MapEditorCanvas + EditorToolbar + NodeMarkerLayer + AdminShell updated
+Stopped at: Completed 09-admin-map-editor-visual-03-PLAN.md — EdgeLayer + EditorSidePanel + MapEditorCanvas edge creation wired
 Resume file: None
+Next action: Execute Phase 09 Plan 04 (if it exists) or run UAT for admin editor
 Next action: Execute Phase 09 Plan 03 (edge creation + properties side panel)
