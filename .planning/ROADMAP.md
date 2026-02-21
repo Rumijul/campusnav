@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 6: Route Visualization & Directions** - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
 - [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
-- [ ] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata
+- [x] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata (completed 2026-02-21)
 - [ ] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export
 
 ## Phase Details
@@ -224,5 +224,5 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1).
 | 6. Route Visualization & Directions | 6/7 | In Progress|  |
 | 7. API & Data Persistence | 3/4 | In Progress|  |
 | 8. Admin Authentication | 2/3 | In Progress|  |
-| 9. Admin Map Editor — Visual | 3/4 | In Progress|  |
+| 9. Admin Map Editor — Visual | 4/4 | Complete   | 2026-02-21 |
 | 10. Admin Map Editor — Management | 0/3 | Not started | - |
