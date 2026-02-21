@@ -38,11 +38,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin — Map Editor
 
-- [ ] **EDIT-01**: Admin can upload a floor plan image as the map base layer
-- [ ] **EDIT-02**: Admin can place visible landmark nodes on the floor plan via drag-and-drop
-- [ ] **EDIT-03**: Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) via drag-and-drop
-- [ ] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
-- [ ] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
+- [x] **EDIT-01**: Admin can upload a floor plan image as the map base layer
+- [x] **EDIT-02**: Admin can place visible landmark nodes on the floor plan via drag-and-drop
+- [x] **EDIT-03**: Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) via drag-and-drop
+- [x] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
+- [x] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
 - [ ] **EDIT-06**: Admin can rename, edit properties of, and delete any node
 - [ ] **EDIT-07**: Admin can view and edit all nodes in a sortable, filterable data table
 - [ ] **EDIT-08**: Admin can import and export graph data in JSON or CSV format
@@ -105,11 +105,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-07 | Phase 4: Map Landmarks & Location Display | Complete |
 | ADMN-01 | Phase 8: Admin Authentication | Complete |
 | ADMN-02 | Phase 7: API & Data Persistence | Complete |
-| EDIT-01 | Phase 9: Admin Map Editor — Visual | Pending |
-| EDIT-02 | Phase 9: Admin Map Editor — Visual | Pending |
-| EDIT-03 | Phase 9: Admin Map Editor — Visual | Pending |
-| EDIT-04 | Phase 9: Admin Map Editor — Visual | Pending |
-| EDIT-05 | Phase 9: Admin Map Editor — Visual | Pending |
+| EDIT-01 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-02 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-03 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-04 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-05 | Phase 9: Admin Map Editor — Visual | Complete |
 | EDIT-06 | Phase 10: Admin Map Editor — Management | Pending |
 | EDIT-07 | Phase 10: Admin Map Editor — Management | Pending |
 | EDIT-08 | Phase 10: Admin Map Editor — Management | Pending |

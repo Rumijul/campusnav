@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 9 IN PROGRESS — data layer (useEditorState hook + admin API endpoints) complete; building visual editor components
+**Current focus:** Phase 9 IN PROGRESS — visual editor components (MapEditorCanvas, NodeMarkerLayer, EditorToolbar) complete; building edge creation + properties panel
 
 ## Current Position
 
 Phase: 09 of 10 (Admin Map Editor Visual) — IN PROGRESS
-Plan: 1 of 4 complete
-Status: Phase 09 Plan 01 complete — useEditorState hook + POST /api/admin/graph + POST /api/admin/floor-plan
-Last activity: 2026-02-21 — Completed Phase 09 Plan 01 (editor data layer)
+Plan: 2 of 4 complete
+Status: Phase 09 Plan 02 complete — MapEditorCanvas + EditorToolbar + NodeMarkerLayer + AdminShell updated
+Last activity: 2026-02-21 — Completed Phase 09 Plan 02 (visual editor components)
 
 Progress: [████████░░] 82%
 
@@ -52,6 +52,7 @@ Progress: [████████░░] 82%
 | Phase 08-admin-authentication P01 | 5 min | 2 tasks | 7 files |
 | Phase 08-admin-authentication P02 | 3 | 2 tasks | 7 files |
 | Phase 09-admin-map-editor-visual P01 | 4 | 2 tasks | 2 files |
+| Phase 09-admin-map-editor-visual P02 | 3 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -135,6 +136,10 @@ Recent decisions affecting current work:
 - [Phase 08-02]: BrowserRouter inside App.tsx, not main.tsx — StrictMode in main stays unchanged; router is App concern
 - [Phase 09-admin-map-editor-visual]: useEditorState undo/redo stored in useRef (not useState) — avoids double renders; lightweight historyInfo useState triggers re-renders only for canUndo/canRedo
 - [Phase 09-admin-map-editor-visual]: db.$client accesses underlying better-sqlite3 Database for synchronous .transaction() API — Drizzle's own transaction is async but better-sqlite3 is sync-only
+- [Phase 09-02]: NodeMarkerLayer renders its own Konva Layer — clean encapsulation matching student view LandmarkLayer pattern
+- [Phase 09-02]: EditorToolbar is absolute-positioned HTML overlay (z-10) above Konva Stage — matches SearchOverlay/ZoomControls pattern; keeps toolbar outside Konva transform space
+- [Phase 09-02]: Stage height = viewportHeight - 52px (toolbar offset) — Stage fills remaining viewport below toolbar
+- [Phase 09-02]: Blob URL from URL.createObjectURL() used after floor plan upload for instant preview + cache-bust
 
 ### Pending Todos
 
@@ -151,6 +156,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Completed 09-admin-map-editor-visual-01-PLAN.md — useEditorState hook + admin graph/floor-plan API endpoints
+Stopped at: Completed 09-admin-map-editor-visual-02-PLAN.md — MapEditorCanvas + EditorToolbar + NodeMarkerLayer + AdminShell updated
 Resume file: None
-Next action: Execute Phase 09 Plan 02 (admin editor visual components)
+Next action: Execute Phase 09 Plan 03 (edge creation + properties side panel)
