@@ -33,6 +33,8 @@ interface EditorSidePanelProps {
   selectedEdge: (NavEdge & { sourceName: string; targetName: string }) | null
   onUpdateNode: (id: string, changes: Partial<NavNode>) => void
   onUpdateEdge: (id: string, changes: Partial<NavEdge>) => void
+  onDeleteNode: (id: string) => void
+  onDeleteEdge: (id: string) => void
   onClose: () => void
 }
 
@@ -43,6 +45,8 @@ export default function EditorSidePanel({
   selectedEdge,
   onUpdateNode,
   onUpdateEdge,
+  onDeleteNode,
+  onDeleteEdge,
   onClose,
 }: EditorSidePanelProps) {
   if (!selectedNode && !selectedEdge) return null
@@ -174,6 +178,15 @@ export default function EditorSidePanel({
               <span className="text-gray-500">Hidden from students (navigation only)</span>
             )}
           </div>
+
+          {/* Delete Node */}
+          <button
+            type="button"
+            onClick={() => onDeleteNode(selectedNode.id)}
+            className="mt-4 w-full rounded bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Delete Node
+          </button>
         </div>
       )}
 
@@ -278,6 +291,15 @@ export default function EditorSidePanel({
               <span className="text-red-600">Blocked for wheelchair routing (weight = 1e10)</span>
             )}
           </div>
+
+          {/* Delete Edge */}
+          <button
+            type="button"
+            onClick={() => onDeleteEdge(selectedEdge.id)}
+            className="mt-4 w-full rounded bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            Delete Edge
+          </button>
         </div>
       )}
     </div>

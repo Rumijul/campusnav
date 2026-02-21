@@ -137,7 +137,8 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         nodes: state.nodes.filter((n) => n.id !== action.id),
         edges: state.edges.filter((e) => e.sourceId !== action.id && e.targetId !== action.id),
         selectedNodeId: state.selectedNodeId === action.id ? null : state.selectedNodeId,
-        pendingEdgeSourceId: state.pendingEdgeSourceId === action.id ? null : state.pendingEdgeSourceId,
+        pendingEdgeSourceId:
+          state.pendingEdgeSourceId === action.id ? null : state.pendingEdgeSourceId,
         isDirty: true,
       }
 

@@ -73,7 +73,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       })
   }, [dispatch])
 
-  // Keyboard shortcuts for undo/redo and escape
+  // Keyboard shortcuts for undo/redo, escape, and delete
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
@@ -87,12 +87,25 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         dispatch({ type: 'SELECT_NODE', id: null })
         dispatch({ type: 'SELECT_EDGE', id: null })
         setCursorCanvasPos(null)
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        const isInputFocused = ['INPUT', 'TEXTAREA', 'SELECT'].includes(
+          (document.activeElement as HTMLElement)?.tagName ?? '',
+        )
+        if (isInputFocused) return
+
+        if (state.selectedNodeId) {
+          dispatch({ type: 'DELETE_NODE', id: state.selectedNodeId })
+          recordHistory()
+        } else if (state.selectedEdgeId) {
+          dispatch({ type: 'DELETE_EDGE', id: state.selectedEdgeId })
+          recordHistory()
+        }
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleUndo, handleRedo, dispatch])
+  }, [handleUndo, handleRedo, dispatch, state.selectedNodeId, state.selectedEdgeId, recordHistory])
 
   // Handle mouse move — track cursor position for rubber-band preview
   const handleMouseMove = useCallback(() => {
@@ -356,6 +369,14 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
               }}
               onUpdateEdge={(id, changes) => {
                 dispatch({ type: 'UPDATE_EDGE', id, changes })
+                recordHistory()
+              }}
+              onDeleteNode={(id) => {
+                dispatch({ type: 'DELETE_NODE', id })
+                recordHistory()
+              }}
+              onDeleteEdge={(id) => {
+                dispatch({ type: 'DELETE_EDGE', id })
                 recordHistory()
               }}
               onClose={() => {
