@@ -295,7 +295,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   })()
 
   return (
-    <div className="relative flex h-full w-full flex-col">
+    <div className="relative flex h-full w-full flex-col min-h-0">
       {/* Toolbar — only shown on Map tab */}
       <div className={activeTab !== 'map' ? 'hidden' : ''}>
         <EditorToolbar
