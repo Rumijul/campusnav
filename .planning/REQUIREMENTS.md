@@ -44,8 +44,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
 - [ ] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
 - [x] **EDIT-06**: Admin can rename, edit properties of, and delete any node
-- [ ] **EDIT-07**: Admin can view and edit all nodes in a sortable, filterable data table
-- [ ] **EDIT-08**: Admin can import and export graph data in JSON or CSV format
+- [x] **EDIT-07**: Admin can view and edit all nodes in a sortable, filterable data table
+- [x] **EDIT-08**: Admin can import and export graph data in JSON or CSV format
 
 ## v2 Requirements
 
@@ -111,8 +111,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-04 | Phase 12: Retroactive Phase Verifications | Pending |
 | EDIT-05 | Phase 12: Retroactive Phase Verifications | Pending |
 | EDIT-06 | Phase 10: Admin Map Editor — Management | Complete |
-| EDIT-07 | Phase 11: Fix Data Tab Visibility | Pending |
-| EDIT-08 | Phase 11: Fix Data Tab Visibility | Pending |
+| EDIT-07 | Phase 11: Fix Data Tab Visibility | Complete |
+| EDIT-08 | Phase 11: Fix Data Tab Visibility | Complete |
 
 **Coverage:**
 - v1 requirements: 25 total

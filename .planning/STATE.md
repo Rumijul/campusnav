@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 10 COMPLETE — All 10 phases done; human UAT approved (Plan 03); known issue: Data tab not visible in MapEditorCanvas.tsx (deferred)
+**Current focus:** Phase 11 Plan 01 COMPLETE — Data tab CSS layout fix applied (min-h-0); human UAT required to confirm Data tab renders correctly
 
 ## Current Position
 
-Phase: 10 of 10 (Admin Map Editor Management) — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 10 Plan 03 complete — Human UAT approved all EDIT-06, EDIT-07, EDIT-08 behaviors; Data tab rendering issue noted as known/deferred
-Last activity: 2026-02-21 — Completed Phase 10 Plan 03 (human verification, phase complete)
+Phase: 11 of 11 (Fix Data Tab) — Plan 01 complete
+Plan: 1 of 1 complete
+Status: Phase 11 Plan 01 complete — min-h-0 fix applied to MapEditorCanvas root div; tsc and biome (on modified file) pass; human UAT required
+Last activity: 2026-02-22 — Completed Phase 11 Plan 01 (Data tab CSS fix)
 
 Progress: [██████████] 100%
 
@@ -59,6 +59,7 @@ Progress: [██████████] 100%
 | Phase 10 P02 | 5 | 2 tasks | 5 files |
 | Phase 10 P03 | 0 | 1 task (human-verify) | 0 files |
 | Phase 07-api-data-persistence P04 | 0 | 2 tasks | 0 files |
+| Phase 11-fix-data-tab P01 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -158,6 +159,7 @@ Recent decisions affecting current work:
 - [Phase 10-03]: Data tab not visible in UI (potential rendering issue in MapEditorCanvas.tsx) — noted as known issue; phase approved for deployment; deferred to follow-up if needed
 - [Phase 07]: No code changes required — Phase 07 implementation passed all 6 must-have truth checks on first human verification
 - [Phase 07]: Idempotent seed confirmed: server restart logs 'Already seeded (48 nodes) — skipping', no data duplication
+- [Phase 11-fix-data-tab]: min-h-0 added to MapEditorCanvas root div — overrides default min-height:auto on flex items, allowing Data panel flex-1 to receive height from ancestor h-screen in AdminShell
 
 ### Pending Todos
 
@@ -173,7 +175,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: Completed 10-admin-map-editor-management-03-PLAN.md — Human UAT approved all Phase 10 features; known issue: Data tab rendering in MapEditorCanvas.tsx (deferred); all 10 phases complete
+Last session: 2026-02-22
+Stopped at: Completed 11-fix-data-tab-01-PLAN.md — Data tab CSS fix (min-h-0) applied; human UAT required to verify Data tab renders with NodeDataTable and EdgeDataTable rows visible
 Resume file: None
-Next action: Project complete — all 10 phases delivered
+Next action: Human UAT — open admin map editor, click Data tab, verify rows appear, test sorting/filtering/inline editing, verify Map tab canvas still works
