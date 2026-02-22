@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 12 of 12 (Retroactive Verifications) — IN PROGRESS
-Plan: 1 of 3 complete
-Status: Phase 12 Plan 01 complete — ADMN-02 confirmed via 07-VERIFICATION.md (6/6 truths, SATISFIED); REQUIREMENTS.md traceability corrected to Phase 7
-Last activity: 2026-02-22 — Completed Phase 12 Plan 01 (ADMN-02 retroactive verification)
+Plan: 2 of 3 complete
+Status: Phase 12 Plan 02 complete — ADMN-01 verified via 08-VERIFICATION.md (5/5 truths, SATISFIED); REQUIREMENTS.md updated to Phase 8 attribution
+Last activity: 2026-02-22 — Completed Phase 12 Plan 02 (ADMN-01 retroactive verification)
 
 Progress: [██████████] 100%
 
@@ -62,6 +62,7 @@ Progress: [██████████] 100%
 | Phase 11-fix-data-tab P01 | 2 | 1 tasks | 1 files |
 | Phase 11-fix-data-tab P02 | 0 | 1 task (human-verify) | 1 files |
 | Phase 12-retroactive-verifications P01 | 3 | 2 tasks | 1 files |
+| Phase 12-retroactive-verifications P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,8 @@ Recent decisions affecting current work:
 - [Phase 11-fix-data-tab]: min-h-0 added to MapEditorCanvas root div — overrides default min-height:auto on flex items, allowing Data panel flex-1 to receive height from ancestor h-screen in AdminShell
 - [Phase 11-fix-data-tab]: EditorToolbar changed from absolute to relative positioning — absolute removed it from flex-col flow, causing tab bar to collapse to Y=0 hidden behind toolbar; both fixes (min-h-0 + relative) required together
 - [Phase 12-retroactive-verifications]: ADMN-02 traceability corrected to Phase 7 — Phase 7 is the true implementing phase; Phase 12 only confirmed documentation completeness
+- [Phase 12-02]: PLACEHOLDER_HASH in routes.ts is intentional timing-attack prevention, documented as Info-level anti-pattern not a stub
+- [Phase 12-02]: ADMN-01 attributed to Phase 8 (not Phase 12) in traceability — Phase 8 was the implementing phase
 
 ### Pending Todos
 
@@ -180,6 +183,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 12-retroactive-verifications-01-PLAN.md — ADMN-02 confirmed satisfied via 07-VERIFICATION.md; REQUIREMENTS.md traceability corrected
+Stopped at: Completed 12-02-PLAN.md — Phase 8 Admin Auth VERIFICATION.md created; ADMN-01 marked complete in REQUIREMENTS.md
 Resume file: None
-Next action: Execute Phase 12 Plan 02 (ADMN-01 retroactive verification)
+Next action: Execute Phase 12 Plan 03 (Admin Map Editor retroactive verifications)
