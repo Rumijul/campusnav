@@ -254,8 +254,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Design and implement location detail display (tooltip or bottom sheet) alongside route selection flow
-- [ ] 13-02-PLAN.md — Wire detail display into FloorPlanCanvas landmark tap handler without breaking Phase 5 route selection
+- [ ] 13-01-PLAN.md — Create LocationDetailSheet.tsx using custom CSS height-transition pattern (no Vaul); displays all NavNode detail fields
+- [ ] 13-02-PLAN.md — Wire detailNode state + dual-action tap handler into FloorPlanCanvas; auto-close on route trigger; legend offset update
 - [ ] 13-03-PLAN.md — Human verification: tap shows details, route selection still works, panel dismissible
 
 ### Phase 14: Documentation Cleanup
