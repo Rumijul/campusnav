@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
 - [x] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata (completed 2026-02-21)
 - [x] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export (completed 2026-02-21)
-- [ ] **Phase 11: Fix Data Tab Visibility** - Fix Tailwind CSS layout issue preventing Data tab from rendering in admin map editor
+- [x] **Phase 11: Fix Data Tab Visibility** - Fix Tailwind CSS layout issue preventing Data tab from rendering in admin map editor (completed 2026-02-22)
 - [ ] **Phase 12: Retroactive Phase Verifications** - Create formal VERIFICATION.md files for Phases 7, 8, and 9 to close documentation gaps
 - [ ] **Phase 13: Restore Location Detail View** - Reintroduce location detail display when a student taps a landmark on the map
 - [ ] **Phase 14: Documentation Cleanup** - Fix stale ROADMAP.md progress table and handleSheetBack documentation mismatch
@@ -290,7 +290,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 | 8. Admin Authentication | 3/3 | Complete | 2026-02-21 |
 | 9. Admin Map Editor — Visual | 4/4 | Complete | 2026-02-21 |
 | 10. Admin Map Editor — Management | 3/3 | Complete | 2026-02-21 |
-| 11. Fix Data Tab Visibility | 1/2 | In Progress|  |
+| 11. Fix Data Tab Visibility | 2/2 | Complete   | 2026-02-22 |
 | 12. Retroactive Phase Verifications | 0/3 | Not started | - |
 | 13. Restore Location Detail View | 0/3 | Not started | - |
 | 14. Documentation Cleanup | 0/1 | Not started | - |

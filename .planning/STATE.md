@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2025-02-18)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 11 Plan 01 COMPLETE — Data tab CSS layout fix applied (min-h-0); human UAT required to confirm Data tab renders correctly
+**Current focus:** Phase 11 COMPLETE — Data tab fully functional after two-part CSS fix (min-h-0 + EditorToolbar relative positioning); human UAT approved
 
 ## Current Position
 
-Phase: 11 of 11 (Fix Data Tab) — Plan 01 complete
-Plan: 1 of 1 complete
-Status: Phase 11 Plan 01 complete — min-h-0 fix applied to MapEditorCanvas root div; tsc and biome (on modified file) pass; human UAT required
-Last activity: 2026-02-22 — Completed Phase 11 Plan 01 (Data tab CSS fix)
+Phase: 11 of 11 (Fix Data Tab) — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 11 complete — Data tab visible and fully interactive; EDIT-07 and EDIT-08 requirements confirmed by human UAT
+Last activity: 2026-02-22 — Completed Phase 11 Plan 02 (human UAT approved)
 
 Progress: [██████████] 100%
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 10 P03 | 0 | 1 task (human-verify) | 0 files |
 | Phase 07-api-data-persistence P04 | 0 | 2 tasks | 0 files |
 | Phase 11-fix-data-tab P01 | 2 | 1 tasks | 1 files |
+| Phase 11-fix-data-tab P02 | 0 | 1 task (human-verify) | 1 files |
 
 ## Accumulated Context
 
@@ -160,6 +161,7 @@ Recent decisions affecting current work:
 - [Phase 07]: No code changes required — Phase 07 implementation passed all 6 must-have truth checks on first human verification
 - [Phase 07]: Idempotent seed confirmed: server restart logs 'Already seeded (48 nodes) — skipping', no data duplication
 - [Phase 11-fix-data-tab]: min-h-0 added to MapEditorCanvas root div — overrides default min-height:auto on flex items, allowing Data panel flex-1 to receive height from ancestor h-screen in AdminShell
+- [Phase 11-fix-data-tab]: EditorToolbar changed from absolute to relative positioning — absolute removed it from flex-col flow, causing tab bar to collapse to Y=0 hidden behind toolbar; both fixes (min-h-0 + relative) required together
 
 ### Pending Todos
 
@@ -176,6 +178,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 11-fix-data-tab-01-PLAN.md — Data tab CSS fix (min-h-0) applied; human UAT required to verify Data tab renders with NodeDataTable and EdgeDataTable rows visible
+Stopped at: Completed 11-fix-data-tab-02-PLAN.md — Human UAT approved; Data tab functional with NodeDataTable, EdgeDataTable, sort/filter/inline edit, and export; Map tab no regression
 Resume file: None
-Next action: Human UAT — open admin map editor, click Data tab, verify rows appear, test sorting/filtering/inline editing, verify Map tab canvas still works
+Next action: None — Phase 11 and full project v1.0 milestone complete
