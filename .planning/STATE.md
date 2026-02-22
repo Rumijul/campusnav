@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 
 ## Current Position
 
-Phase: 12 of 12 (Retroactive Verifications) — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 12 Plan 03 complete — EDIT-01 through EDIT-05 verified via 09-VERIFICATION.md (5/5 truths, SATISFIED); REQUIREMENTS.md updated with Phase 9 attribution; 21/25 v1 requirements complete
-Last activity: 2026-02-22 — Completed Phase 12 Plan 03 (EDIT-01 through EDIT-05 retroactive verification)
+Phase: 13 of 13 (Restore Location Detail) — IN PROGRESS
+Plan: 1 of 3 complete
+Status: Phase 13 Plan 01 complete — LocationDetailSheet.tsx custom CSS bottom sheet created; exports LocationDetailSheet and LocationDetailSheetProps; passes Biome + TypeScript checks; ROUT-07 partial
+Last activity: 2026-02-22 — Completed Phase 13 Plan 01 (LocationDetailSheet component creation)
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 12-retroactive-verifications P01 | 3 | 2 tasks | 1 files |
 | Phase 12-retroactive-verifications P02 | 2 | 2 tasks | 2 files |
 | Phase 12-retroactive-verifications P03 | 3 | 2 tasks | 2 files |
+| Phase 13-restore-location-detail P01 | 6 | 1 task | 1 file |
 
 ## Accumulated Context
 
@@ -170,6 +171,9 @@ Recent decisions affecting current work:
 - [Phase 12-02]: ADMN-01 attributed to Phase 8 (not Phase 12) in traceability — Phase 8 was the implementing phase
 - [Phase 12-03]: EDIT-05 1e10 sentinel confirmed: EditorSidePanel.tsx line 251 uses accessibleWeight: 1e10, not Infinity
 - [Phase 12-03]: 09-VERIFICATION.md format matches 07-VERIFICATION.md exactly: 7 sections, same table columns, same frontmatter structure
+- [Phase 13-01]: nodeId derived from node?.id used as useEffect dependency — avoids Biome useExhaustiveDependencies false positive on object references; biome-ignore comment added with rationale
+- [Phase 13-01]: LocationDetailSheet PEEK_HEIGHT=180px (DirectionsSheet uses 260px) — detail header is more compact than route summary
+- [Phase 13-01]: LocationDetailSheet z-40 (one below DirectionsSheet z-50) — directions sheet renders on top in stacking order
 
 ### Pending Todos
 
@@ -186,6 +190,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 12-03-PLAN.md — Phase 9 Admin Map Editor VERIFICATION.md created; EDIT-01 through EDIT-05 marked complete in REQUIREMENTS.md; Phase 12 all 3 plans complete
+Stopped at: Completed 13-01-PLAN.md — LocationDetailSheet.tsx custom CSS bottom sheet created; ROUT-07 partial (Plan 01 of 03)
 Resume file: None
-Next action: None — Phase 12 retroactive verifications complete; all planned verification tasks done
+Next action: Execute 13-02-PLAN.md — wire LocationDetailSheet into FloorPlanCanvas tap handler

@@ -29,7 +29,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ROUT-04**: App draws visual route paths on the floor plan map from start to destination
 - [x] **ROUT-05**: App provides step-by-step text directions with landmark references (e.g., "Turn left at the cafeteria")
 - [x] **ROUT-06**: App shows estimated walking time for both standard and wheelchair-accessible routes
-- [ ] **ROUT-07**: User can tap a location to see its details (name, room number, type, description)
+- [x] **ROUT-07**: User can tap a location to see its details (name, room number, type, description)
 
 ### Admin — Authentication
 
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-04 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-05 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-06 | Phase 6: Route Visualization & Directions | Complete |
-| ROUT-07 | Phase 13: Restore Location Detail View | Pending |
+| ROUT-07 | Phase 13: Restore Location Detail View | Complete |
 | ADMN-01 | Phase 8: Admin Authentication | Complete |
 | ADMN-02 | Phase 7: API & Data Persistence | Complete |
 | EDIT-01 | Phase 9: Admin Map Editor — Visual | Complete |
