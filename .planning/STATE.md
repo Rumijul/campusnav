@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 10-admin-map-editor-management P01 | 3 | 2 tasks | 3 files |
 | Phase 10 P02 | 5 | 2 tasks | 5 files |
 | Phase 10 P03 | 0 | 1 task (human-verify) | 0 files |
+| Phase 07-api-data-persistence P04 | 0 | 2 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,8 @@ Recent decisions affecting current work:
 - [Phase 10]: importExport.ts is a single utility module — all six import/export functions centralized with no logic scattered across components
 - [Phase 10]: CSV header detection heuristic — firstLine.includes('label') && firstLine.includes('type') distinguishes nodes.csv from edges.csv for single Import CSV button
 - [Phase 10-03]: Data tab not visible in UI (potential rendering issue in MapEditorCanvas.tsx) — noted as known issue; phase approved for deployment; deferred to follow-up if needed
+- [Phase 07]: No code changes required — Phase 07 implementation passed all 6 must-have truth checks on first human verification
+- [Phase 07]: Idempotent seed confirmed: server restart logs 'Already seeded (48 nodes) — skipping', no data duplication
 
 ### Pending Todos
 
