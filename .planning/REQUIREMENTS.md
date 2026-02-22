@@ -38,11 +38,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin — Map Editor
 
-- [ ] **EDIT-01**: Admin can upload a floor plan image as the map base layer
-- [ ] **EDIT-02**: Admin can place visible landmark nodes on the floor plan via drag-and-drop
-- [ ] **EDIT-03**: Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) via drag-and-drop
-- [ ] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
-- [ ] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
+- [x] **EDIT-01**: Admin can upload a floor plan image as the map base layer
+- [x] **EDIT-02**: Admin can place visible landmark nodes on the floor plan via drag-and-drop
+- [x] **EDIT-03**: Admin can place hidden navigation nodes (ramps, stairs, hallway junctions) via drag-and-drop
+- [x] **EDIT-04**: Admin can create edges (connections) between nodes with distance/weight metadata
+- [x] **EDIT-05**: Admin can mark edges as wheelchair-accessible or not
 - [x] **EDIT-06**: Admin can rename, edit properties of, and delete any node
 - [x] **EDIT-07**: Admin can view and edit all nodes in a sortable, filterable data table
 - [x] **EDIT-08**: Admin can import and export graph data in JSON or CSV format
@@ -105,11 +105,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-07 | Phase 13: Restore Location Detail View | Pending |
 | ADMN-01 | Phase 8: Admin Authentication | Complete |
 | ADMN-02 | Phase 7: API & Data Persistence | Complete |
-| EDIT-01 | Phase 12: Retroactive Phase Verifications | Pending |
-| EDIT-02 | Phase 12: Retroactive Phase Verifications | Pending |
-| EDIT-03 | Phase 12: Retroactive Phase Verifications | Pending |
-| EDIT-04 | Phase 12: Retroactive Phase Verifications | Pending |
-| EDIT-05 | Phase 12: Retroactive Phase Verifications | Pending |
+| EDIT-01 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-02 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-03 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-04 | Phase 9: Admin Map Editor — Visual | Complete |
+| EDIT-05 | Phase 9: Admin Map Editor — Visual | Complete |
 | EDIT-06 | Phase 10: Admin Map Editor — Management | Complete |
 | EDIT-07 | Phase 11: Fix Data Tab Visibility | Complete |
 | EDIT-08 | Phase 11: Fix Data Tab Visibility | Complete |
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 - v1 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0 ✓
-- Complete: 16 | Pending (gap closure): 9
+- Complete: 21 | Pending (gap closure): 4
 
 ---
 *Requirements defined: 2025-02-18*
