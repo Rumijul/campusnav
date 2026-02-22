@@ -37,7 +37,7 @@ export default function EditorToolbar({
   const disabledClass = 'opacity-50 cursor-not-allowed'
 
   return (
-    <div className="absolute top-0 left-0 right-0 z-10 bg-white border-b shadow-sm px-4 py-2 flex items-center gap-2 flex-wrap">
+    <div className="relative w-full z-10 bg-white border-b shadow-sm px-4 py-2 flex items-center gap-2 flex-wrap">
       {/* Mode buttons */}
       <div className="flex items-center gap-1">
         <button
