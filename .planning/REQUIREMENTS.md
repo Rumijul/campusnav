@@ -104,7 +104,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ROUT-06 | Phase 6: Route Visualization & Directions | Complete |
 | ROUT-07 | Phase 13: Restore Location Detail View | Pending |
 | ADMN-01 | Phase 12: Retroactive Phase Verifications | Pending |
-| ADMN-02 | Phase 12: Retroactive Phase Verifications | Complete |
+| ADMN-02 | Phase 7: API & Data Persistence | Complete |
 | EDIT-01 | Phase 12: Retroactive Phase Verifications | Pending |
 | EDIT-02 | Phase 12: Retroactive Phase Verifications | Pending |
 | EDIT-03 | Phase 12: Retroactive Phase Verifications | Pending |
