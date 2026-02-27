@@ -347,6 +347,8 @@ export default function FloorPlanCanvas() {
           destination={routeSelection.destination}
           imageRect={imageRect}
           stageScale={stageScale}
+          onClearStart={routeSelection.clearStart}
+          onClearDestination={routeSelection.clearDestination}
         />
 
         {/* UI overlay — loading/error states */}
