@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-02-27T19:39:30.128Z"
+progress:
+  total_phases: 17
+  completed_phases: 15
+  total_plans: 48
+  completed_plans: 46
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-02-27T13:17:12.192Z"
 progress:
   total_phases: 16
@@ -22,10 +35,10 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 
 ## Current Position
 
-Phase: 14 of 14 (Documentation Cleanup) — COMPLETE
-Plan: 1 of 1 complete
-Status: Phase 14 complete — ROADMAP.md fully corrected (all phases [x], Phase 6 extended to 7 plans, progress table accurate); 05.1-02-SUMMARY.md handleSheetBack supersession annotated
-Last activity: 2026-02-27 — Phase 14 Plan 01 complete; v1.0 milestone documentation fully accurate
+Phase: 14.1 (node-selection-fixes-and-admin-room-number-edit) — In Progress
+Plan: 2 of 3 complete
+Status: Plan 02 complete — Tappable A/B pins with cancelBubble + expanded hitFunc; FIX-04 satisfied; ROADMAP.md updated (2/3 summaries)
+Last activity: 2026-02-27 — Phase 14.1 Plan 02 complete; A/B selection pins now tappable to clear route endpoints
 
 Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
@@ -81,6 +94,8 @@ Progress: [██████████] 100% (of original 12 phases; Phase 13
 | Phase 13 P02 | 5 | 1 tasks | 1 files |
 | Phase 13-restore-location-detail P03 | 1 | 0 tasks | 0 files |
 | Phase 14-documentation-cleanup P01 | 3 | 2 tasks | 2 files |
+| Phase 14.1-node-selection-fixes P02 | 2 | 2 tasks | 2 files |
+| Phase 14.1-node-selection-fixes-and-admin-room-number-edit P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -197,6 +212,9 @@ Recent decisions affecting current work:
 - [Phase 13-restore-location-detail]: Human-approved: all 7 ROUT-07 browser tests passed — LocationDetailSheet, route selection coexistence, dismissal, and canvas pan all confirmed working
 - [Phase 14]: Annotate rather than rewrite 05.1-02-SUMMARY — historical record of what was built must be preserved; only add superseded note
 - [Phase 14]: Phase 6 plan count corrected to 7 (06-01 through 06-07) — 06-06 and 06-07 were gap-closure plans not previously listed in ROADMAP
+- [Phase 14.1-02]: cancelBubble on pin Group click/tap prevents event bubbling to LandmarkLayer — tap clears pin without re-triggering handleLandmarkTap
+- [Phase 14.1-02]: hitFunc PIN_RADIUS * 2.5 expands tap target to 30px vs 12px visual — matches LandmarkMarker pattern for mobile tappability
+- [Phase 14.1-02]: onClearStart/onClearDestination as optional props — backward compatible; no additional clearing logic needed (existing useEffect handles teardown)
 
 ### Pending Todos
 
@@ -205,6 +223,7 @@ None yet.
 ### Roadmap Evolution
 
 - Phase 5.1 inserted after Phase 5: Issues needed to be fixed (URGENT) — COMPLETE
+- Phase 14.1 inserted after Phase 14: node selection fixes and admin room number edit (URGENT)
 
 ### Blockers/Concerns
 
@@ -213,6 +232,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 14-01-PLAN.md — Documentation cleanup complete; all phases marked [x], Phase 6 extended to 7 plans, progress table corrected, 05.1-02-SUMMARY annotated
+Stopped at: Completed 14.1-02-PLAN.md — Tappable A/B pins implemented; cancelBubble + expanded hitFunc; FIX-04 satisfied
 Resume file: None
-Next action: v1.0 milestone complete — all phases delivered and documented
+Next action: Execute 14.1-03-PLAN.md (final plan in phase 14.1)

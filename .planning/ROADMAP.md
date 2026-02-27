@@ -296,3 +296,13 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 | 12. Retroactive Phase Verifications | 3/3 | Complete    | 2026-02-22 |
 | 13. Restore Location Detail View | 3/3 | Complete   | 2026-02-27 |
 | 14. Documentation Cleanup | 1/1 | Complete    | 2026-02-27 |
+
+### Phase 14.1: node selection fixes and admin room number edit (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 14
+**Plans:** 2/3 plans executed
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 14.1 to break down)
