@@ -302,9 +302,9 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 **Goal:** Fix admin map editor selection UX — toggle deselect, floor plan image click deselect, tappable A/B pins, and room number editing
 **Requirements**: FIX-03, FIX-04, EDIT-06
 **Depends on:** Phase 14
-**Plans:** 2/3 plans complete
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 14.1-01: Node selection toggle deselect + floor plan image click deselect
 - [x] 14.1-02: Tappable A/B selection pins (cancelBubble + expanded hitFunc)
-- [ ] 14.1-03: Admin room number edit in EditorSidePanel
+- [x] 14.1-03: Admin room number edit in EditorSidePanel
