@@ -296,6 +296,7 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 | 12. Retroactive Phase Verifications | 3/3 | Complete    | 2026-02-22 |
 | 13. Restore Location Detail View | 3/3 | Complete   | 2026-02-27 |
 | 14. Documentation Cleanup | 1/1 | Complete   | 2026-02-27 |
+| 14.1. Node selection fixes & admin room # edit (INSERTED) | 3/3 | Complete | 2026-02-28 |
 
 ### Phase 14.1: node selection fixes and admin room number edit (INSERTED)
 
