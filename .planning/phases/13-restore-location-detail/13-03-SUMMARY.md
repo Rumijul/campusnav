@@ -40,24 +40,26 @@ completed: 2026-02-27
 
 # Phase 13 Plan 03: Restore Location Detail — Human Verification Summary
 
-**Human-verify checkpoint for ROUT-07: LocationDetailSheet wired into FloorPlanCanvas, awaiting browser confirmation of all 7 must-have truths**
+**Human-verify checkpoint for ROUT-07: all 7 browser tests passed — LocationDetailSheet, dual-action tap, route selection coexistence, dismissal, and canvas pan confirmed working**
 
 ## Performance
 
 - **Duration:** 1 min
 - **Started:** 2026-02-27T12:12:52Z
 - **Completed:** 2026-02-27T12:13:00Z
-- **Tasks:** 0 auto-executed (1 checkpoint task — awaiting human)
+- **Tasks:** 0 auto-executed (1 checkpoint task — human approved)
 - **Files modified:** 0
 
 ## Accomplishments
-- Plan 03 is a verification-only plan: no code was written
-- LocationDetailSheet component (Plan 01) and FloorPlanCanvas wiring (Plan 02) are already complete
-- This plan confirms all 7 must-have truths pass in the live browser
+- All 7 ROUT-07 browser verification tests passed (human approved)
+- LocationDetailSheet component (Plan 01) and FloorPlanCanvas wiring (Plan 02) confirmed working end-to-end
+- Detail sheet opens on tap, shows correct content, dismisses via X and drag-down, and does not block route selection
+- Route selection still works: A tap + B tap triggers DirectionsSheet and closes LocationDetailSheet automatically
+- Canvas pans freely above the peek sheet; legend repositions correctly when sheet is open
 
 ## Task Commits
 
-This plan contains only a `checkpoint:human-verify` task — no code commits are produced. Verification outcome will determine if Phase 13 is complete or if gap-closure work is needed.
+This plan contains only a `checkpoint:human-verify` task — no code commits are produced. Human tester approved all 7 must-have truths in the live browser.
 
 ## Files Created/Modified
 
@@ -81,8 +83,9 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-- If all 7 tests pass: Phase 13 is complete. ROUT-07 fully satisfied. v1.0 milestone can be audited.
-- If any test fails: gap-closure work will be scoped based on failure report.
+- Phase 13 is complete. ROUT-07 fully satisfied by human verification.
+- All 3 Phase 13 plans complete (01: component, 02: wiring, 03: verification).
+- Next: Phase 14 (Documentation Cleanup) — fix stale ROADMAP.md progress table and handleSheetBack SUMMARY mismatch.
 
 ---
 *Phase: 13-restore-location-detail*

@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-27T12:13:37.352Z"
+last_updated: "2026-02-27T12:56:04.431Z"
 progress:
   total_phases: 16
   completed_phases: 14
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 
 ## Current Position
 
-Phase: 13 of 13 (Restore Location Detail) — IN PROGRESS
-Plan: 3 of 3 (checkpoint awaiting human verification)
-Status: Phase 13 Plan 03 reached checkpoint:human-verify — LocationDetailSheet and FloorPlanCanvas integration complete; awaiting browser verification of all 7 ROUT-07 must-have truths
-Last activity: 2026-02-27 — Reached Phase 13 Plan 03 checkpoint (human verify ROUT-07 in browser)
+Phase: 13 of 13 (Restore Location Detail) — COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 13 complete — all 7 ROUT-07 browser verification tests passed; LocationDetailSheet, dual-action tap, route selection coexistence, dismissal, and canvas pan all confirmed working
+Last activity: 2026-02-27 — Phase 13 Plan 03 human-verified and approved; ROUT-07 complete
 
 Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
@@ -193,6 +193,7 @@ Recent decisions affecting current work:
 - [Phase 13-02]: Auto-close useEffect watches [routeSelection.start, routeSelection.destination] — same dep array as clear-route effect; two separate effects for two separate behaviors
 - [Phase 13-02]: LocationDetailSheet rendered before DirectionsSheet in JSX — z-40 vs z-50 ensures directions sheet always stacks on top
 - [Phase 13-02]: 196px legend bottom offset = PEEK_HEIGHT(180) + 16px gap — matches LocationDetailSheet peek geometry exactly
+- [Phase 13-restore-location-detail]: Human-approved: all 7 ROUT-07 browser tests passed — LocationDetailSheet, route selection coexistence, dismissal, and canvas pan all confirmed working
 
 ### Pending Todos
 
@@ -209,6 +210,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Reached checkpoint in 13-03-PLAN.md — human-verify gate for ROUT-07 browser testing
+Stopped at: Completed 13-03-PLAN.md — ROUT-07 human verification approved; Phase 13 complete
 Resume file: None
-Next action: Human verifies all 7 ROUT-07 must-have truths in browser; type "approved" or describe failures
+Next action: Execute Phase 14 (Documentation Cleanup) — fix stale ROADMAP.md progress table and handleSheetBack SUMMARY mismatch
