@@ -33,9 +33,10 @@ export function NodeDataTable({
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [filterText, setFilterText] = useState('')
   const [filterType, setFilterType] = useState<NavNodeType | 'all'>('all')
-  const [editingCell, setEditingCell] = useState<{ rowId: string; field: 'label' | 'type' } | null>(
-    null,
-  )
+  const [editingCell, setEditingCell] = useState<{
+    rowId: string
+    field: 'label' | 'type' | 'roomNumber'
+  } | null>(null)
   const [editValue, setEditValue] = useState('')
 
   function toggleSort(field: SortField) {
@@ -58,9 +59,15 @@ export function NodeDataTable({
     })
   }, [nodes, filterText, filterType, sortField, sortDir])
 
-  function commitEdit(node: NavNode, field: 'label' | 'type') {
+  function commitEdit(node: NavNode, field: 'label' | 'type' | 'roomNumber') {
     if (field === 'label') onUpdateNode(node.id, { label: editValue })
-    else onUpdateNode(node.id, { type: editValue as NavNodeType })
+    else if (field === 'type') onUpdateNode(node.id, { type: editValue as NavNodeType })
+    else if (field === 'roomNumber') {
+      const trimmed = editValue.trim()
+      // Empty string treated as undefined (removes room number).
+      // Spread conditional key to satisfy exactOptionalPropertyTypes.
+      onUpdateNode(node.id, trimmed === '' ? {} : { roomNumber: trimmed })
+    }
     setEditingCell(null)
   }
 
@@ -184,7 +191,36 @@ export function NodeDataTable({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-gray-500">{node.roomNumber ?? '—'}</td>
+                {/* Room # — inline editable */}
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: td stopPropagation only, actual interactive elements inside handle keyboard */}
+                <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                  {editingCell?.rowId === node.id && editingCell.field === 'roomNumber' ? (
+                    <input
+                      // biome-ignore lint/a11y/noAutofocus: intentional focus for inline edit UX
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => commitEdit(node, 'roomNumber')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') commitEdit(node, 'roomNumber')
+                        if (e.key === 'Escape') setEditingCell(null)
+                      }}
+                      className="w-full rounded border border-blue-400 px-1 py-0.5 text-sm focus:outline-none"
+                    />
+                  ) : (
+                    // biome-ignore lint/a11y/useKeyWithClickEvents: inline edit trigger; keyboard handled by surrounding input on activation
+                    // biome-ignore lint/a11y/noStaticElementInteractions: span is an inline edit trigger
+                    <span
+                      className="block cursor-text rounded px-1 py-0.5 text-gray-500 hover:bg-blue-100"
+                      onClick={() => {
+                        setEditingCell({ rowId: node.id, field: 'roomNumber' })
+                        setEditValue(node.roomNumber ?? '')
+                      }}
+                    >
+                      {node.roomNumber ?? '—'}
+                    </span>
+                  )}
+                </td>
                 <td className="px-3 py-2">{node.floor}</td>
                 <td className="px-3 py-2">{node.searchable ? 'Yes' : 'No'}</td>
                 {/* biome-ignore lint/a11y/useKeyWithClickEvents: td stopPropagation only; button inside handles keyboard */}
