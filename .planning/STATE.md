@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-02-27T12:11:39.895Z"
+progress:
+  total_phases: 16
+  completed_phases: 13
+  total_plans: 44
+  completed_plans: 43
+---
+
 # Project State
 
 ## Project Reference
@@ -10,9 +23,9 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 ## Current Position
 
 Phase: 13 of 13 (Restore Location Detail) — IN PROGRESS
-Plan: 1 of 3 complete
-Status: Phase 13 Plan 01 complete — LocationDetailSheet.tsx custom CSS bottom sheet created; exports LocationDetailSheet and LocationDetailSheetProps; passes Biome + TypeScript checks; ROUT-07 partial
-Last activity: 2026-02-22 — Completed Phase 13 Plan 01 (LocationDetailSheet component creation)
+Plan: 2 of 3 complete
+Status: Phase 13 Plan 02 complete — FloorPlanCanvas.tsx wired with detailNode state, handleLandmarkTap dual-action callback, auto-close useEffect, and LocationDetailSheet render; ROUT-07 fully implemented
+Last activity: 2026-02-27 — Completed Phase 13 Plan 02 (wire LocationDetailSheet into FloorPlanCanvas tap flow)
 
 Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
@@ -65,6 +78,7 @@ Progress: [██████████] 100% (of original 12 phases; Phase 13
 | Phase 12-retroactive-verifications P02 | 2 | 2 tasks | 2 files |
 | Phase 12-retroactive-verifications P03 | 3 | 2 tasks | 2 files |
 | Phase 13-restore-location-detail P01 | 6 | 1 task | 1 file |
+| Phase 13 P02 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -174,6 +188,10 @@ Recent decisions affecting current work:
 - [Phase 13-01]: nodeId derived from node?.id used as useEffect dependency — avoids Biome useExhaustiveDependencies false positive on object references; biome-ignore comment added with rationale
 - [Phase 13-01]: LocationDetailSheet PEEK_HEIGHT=180px (DirectionsSheet uses 260px) — detail header is more compact than route summary
 - [Phase 13-01]: LocationDetailSheet z-40 (one below DirectionsSheet z-50) — directions sheet renders on top in stacking order
+- [Phase 13]: handleLandmarkTap calls both setDetailNode and routeSelection.setFromTap — single tap does double duty (detail view + route A/B assignment)
+- [Phase 13-02]: Auto-close useEffect watches [routeSelection.start, routeSelection.destination] — same dep array as clear-route effect; two separate effects for two separate behaviors
+- [Phase 13-02]: LocationDetailSheet rendered before DirectionsSheet in JSX — z-40 vs z-50 ensures directions sheet always stacks on top
+- [Phase 13-02]: 196px legend bottom offset = PEEK_HEIGHT(180) + 16px gap — matches LocationDetailSheet peek geometry exactly
 
 ### Pending Todos
 
@@ -189,7 +207,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 13-01-PLAN.md — LocationDetailSheet.tsx custom CSS bottom sheet created; ROUT-07 partial (Plan 01 of 03)
+Last session: 2026-02-27
+Stopped at: Completed 13-02-PLAN.md — FloorPlanCanvas.tsx wired with LocationDetailSheet dual-action tap handler; ROUT-07 complete (Plan 02 of 03)
 Resume file: None
-Next action: Execute 13-02-PLAN.md — wire LocationDetailSheet into FloorPlanCanvas tap handler
+Next action: Execute 13-03-PLAN.md — human verify LocationDetailSheet behavior in browser
