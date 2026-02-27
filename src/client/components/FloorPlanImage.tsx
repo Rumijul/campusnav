@@ -8,6 +8,7 @@ interface FloorPlanImageProps {
   viewportWidth: number
   viewportHeight: number
   onImageRectChange?: (rect: { x: number; y: number; width: number; height: number }) => void
+  onClick?: () => void
 }
 
 /**
@@ -22,6 +23,7 @@ export default function FloorPlanImage({
   viewportWidth,
   viewportHeight,
   onImageRectChange,
+  onClick,
 }: FloorPlanImageProps) {
   const imageRef = useRef<Konva.Image>(null)
   const tweenRef = useRef<Konva.Tween | null>(null)
@@ -84,6 +86,7 @@ export default function FloorPlanImage({
       y={rect.y}
       width={rect.width}
       height={rect.height}
+      {...(onClick ? { onClick } : {})}
     />
   )
 }
