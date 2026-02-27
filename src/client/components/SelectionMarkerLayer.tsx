@@ -16,6 +16,8 @@ interface SelectionMarkerLayerProps {
   destination: NavNode | null
   imageRect: { x: number; y: number; width: number; height: number } | null
   stageScale: number
+  onClearStart?: () => void
+  onClearDestination?: () => void
 }
 
 /* ──────────────── Component ──────────────── */
@@ -26,13 +28,15 @@ interface SelectionMarkerLayerProps {
  * - Start pin: green circle with white "A" label
  * - Destination pin: red circle with white "B" label
  * - Counter-scaled to maintain constant screen size during zoom
- * - Display-only — no click handlers
+ * - Tapping A pin calls onClearStart; tapping B pin calls onClearDestination.
  */
 export function SelectionMarkerLayer({
   start,
   destination,
   imageRect,
   stageScale,
+  onClearStart,
+  onClearDestination,
 }: SelectionMarkerLayerProps) {
   if (!imageRect) return null
 
@@ -46,8 +50,21 @@ export function SelectionMarkerLayer({
           y={imageRect.y + start.y * imageRect.height}
           scaleX={scale}
           scaleY={scale}
+          onClick={(e) => { e.cancelBubble = true; onClearStart?.() }}
+          onTap={(e) => { e.cancelBubble = true; onClearStart?.() }}
         >
-          <Circle radius={PIN_RADIUS} fill={START_COLOR} stroke="#ffffff" strokeWidth={2} />
+          <Circle
+            radius={PIN_RADIUS}
+            fill={START_COLOR}
+            stroke="#ffffff"
+            strokeWidth={2}
+            hitFunc={(context, shape) => {
+              context.beginPath()
+              context.arc(0, 0, PIN_RADIUS * 2.5, 0, Math.PI * 2, true)
+              context.closePath()
+              context.fillStrokeShape(shape)
+            }}
+          />
           <Text
             text="A"
             fontSize={LABEL_FONT_SIZE}
@@ -68,8 +85,21 @@ export function SelectionMarkerLayer({
           y={imageRect.y + destination.y * imageRect.height}
           scaleX={scale}
           scaleY={scale}
+          onClick={(e) => { e.cancelBubble = true; onClearDestination?.() }}
+          onTap={(e) => { e.cancelBubble = true; onClearDestination?.() }}
         >
-          <Circle radius={PIN_RADIUS} fill={DEST_COLOR} stroke="#ffffff" strokeWidth={2} />
+          <Circle
+            radius={PIN_RADIUS}
+            fill={DEST_COLOR}
+            stroke="#ffffff"
+            strokeWidth={2}
+            hitFunc={(context, shape) => {
+              context.beginPath()
+              context.arc(0, 0, PIN_RADIUS * 2.5, 0, Math.PI * 2, true)
+              context.closePath()
+              context.fillStrokeShape(shape)
+            }}
+          />
           <Text
             text="B"
             fontSize={LABEL_FONT_SIZE}
