@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-27T12:56:04.431Z"
+last_updated: "2026-02-27T13:13:49.777Z"
 progress:
   total_phases: 16
-  completed_phases: 14
-  total_plans: 44
-  completed_plans: 44
+  completed_phases: 15
+  total_plans: 45
+  completed_plans: 45
 ---
 
 # Project State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 
 ## Current Position
 
-Phase: 13 of 13 (Restore Location Detail) — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 13 complete — all 7 ROUT-07 browser verification tests passed; LocationDetailSheet, dual-action tap, route selection coexistence, dismissal, and canvas pan all confirmed working
-Last activity: 2026-02-27 — Phase 13 Plan 03 human-verified and approved; ROUT-07 complete
+Phase: 14 of 14 (Documentation Cleanup) — COMPLETE
+Plan: 1 of 1 complete
+Status: Phase 14 complete — ROADMAP.md fully corrected (all phases [x], Phase 6 extended to 7 plans, progress table accurate); 05.1-02-SUMMARY.md handleSheetBack supersession annotated
+Last activity: 2026-02-27 — Phase 14 Plan 01 complete; v1.0 milestone documentation fully accurate
 
 Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
@@ -80,6 +80,7 @@ Progress: [██████████] 100% (of original 12 phases; Phase 13
 | Phase 13-restore-location-detail P01 | 6 | 1 task | 1 file |
 | Phase 13 P02 | 5 | 1 tasks | 1 files |
 | Phase 13-restore-location-detail P03 | 1 | 0 tasks | 0 files |
+| Phase 14-documentation-cleanup P01 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,8 @@ Recent decisions affecting current work:
 - [Phase 13-02]: LocationDetailSheet rendered before DirectionsSheet in JSX — z-40 vs z-50 ensures directions sheet always stacks on top
 - [Phase 13-02]: 196px legend bottom offset = PEEK_HEIGHT(180) + 16px gap — matches LocationDetailSheet peek geometry exactly
 - [Phase 13-restore-location-detail]: Human-approved: all 7 ROUT-07 browser tests passed — LocationDetailSheet, route selection coexistence, dismissal, and canvas pan all confirmed working
+- [Phase 14]: Annotate rather than rewrite 05.1-02-SUMMARY — historical record of what was built must be preserved; only add superseded note
+- [Phase 14]: Phase 6 plan count corrected to 7 (06-01 through 06-07) — 06-06 and 06-07 were gap-closure plans not previously listed in ROADMAP
 
 ### Pending Todos
 
@@ -210,6 +213,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 13-03-PLAN.md — ROUT-07 human verification approved; Phase 13 complete
+Stopped at: Completed 14-01-PLAN.md — Documentation cleanup complete; all phases marked [x], Phase 6 extended to 7 plans, progress table corrected, 05.1-02-SUMMARY annotated
 Resume file: None
-Next action: Execute Phase 14 (Documentation Cleanup) — fix stale ROADMAP.md progress table and handleSheetBack SUMMARY mismatch
+Next action: v1.0 milestone complete — all phases delivered and documented
