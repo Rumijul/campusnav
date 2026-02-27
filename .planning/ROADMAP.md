@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export (completed 2026-02-21)
 - [x] **Phase 11: Fix Data Tab Visibility** - Fix Tailwind CSS layout issue preventing Data tab from rendering in admin map editor (completed 2026-02-22)
 - [x] **Phase 12: Retroactive Phase Verifications** - Create formal VERIFICATION.md files for Phases 7, 8, and 9 to close documentation gaps (completed 2026-02-22)
-- [ ] **Phase 13: Restore Location Detail View** - Reintroduce location detail display when a student taps a landmark on the map
+- [x] **Phase 13: Restore Location Detail View** - Reintroduce location detail display when a student taps a landmark on the map (completed 2026-02-27)
 - [ ] **Phase 14: Documentation Cleanup** - Fix stale ROADMAP.md progress table and handleSheetBack documentation mismatch
 
 ## Phase Details
@@ -292,5 +292,5 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 | 10. Admin Map Editor — Management | 3/3 | Complete | 2026-02-21 |
 | 11. Fix Data Tab Visibility | 2/2 | Complete    | 2026-02-22 |
 | 12. Retroactive Phase Verifications | 3/3 | Complete    | 2026-02-22 |
-| 13. Restore Location Detail View | 2/3 | In Progress|  |
+| 13. Restore Location Detail View | 3/3 | Complete   | 2026-02-27 |
 | 14. Documentation Cleanup | 0/1 | Not started | - |
