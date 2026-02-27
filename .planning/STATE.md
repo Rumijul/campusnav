@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-02-27T19:41:15.579Z"
+progress:
+  total_phases: 17
+  completed_phases: 16
+  total_plans: 48
+  completed_plans: 48
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-02-27T19:39:30.128Z"
 progress:
   total_phases: 17
@@ -35,10 +48,10 @@ See: .planning/PROJECT.md (updated 2025-02-18)
 
 ## Current Position
 
-Phase: 14.1 (node-selection-fixes-and-admin-room-number-edit) — In Progress
-Plan: 2 of 3 complete
-Status: Plan 02 complete — Tappable A/B pins with cancelBubble + expanded hitFunc; FIX-04 satisfied; ROADMAP.md updated (2/3 summaries)
-Last activity: 2026-02-27 — Phase 14.1 Plan 02 complete; A/B selection pins now tappable to clear route endpoints
+Phase: 14.1 (node-selection-fixes-and-admin-room-number-edit) — COMPLETE
+Plan: 3 of 3 complete
+Status: Phase 14.1 complete — Room # inline edit in NodeDataTable; SearchOverlay "Room N · type" display; node toggle deselect; floor plan click deselect; clear A/B pin buttons
+Last activity: 2026-02-27 — Phase 14.1 Plan 03 complete; all 3 plans delivered
 
 Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
 
@@ -95,7 +108,9 @@ Progress: [██████████] 100% (of original 12 phases; Phase 13
 | Phase 13-restore-location-detail P03 | 1 | 0 tasks | 0 files |
 | Phase 14-documentation-cleanup P01 | 3 | 2 tasks | 2 files |
 | Phase 14.1-node-selection-fixes P02 | 2 | 2 tasks | 2 files |
+| Phase 14.1-node-selection-fixes-and-admin-room-number-edit P01 | 2 | 2 tasks | 2 files |
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P02 | 2 | 2 tasks | 2 files |
+| Phase 14.1-node-selection-fixes-and-admin-room-number-edit P03 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -212,9 +227,14 @@ Recent decisions affecting current work:
 - [Phase 13-restore-location-detail]: Human-approved: all 7 ROUT-07 browser tests passed — LocationDetailSheet, route selection coexistence, dismissal, and canvas pan all confirmed working
 - [Phase 14]: Annotate rather than rewrite 05.1-02-SUMMARY — historical record of what was built must be preserved; only add superseded note
 - [Phase 14]: Phase 6 plan count corrected to 7 (06-01 through 06-07) — 06-06 and 06-07 were gap-closure plans not previously listed in ROADMAP
+- [Phase 14.1-01]: Conditional spread {...(onClick ? { onClick } : {})} for exactOptionalPropertyTypes-safe optional Konva event prop on FloorPlanImage
+- [Phase 14.1-01]: state.selectedNodeId added to handleNodeClick dep array — required to prevent stale closure on toggle comparison
+- [Phase 14.1-01]: Mode guard (state.mode === 'select') in FloorPlanImage onClick — prevents interference with add-node placement and add-edge creation
 - [Phase 14.1-02]: cancelBubble on pin Group click/tap prevents event bubbling to LandmarkLayer — tap clears pin without re-triggering handleLandmarkTap
 - [Phase 14.1-02]: hitFunc PIN_RADIUS * 2.5 expands tap target to 30px vs 12px visual — matches LandmarkMarker pattern for mobile tappability
 - [Phase 14.1-02]: onClearStart/onClearDestination as optional props — backward compatible; no additional clearing logic needed (existing useEffect handles teardown)
+- [Phase 14.1-03]: exactOptionalPropertyTypes workaround: conditional spread ({} vs { roomNumber: trimmed }) to clear optional fields instead of passing undefined
+- [Phase 14.1-03]: SearchOverlay gap-1 + items-center for tighter Room N · type grouping; conditional dot separator renders only when roomNumber present
 
 ### Pending Todos
 
@@ -232,6 +252,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 14.1-02-PLAN.md — Tappable A/B pins implemented; cancelBubble + expanded hitFunc; FIX-04 satisfied
+Stopped at: Completed 14.1-03-PLAN.md — Room # inline edit in NodeDataTable (Enter/Escape/blur) + SearchOverlay "Room 204 · room" display; Phase 14.1 complete (3/3 plans)
 Resume file: None
-Next action: Execute 14.1-03-PLAN.md (final plan in phase 14.1)
+Next action: Phase 14.1 complete — all phases delivered

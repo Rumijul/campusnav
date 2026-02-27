@@ -295,14 +295,16 @@ Note: Phases 2 and 3 can execute in parallel (both depend only on Phase 1). Phas
 | 11. Fix Data Tab Visibility | 2/2 | Complete    | 2026-02-22 |
 | 12. Retroactive Phase Verifications | 3/3 | Complete    | 2026-02-22 |
 | 13. Restore Location Detail View | 3/3 | Complete   | 2026-02-27 |
-| 14. Documentation Cleanup | 1/1 | Complete    | 2026-02-27 |
+| 14. Documentation Cleanup | 1/1 | Complete   | 2026-02-27 |
 
 ### Phase 14.1: node selection fixes and admin room number edit (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Fix admin map editor selection UX — toggle deselect, floor plan image click deselect, tappable A/B pins, and room number editing
+**Requirements**: FIX-03, FIX-04, EDIT-06
 **Depends on:** Phase 14
-**Plans:** 2/3 plans executed
+**Plans:** 2/3 plans complete
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 14.1 to break down)
+- [x] 14.1-01: Node selection toggle deselect + floor plan image click deselect
+- [x] 14.1-02: Tappable A/B selection pins (cancelBubble + expanded hitFunc)
+- [ ] 14.1-03: Admin room number edit in EditorSidePanel
