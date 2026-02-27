@@ -12,21 +12,21 @@ CampusNav delivers a campus wayfinding web app in 10 phases, progressing from pr
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Project Setup & Foundation** - Scaffold the monorepo, configure tooling, define core TypeScript types for the graph data model
+- [x] **Phase 1: Project Setup & Foundation** (completed 2026-02-18) - Scaffold the monorepo, configure tooling, define core TypeScript types for the graph data model
 - [x] **Phase 2: Floor Plan Rendering** - Interactive 2D floor plan canvas with pan, zoom, and mobile touch gestures (completed 2026-02-18)
-- [ ] **Phase 3: Graph Data Model & Pathfinding Engine** - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
+- [x] **Phase 3: Graph Data Model & Pathfinding Engine** (completed 2026-02-19) - Build the in-memory graph structure and pathfinding with accessibility-aware edge filtering
 - [x] **Phase 4: Map Landmarks & Location Display** - Render visible landmarks on the map, hide navigation-only nodes, show location details on tap (completed 2026-02-19)
 - [x] **Phase 5: Search & Location Selection** - Autocomplete search, tap-to-select, dropdown selection, and nearest-POI search (completed 2026-02-19)
 - [x] **Phase 5.1: Issues needed to be fixed** - Urgent fixes discovered mid-milestone (INSERTED) (completed 2026-02-20)
-- [ ] **Phase 6: Route Visualization & Directions** - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
-- [ ] **Phase 7: API & Data Persistence** - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
-- [ ] **Phase 8: Admin Authentication** - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
+- [x] **Phase 6: Route Visualization & Directions** (completed 2026-02-20) - Draw dual-route paths on the map with color coding, step-by-step text directions, and time estimates
+- [x] **Phase 7: API & Data Persistence** (completed 2026-02-22) - Hono REST API, SQLite database, graph JSON serving, and open student access (no login required)
+- [x] **Phase 8: Admin Authentication** (completed 2026-02-21) - Admin login with JWT, protected admin routes, unauthenticated student access confirmed
 - [x] **Phase 9: Admin Map Editor — Visual** - Floor plan upload, drag-and-drop node placement, edge creation with accessibility metadata (completed 2026-02-21)
 - [x] **Phase 10: Admin Map Editor — Management** - Node editing/deletion, sortable data table view, JSON/CSV import and export (completed 2026-02-21)
 - [x] **Phase 11: Fix Data Tab Visibility** - Fix Tailwind CSS layout issue preventing Data tab from rendering in admin map editor (completed 2026-02-22)
 - [x] **Phase 12: Retroactive Phase Verifications** - Create formal VERIFICATION.md files for Phases 7, 8, and 9 to close documentation gaps (completed 2026-02-22)
 - [x] **Phase 13: Restore Location Detail View** - Reintroduce location detail display when a student taps a landmark on the map (completed 2026-02-27)
-- [ ] **Phase 14: Documentation Cleanup** - Fix stale ROADMAP.md progress table and handleSheetBack documentation mismatch
+- [x] **Phase 14: Documentation Cleanup** (completed 2026-02-27) - Fix stale ROADMAP.md progress table and handleSheetBack documentation mismatch
 
 ## Phase Details
 
@@ -42,8 +42,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold project, install deps, configure tooling, define shared types, create Hono server
-- [ ] 01-02-PLAN.md — Create React client with Konva hello-world canvas, verify full dev workflow end-to-end
+- [x] 01-01-PLAN.md — Scaffold project, install deps, configure tooling, define shared types, create Hono server
+- [x] 01-02-PLAN.md — Create React client with Konva hello-world canvas, verify full dev workflow end-to-end
 
 ### Phase 2: Floor Plan Rendering
 **Goal**: Users can view and navigate an interactive 2D floor plan image in their browser
@@ -58,8 +58,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Serve floor plan images from API + progressive floor plan canvas rendering with grid background
-- [ ] 02-02-PLAN.md — Interactive pan/zoom/rotation/touch gestures + zoom controls with elastic bounds
+- [x] 02-01-PLAN.md — Serve floor plan images from API + progressive floor plan canvas rendering with grid background
+- [x] 02-02-PLAN.md — Interactive pan/zoom/rotation/touch gestures + zoom controls with elastic bounds
 
 ### Phase 3: Graph Data Model & Pathfinding Engine
 **Goal**: The app can compute shortest paths and wheelchair-accessible paths on a navigation graph
@@ -73,8 +73,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Pathfinding types, graph builder, test fixture, and builder tests
-- [ ] 03-02-PLAN.md — Pathfinding engine with dual-mode A* (TDD: tests first, then implementation)
+- [x] 03-01-PLAN.md — Pathfinding types, graph builder, test fixture, and builder tests
+- [x] 03-02-PLAN.md — Pathfinding engine with dual-mode A* (TDD: tests first, then implementation)
 
 ### Phase 4: Map Landmarks & Location Display
 **Goal**: Users can see meaningful locations on the map and tap them to view details
@@ -88,10 +88,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Extend NavNodeData types, create campus-graph.json fixture (25 nodes), add GET /api/map endpoint
-- [ ] 04-02-PLAN.md — useGraphData hook, LandmarkMarker + LandmarkLayer components, stageScale sync, FloorPlanCanvas landmark integration
-- [ ] 04-03-PLAN.md — Install Vaul, LandmarkSheet bottom sheet component, wire into FloorPlanCanvas
-- [ ] 04-04-PLAN.md — Human verification: landmark rendering, hidden nodes, bottom sheet interaction
+- [x] 04-01-PLAN.md — Extend NavNodeData types, create campus-graph.json fixture (25 nodes), add GET /api/map endpoint
+- [x] 04-02-PLAN.md — useGraphData hook, LandmarkMarker + LandmarkLayer components, stageScale sync, FloorPlanCanvas landmark integration
+- [x] 04-03-PLAN.md — Install Vaul, LandmarkSheet bottom sheet component, wire into FloorPlanCanvas
+- [x] 04-04-PLAN.md — Human verification: landmark rendering, hidden nodes, bottom sheet interaction
 
 ### Phase 5: Search & Location Selection
 **Goal**: Users can find and select locations through search or map interaction to set route start/destination
@@ -106,9 +106,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Route selection state (useRouteSelection hook), A/B labeled pin markers, tap-to-select wiring
-- [ ] 05-02-PLAN.md — Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger
-- [ ] 05-03-PLAN.md — Human verification: search, tap-to-select, nearest POI, compact strip, auto-pan
+- [x] 05-01-PLAN.md — Route selection state (useRouteSelection hook), A/B labeled pin markers, tap-to-select wiring
+- [x] 05-02-PLAN.md — Search UI with autocomplete, nearest-POI search, compact strip, auto-pan, route trigger
+- [x] 05-03-PLAN.md — Human verification: search, tap-to-select, nearest POI, compact strip, auto-pan
 
 ### Phase 05.1: Issues needed to be fixed (INSERTED)
 
@@ -134,14 +134,16 @@ Plans:
   3. Step-by-step text directions are displayed with landmark references (e.g., "Turn left at the cafeteria")
   4. Estimated walking time is shown for both the standard route and the wheelchair-accessible route
   5. If only one route exists (e.g., standard and accessible routes are the same), the display handles this gracefully
-**Plans**: 5 plans
+**Plans**: 7 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — useRouteDirections hook: turn-by-turn step generation with landmark references and time estimates (TDD)
-- [ ] 06-02-PLAN.md — RouteLayer: animated dashed Konva route line (blue/green per mode)
-- [ ] 06-03-PLAN.md — DirectionsSheet: Vaul bottom sheet with Standard/Accessible tabs, step list, time estimates
-- [ ] 06-04-PLAN.md — FloorPlanCanvas wiring: RouteLayer + DirectionsSheet integration, legend, activeMode control
-- [ ] 06-05-PLAN.md — Human verification: animated route line, directions sheet, tab switching, legend, back arrow
+- [x] 06-01-PLAN.md — useRouteDirections hook: turn-by-turn step generation with landmark references and time estimates (TDD)
+- [x] 06-02-PLAN.md — RouteLayer: animated dashed Konva route line (blue/green per mode)
+- [x] 06-03-PLAN.md — DirectionsSheet: Vaul bottom sheet with Standard/Accessible tabs, step list, time estimates
+- [x] 06-04-PLAN.md — FloorPlanCanvas wiring: RouteLayer + DirectionsSheet integration, legend, activeMode control
+- [x] 06-05-PLAN.md — Human verification: animated route line, directions sheet, tab switching, legend, back arrow
+- [x] 06-06-PLAN.md — Gap closure: back arrow closes sheet only (route line stays), legend repositioned, single-finger pan unblocked
+- [x] 06-07-PLAN.md — Gap closure: compact strip reopens directions sheet, SearchOverlay onOpenSheet bridge
 
 ### Phase 7: API & Data Persistence
 **Goal**: Graph data and floor plan images are persisted on the server and served to the student app
@@ -155,10 +157,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Drizzle schema, DB client singleton, drizzle.config.ts, migration generation, .gitignore update
-- [ ] 07-02-PLAN.md — Idempotent startup seeder + rewrite GET /api/map handler to query SQLite
-- [ ] 07-03-PLAN.md — useGraphData retry logic, HTML loading spinner overlay, fix double-fetch (LandmarkLayer nodes prop)
-- [ ] 07-04-PLAN.md — Human verification: server startup, public API, spinner, landmarks, routing, single fetch
+- [x] 07-01-PLAN.md — Drizzle schema, DB client singleton, drizzle.config.ts, migration generation, .gitignore update
+- [x] 07-02-PLAN.md — Idempotent startup seeder + rewrite GET /api/map handler to query SQLite
+- [x] 07-03-PLAN.md — useGraphData retry logic, HTML loading spinner overlay, fix double-fetch (LandmarkLayer nodes prop)
+- [x] 07-04-PLAN.md — Human verification: server startup, public API, spinner, landmarks, routing, single fetch
 
 ### Phase 8: Admin Authentication
 **Goal**: Only authenticated admins can access the map editor; students use the app without any login
@@ -172,9 +174,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Server-side auth: JWT login/logout/me endpoints, rate limiter, CSRF, credential validation, admin route guard
-- [ ] 08-02-PLAN.md — Client-side auth: React Router setup, login page, useAuth hook, ProtectedRoute, admin shell with logout
-- [ ] 08-03-PLAN.md — Human verification: full auth flow (login, session persistence, protected routes, logout, student access)
+- [x] 08-01-PLAN.md — Server-side auth: JWT login/logout/me endpoints, rate limiter, CSRF, credential validation, admin route guard
+- [x] 08-02-PLAN.md — Client-side auth: React Router setup, login page, useAuth hook, ProtectedRoute, admin shell with logout
+- [x] 08-03-PLAN.md — Human verification: full auth flow (login, session persistence, protected routes, logout, student access)
 
 ### Phase 9: Admin Map Editor — Visual
 **Goal**: Admin can build the navigation graph visually by uploading a floor plan and placing nodes and edges on it
@@ -189,10 +191,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — useEditorState hook (useReducer + undo/redo) + POST /api/admin/graph and POST /api/admin/floor-plan endpoints
-- [ ] 09-02-PLAN.md — MapEditorCanvas + EditorToolbar + NodeMarkerLayer (floor plan rendering, node placement, mode switching)
-- [ ] 09-03-PLAN.md — EdgeLayer (rubber-band preview + edge rendering) + EditorSidePanel (OSM-style property editor)
-- [ ] 09-04-PLAN.md — Human verification: floor plan upload, node placement, edge creation, accessibility marking, save/persist
+- [x] 09-01-PLAN.md — useEditorState hook (useReducer + undo/redo) + POST /api/admin/graph and POST /api/admin/floor-plan endpoints
+- [x] 09-02-PLAN.md — MapEditorCanvas + EditorToolbar + NodeMarkerLayer (floor plan rendering, node placement, mode switching)
+- [x] 09-03-PLAN.md — EdgeLayer (rubber-band preview + edge rendering) + EditorSidePanel (OSM-style property editor)
+- [x] 09-04-PLAN.md — Human verification: floor plan upload, node placement, edge creation, accessibility marking, save/persist
 
 ### Phase 10: Admin Map Editor — Management
 **Goal**: Admin can manage all graph data through editing, tabular views, and bulk import/export
@@ -207,9 +209,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Extend useEditorState with DELETE_NODE/DELETE_EDGE actions; wire keyboard delete (with input focus guard) + side panel Delete button
-- [ ] 10-02-PLAN.md — Tab switcher (Map/Data) with mounted canvas; NodeDataTable + EdgeDataTable with sort/filter/inline-edit; importExport.ts utility + DataTabToolbar with JSON/CSV import-export
-- [ ] 10-03-PLAN.md — Human verification: deletion, data tables, inline editing, import/export end-to-end
+- [x] 10-01-PLAN.md — Extend useEditorState with DELETE_NODE/DELETE_EDGE actions; wire keyboard delete (with input focus guard) + side panel Delete button
+- [x] 10-02-PLAN.md — Tab switcher (Map/Data) with mounted canvas; NodeDataTable + EdgeDataTable with sort/filter/inline-edit; importExport.ts utility + DataTabToolbar with JSON/CSV import-export
+- [x] 10-03-PLAN.md — Human verification: deletion, data tables, inline editing, import/export end-to-end
 
 ### Phase 11: Fix Data Tab Visibility
 **Goal**: The Data tab in the admin map editor renders correctly in the browser and displays NodeDataTable and EdgeDataTable
@@ -223,8 +225,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md — Fix Tailwind flex layout (min-h-0) in MapEditorCanvas.tsx; browser-verify Data tab renders
-- [ ] 11-02-PLAN.md — Human verification: Data tab visible, tables display and are interactive
+- [x] 11-01-PLAN.md — Fix Tailwind flex layout (min-h-0) in MapEditorCanvas.tsx; browser-verify Data tab renders
+- [x] 11-02-PLAN.md — Human verification: Data tab visible, tables display and are interactive
 
 ### Phase 12: Retroactive Phase Verifications
 **Goal**: Create formal VERIFICATION.md files for Phases 7, 8, and 9, closing documentation gaps for 7 orphaned requirements
@@ -238,9 +240,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 12-01-PLAN.md — Retroactive verification for Phase 7: verify ADMN-02 against existing code and SUMMARYs
-- [ ] 12-02-PLAN.md — Retroactive verification for Phase 8: verify ADMN-01 against existing code and SUMMARYs
-- [ ] 12-03-PLAN.md — Retroactive verification for Phase 9: verify EDIT-01 through EDIT-05 against existing code and SUMMARYs
+- [x] 12-01-PLAN.md — Retroactive verification for Phase 7: verify ADMN-02 against existing code and SUMMARYs
+- [x] 12-02-PLAN.md — Retroactive verification for Phase 8: verify ADMN-01 against existing code and SUMMARYs
+- [x] 12-03-PLAN.md — Retroactive verification for Phase 9: verify EDIT-01 through EDIT-05 against existing code and SUMMARYs
 
 ### Phase 13: Restore Location Detail View
 **Goal**: Students can tap any landmark to view its full details (name, room number, type, description, accessibility notes)
@@ -254,9 +256,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Create LocationDetailSheet.tsx using custom CSS height-transition pattern (no Vaul); displays all NavNode detail fields
-- [ ] 13-02-PLAN.md — Wire detailNode state + dual-action tap handler into FloorPlanCanvas; auto-close on route trigger; legend offset update
-- [ ] 13-03-PLAN.md — Human verification: tap shows details, route selection still works, panel dismissible
+- [x] 13-01-PLAN.md — Create LocationDetailSheet.tsx using custom CSS height-transition pattern (no Vaul); displays all NavNode detail fields
+- [x] 13-02-PLAN.md — Wire detailNode state + dual-action tap handler into FloorPlanCanvas; auto-close on route trigger; legend offset update
+- [x] 13-03-PLAN.md — Human verification: tap shows details, route selection still works, panel dismissible
 
 ### Phase 14: Documentation Cleanup
 **Goal**: Fix stale progress tracking and misleading documentation so the project record accurately reflects the built state
@@ -269,7 +271,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 14-01-PLAN.md — Update ROADMAP.md progress table; correct Phase 05.1 handleSheetBack SUMMARY documentation
+- [x] 14-01-PLAN.md — Update ROADMAP.md progress table; correct Phase 05.1 handleSheetBack SUMMARY documentation
 
 ## Progress
 
