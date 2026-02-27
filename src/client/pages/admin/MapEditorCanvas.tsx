@@ -183,7 +183,12 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const handleNodeClick = useCallback(
     (nodeId: string) => {
       if (state.mode === 'select') {
-        dispatch({ type: 'SELECT_NODE', id: nodeId })
+        if (state.selectedNodeId === nodeId) {
+          // Toggle: clicking already-selected node clears selection
+          dispatch({ type: 'SELECT_NODE', id: null })
+        } else {
+          dispatch({ type: 'SELECT_NODE', id: nodeId })
+        }
       } else if (state.mode === 'add-edge') {
         if (state.pendingEdgeSourceId === null) {
           // First click: set pending source
@@ -215,7 +220,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         // Same node clicked: ignore (no self-loops)
       }
     },
-    [state.mode, state.pendingEdgeSourceId, state.nodes, dispatch, recordHistory],
+    [state.mode, state.selectedNodeId, state.pendingEdgeSourceId, state.nodes, dispatch, recordHistory],
   )
 
   // Handle edge click
@@ -357,6 +362,12 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
                 viewportWidth={width}
                 viewportHeight={editorHeight - 52}
                 onImageRectChange={setImageRect}
+                onClick={() => {
+                  if (state.mode === 'select') {
+                    dispatch({ type: 'SELECT_NODE', id: null })
+                    dispatch({ type: 'SELECT_EDGE', id: null })
+                  }
+                }}
               />
             )}
           </Layer>
