@@ -303,8 +303,13 @@ export function SearchOverlay({
               />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-slate-800 truncate">{node.label}</div>
-                <div className="text-xs text-slate-400 flex gap-2">
-                  {node.roomNumber && <span>{node.roomNumber}</span>}
+                <div className="text-xs text-slate-400 flex gap-1 items-center">
+                  {node.roomNumber && (
+                    <>
+                      <span>Room {node.roomNumber}</span>
+                      <span>·</span>
+                    </>
+                  )}
                   <span>{TYPE_LABELS[node.type] ?? node.type}</span>
                 </div>
               </div>
