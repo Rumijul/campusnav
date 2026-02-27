@@ -15,6 +15,7 @@ import { DirectionsSheet } from './DirectionsSheet'
 import FloorPlanImage from './FloorPlanImage'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
+import { LocationDetailSheet } from './LocationDetailSheet'
 import { RouteLayer } from './RouteLayer'
 import { SearchOverlay } from './SearchOverlay'
 import { SelectionMarkerLayer } from './SelectionMarkerLayer'
@@ -52,6 +53,8 @@ export default function FloorPlanCanvas() {
   // routeVisible tracks whether the route line should be drawn — decoupled from sheetOpen
   // so the line stays visible after pressing Back (sheet closes but route remains)
   const [routeVisible, setRouteVisible] = useState<boolean>(false)
+  // detailNode — tracks which landmark is being viewed in the detail sheet
+  const [detailNode, setDetailNode] = useState<NavNode | null>(null)
 
   const routeSelection = useRouteSelection()
   const graphState = useGraphData()
@@ -214,10 +217,26 @@ export default function FloorPlanCanvas() {
     }
   }, [routeSelection.start, routeSelection.destination])
 
+  // Close detail sheet when both endpoints are set and route is triggered
+  useEffect(() => {
+    if (routeSelection.start !== null && routeSelection.destination !== null) {
+      setDetailNode(null)
+    }
+  }, [routeSelection.start, routeSelection.destination])
+
   /** Back arrow in directions sheet — close sheet only, keep route line visible */
   const handleSheetBack = useCallback(() => {
     setSheetOpen(false)
   }, [])
+
+  /** Combined landmark tap handler: show detail sheet AND feed route selection */
+  const handleLandmarkTap = useCallback(
+    (node: NavNode) => {
+      setDetailNode(node)
+      routeSelection.setFromTap(node)
+    },
+    [routeSelection],
+  )
 
   /** Convert node IDs to flat pixel coordinate array for RouteLayer */
   const buildRoutePoints = useCallback(
@@ -318,7 +337,7 @@ export default function FloorPlanCanvas() {
           imageRect={imageRect}
           stageScale={stageScale}
           selectedNodeId={null}
-          onSelectNode={routeSelection.setFromTap}
+          onSelectNode={handleLandmarkTap}
           hiddenNodeIds={hiddenNodeIds}
         />
 
@@ -363,6 +382,8 @@ export default function FloorPlanCanvas() {
         disabled={interactionDisabled}
       />
 
+      <LocationDetailSheet node={detailNode} onClose={() => setDetailNode(null)} />
+
       <DirectionsSheet
         open={sheetOpen}
         standard={routeResult?.standard ?? null}
@@ -378,31 +399,33 @@ export default function FloorPlanCanvas() {
       />
 
       {/* Canvas legend — color key for route lines, floats above sheet when open */}
-      {routeVisible && routeResult && (routeResult.standard.found || routeResult.accessible.found) && (
-        <div
-          className="absolute left-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
-          style={{ bottom: sheetOpen ? '276px' : '16px' }}
-        >
-          {routeResult.standard.found && (
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
-              <span className="text-slate-700">Standard</span>
-            </div>
-          )}
-          {routeResult.accessible.found && !routesIdentical && (
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-1.5 rounded-full bg-green-500 inline-block" />
-              <span className="text-slate-700">Accessible</span>
-            </div>
-          )}
-          {routesIdentical && (
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
-              <span className="text-slate-700">Standard (accessible)</span>
-            </div>
-          )}
-        </div>
-      )}
+      {routeVisible &&
+        routeResult &&
+        (routeResult.standard.found || routeResult.accessible.found) && (
+          <div
+            className="absolute left-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
+            style={{ bottom: sheetOpen ? '276px' : detailNode !== null ? '196px' : '16px' }}
+          >
+            {routeResult.standard.found && (
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
+                <span className="text-slate-700">Standard</span>
+              </div>
+            )}
+            {routeResult.accessible.found && !routesIdentical && (
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-1.5 rounded-full bg-green-500 inline-block" />
+                <span className="text-slate-700">Accessible</span>
+              </div>
+            )}
+            {routesIdentical && (
+              <div className="flex items-center gap-2">
+                <span className="w-6 h-1.5 rounded-full bg-blue-500 inline-block" />
+                <span className="text-slate-700">Standard (accessible)</span>
+              </div>
+            )}
+          </div>
+        )}
 
       {/* Toast notification */}
       {toast && (
