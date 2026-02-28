@@ -74,12 +74,10 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 14.1 (node-selection-fixes-and-admin-room-number-edit) — COMPLETE
-Plan: 3 of 3 complete
-Status: Phase 14.1 complete — Room # inline edit in NodeDataTable; SearchOverlay "Room N · type" display; node toggle deselect; floor plan click deselect; clear A/B pin buttons
-Last activity: 2026-02-27 — Phase 14.1 Plan 03 complete; all 3 plans delivered
-
-Progress: [██████████] 100% (of original 12 phases; Phase 13 adds 3 new plans)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v1.5
+Last activity: 2026-02-28 — Milestone v1.5 General Support Update started
 
 ## Performance Metrics
 

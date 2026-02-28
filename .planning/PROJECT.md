@@ -28,7 +28,19 @@ Show any student the quickest route from where they are to where they need to be
 
 ### Active
 
-(None — all v1 requirements shipped. New requirements belong in next milestone.)
+<!-- v1.5 scope — multi-floor, multi-building, hosted deployment -->
+
+- [ ] Each building floor has its own uploaded floor plan image and node graph
+- [ ] Staircase/elevator/ramp nodes are marked as floor connectors (link floor N to floor N+1)
+- [ ] Routes auto-path across floors using accessible floor connectors where required
+- [ ] Per-floor route visualization — student sees each floor's map segment of the route
+- [ ] Student can manually switch floors to browse the map
+- [ ] Admin supports multiple buildings — each building has multiple floors
+- [ ] Campus outdoor map — admin uploads a hand-drawn overhead campus image
+- [ ] Admin places outdoor path nodes and building entrance nodes on campus map
+- [ ] Building entrances connect outdoor graph to each building's floor 1 graph
+- [ ] Routes spanning buildings show campus outdoor map segment + building floor segments
+- [ ] Full deployment to free always-on hosting (frontend CDN + API + cloud DB)
 
 ### Out of Scope
 
@@ -88,5 +100,14 @@ Shipped v1.0 with ~6,865 LOC TypeScript (React 19 + Hono + Konva.js + Drizzle/SQ
 | Decimal phase numbering for insertions (5.1, 14.1) | Clear insertion semantics without renumbering subsequent phases | ✓ Good — two insertions executed cleanly (5.1: UAT fixes, 14.1: UX improvements) |
 | Client-side pathfinding only | Server remains thin CRUD; pathfinding is fast enough in-browser | ✓ Good — no latency on route computation |
 
+## Current Milestone: v1.5 General Support Update
+
+**Goal:** Extend CampusNav from single-floor/single-building to a full multi-floor, multi-building campus navigation system, and deploy on free always-on hosting.
+
+**Target features:**
+- Multi-floor navigation with per-floor images and auto-routed staircase/elevator transitions
+- Multi-building support with hand-drawn campus overhead map and outdoor path routing
+- Free always-on deployment (frontend + API + database)
+
 ---
-*Last updated: 2026-02-28 after v1.0 milestone*
+*Last updated: 2026-02-28 after v1.5 milestone start*
