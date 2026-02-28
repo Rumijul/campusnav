@@ -93,3 +93,10 @@ None - no external service configuration required.
 ---
 *Phase: 11-fix-data-tab*
 *Completed: 2026-02-22*
+
+## Self-Check: PASSED
+
+- FOUND: `src/client/pages/admin/MapEditorCanvas.tsx` (contains `min-h-0`)
+- FOUND: `.planning/phases/11-fix-data-tab/11-01-SUMMARY.md`
+- FOUND: commit `3e7e763` (fix: add min-h-0)
+- FOUND: commit `12dd747` (docs: complete plan metadata)

@@ -1,6 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
+milestone_name: MVP
+status: complete
+last_updated: "2026-02-28T00:00:00.000Z"
+progress:
+  total_phases: 16
+  completed_phases: 16
+  total_plans: 48
+  completed_plans: 48
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
 milestone_name: milestone
 status: unknown
 last_updated: "2026-02-27T23:05:56.016Z"
@@ -54,10 +67,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2025-02-18)
+See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** Phase 11 COMPLETE — Data tab fully functional after two-part CSS fix (min-h-0 + EditorToolbar relative positioning); human UAT approved
+**Current focus:** v1.0 milestone complete — all 25 requirements shipped, archived to .planning/milestones/. Planning next milestone with /gsd:new-milestone.
 
 ## Current Position
 
@@ -265,6 +278,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Phase 14.1 fully closed — VERIFICATION.md created (14/14 passed), ROADMAP progress row added, .continue-here checkpoint cleared, commit 58fa6e3
+Stopped at: v1.0 milestone archived — MILESTONES.md, PROJECT.md, ROADMAP.md updated; REQUIREMENTS.md deleted; git tagged v1.0; RETROSPECTIVE.md created
 Resume file: None
-Next action: All v1.0 milestone phases complete — ready for milestone audit or new milestone
+Next action: Run /gsd:new-milestone to start v1.1 planning (questioning → research → requirements → roadmap)

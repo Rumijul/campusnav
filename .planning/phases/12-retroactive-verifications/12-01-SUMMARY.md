@@ -62,7 +62,7 @@ Each task was committed atomically:
 1. **Task 1: Confirm 07-VERIFICATION.md completeness** - No file changes (confirmation only; file already complete)
 2. **Task 2: Update REQUIREMENTS.md traceability for ADMN-02** - `d6a9620` (docs)
 
-**Plan metadata:** (to be filled after final docs commit)
+**Plan metadata:** `7491144` (docs: complete ADMN-02 retroactive verification plan)
 
 ## Files Created/Modified
 
