@@ -2,8 +2,9 @@
  * Graph construction from NavGraph JSON.
  *
  * Builds a typed ngraph.graph instance from a serialized NavGraph object,
- * handling bidirectional edge expansion. Also exports a Euclidean distance
- * utility used for edge weight calculation and A* heuristic.
+ * handling bidirectional edge expansion and cross-floor edge synthesis.
+ * Also exports a Euclidean distance utility used for edge weight calculation
+ * and A* heuristic.
  */
 
 import type { NavEdge, NavEdgeData, NavGraph, NavNode, NavNodeData } from '@shared/types'
@@ -13,12 +14,9 @@ import createGraph from 'ngraph.graph'
 /**
  * Flattens a multi-floor NavGraph into a single list of nodes and edges.
  *
- * Phase 16 compatibility shim: the pathfinding engine was written for a flat
- * NavGraph. This function extracts all nodes and edges across all buildings and
- * floors so the existing engine continues to work for single-floor routing.
- *
- * Phase 17 will replace this shim with cross-floor routing logic that properly
- * handles floor connector nodes and inter-floor edges.
+ * Retained for the admin map editor (MapEditorCanvas.tsx) which depends on
+ * this function to flatten the NavGraph before editing and re-wrap it on save.
+ * This function is NOT called inside buildGraph as of Phase 17.
  */
 export function flattenNavGraph(navGraph: NavGraph): { nodes: NavNode[]; edges: NavEdge[] } {
   const nodes: NavNode[] = []
@@ -35,36 +33,85 @@ export function flattenNavGraph(navGraph: NavGraph): { nodes: NavNode[]; edges: 
 /**
  * Constructs a live ngraph.graph from a serialized NavGraph JSON object.
  *
+ * Phase 17 implementation: iterates buildings → floors directly (no longer
+ * calls flattenNavGraph internally). After all nodes and intra-floor edges
+ * are added, performs a second pass to synthesize bidirectional inter-floor
+ * edges from connectsToNodeAboveId on stairs, elevator, and ramp nodes.
+ *
+ * Inter-floor edge weights:
+ * - stairs: standardWeight=0.3, accessibleWeight=Infinity, accessible=false
+ * - elevator/ramp: standardWeight=0.3, accessibleWeight=0.45, accessible=true
+ *
  * For each node: destructures `{ id, ...data }` and adds to graph.
- * For each edge: adds a directed link. If `bidirectional` is true,
+ * For each intra-floor edge: adds a directed link. If `bidirectional` is true,
  * also adds the reverse directed link so both `graph.getLink(a, b)`
  * and `graph.getLink(b, a)` return a link.
  *
- * Uses flattenNavGraph to extract a flat nodes/edges view from the nested
- * buildings → floors structure. The pathfinding engine uses only x, y, and
- * weight fields for routing; extra fields (floorId, connector IDs) are
- * stored as node data and ignored by the routing algorithm.
+ * The pathfinding engine uses x, y, and weight fields for routing; extra
+ * fields (floorId, connector IDs) are stored as node data and passed through.
  */
 export function buildGraph(navGraph: NavGraph): Graph<NavNodeData, NavEdgeData> {
   const graph = createGraph<NavNodeData, NavEdgeData>()
-  const { nodes, edges } = flattenNavGraph(navGraph)
 
-  for (const { id, ...data } of nodes) {
-    graph.addNode(id, data)
-  }
+  // Pass 1: add all nodes and intra-floor edges from all buildings and floors.
+  for (const building of navGraph.buildings) {
+    for (const floor of building.floors) {
+      for (const { id, ...data } of floor.nodes) {
+        graph.addNode(id, data)
+      }
 
-  for (const { id: _id, sourceId, targetId, ...data } of edges) {
-    // Normalize accessibleWeight to Infinity for non-accessible edges.
-    // JSON cannot represent Infinity, so the serialized form uses a large
-    // finite number. The graph should carry the true semantic value.
-    const edgeData: NavEdgeData = data.accessible
-      ? data
-      : { ...data, accessibleWeight: Number.POSITIVE_INFINITY }
-    graph.addLink(sourceId, targetId, edgeData)
-    if (edgeData.bidirectional) {
-      graph.addLink(targetId, sourceId, edgeData)
+      for (const { id: _id, sourceId, targetId, ...data } of floor.edges) {
+        // Normalize accessibleWeight to Infinity for non-accessible edges.
+        // JSON cannot represent Infinity, so the serialized form uses a large
+        // finite number. The graph should carry the true semantic value.
+        const edgeData: NavEdgeData = data.accessible
+          ? data
+          : { ...data, accessibleWeight: Number.POSITIVE_INFINITY }
+        graph.addLink(sourceId, targetId, edgeData)
+        if (edgeData.bidirectional) {
+          graph.addLink(targetId, sourceId, edgeData)
+        }
+      }
     }
   }
+
+  // Pass 2: synthesize bidirectional inter-floor edges from connector nodes.
+  // Only process connectsToNodeAboveId to avoid adding each pair twice
+  // (the counterpart node on the floor above has connectsToNodeBelowId pointing
+  // back, which would duplicate the edge if we processed both directions here).
+  const processedPairs = new Set<string>()
+
+  graph.forEachNode((node) => {
+    const data = node.data
+    const nodeType = data.type
+
+    if (
+      (nodeType === 'stairs' || nodeType === 'elevator' || nodeType === 'ramp') &&
+      data.connectsToNodeAboveId != null
+    ) {
+      const targetId = data.connectsToNodeAboveId
+      if (!graph.hasNode(targetId)) return
+
+      // Build a canonical pair key (sorted) to skip duplicates.
+      const pairKey = [node.id, targetId].sort().join('|')
+      if (processedPairs.has(pairKey)) return
+      processedPairs.add(pairKey)
+
+      // Skip if links already exist (e.g. JSON stored inter-floor edges).
+      if (graph.hasLink(node.id, targetId) || graph.hasLink(targetId, node.id)) return
+
+      const isAccessible = nodeType === 'elevator' || nodeType === 'ramp'
+      const interFloorEdge: NavEdgeData = {
+        standardWeight: 0.3,
+        accessibleWeight: isAccessible ? 0.45 : Number.POSITIVE_INFINITY,
+        accessible: isAccessible,
+        bidirectional: true,
+      }
+
+      graph.addLink(node.id, targetId, interFloorEdge)
+      graph.addLink(targetId, node.id, interFloorEdge)
+    }
+  })
 
   return graph
 }
