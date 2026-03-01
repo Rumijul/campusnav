@@ -83,6 +83,8 @@ export interface NavNodeData {
   connectsToNodeAboveId?: string
   /** ID of the corresponding node on the floor below */
   connectsToNodeBelowId?: string
+  /** ID of the building this campus entrance marker bridges to (campus map only, entrance nodes) */
+  connectsToBuildingId?: number
 }
 
 // ============================================================

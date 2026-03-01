@@ -31,6 +31,7 @@ export const nodes = pgTable('nodes', {
   connectsToFloorBelowId: integer('connects_to_floor_below_id').references(() => floors.id),
   connectsToNodeAboveId: text('connects_to_node_above_id').references((): AnyPgColumn => nodes.id),
   connectsToNodeBelowId: text('connects_to_node_below_id').references((): AnyPgColumn => nodes.id),
+  connectsToBuildingId: integer('connects_to_building_id').references(() => buildings.id),
 })
 
 export const edges = pgTable('edges', {
