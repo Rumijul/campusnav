@@ -36,7 +36,9 @@ export class PathfindingEngine {
       distance: (_from: Node<NavNodeData>, _to: Node<NavNodeData>, link: Link<NavEdgeData>) =>
         link.data.standardWeight,
       heuristic: (a: Node<NavNodeData>, b: Node<NavNodeData>) =>
-        calculateWeight(a.data.x, a.data.y, b.data.x, b.data.y),
+        a.data.floorId !== b.data.floorId
+          ? 0
+          : calculateWeight(a.data.x, a.data.y, b.data.x, b.data.y),
     })
 
     // Accessible finder: uses accessibleWeight, blocks non-accessible edges
@@ -44,7 +46,9 @@ export class PathfindingEngine {
       distance: (_from: Node<NavNodeData>, _to: Node<NavNodeData>, link: Link<NavEdgeData>) =>
         link.data.accessibleWeight,
       heuristic: (a: Node<NavNodeData>, b: Node<NavNodeData>) =>
-        calculateWeight(a.data.x, a.data.y, b.data.x, b.data.y),
+        a.data.floorId !== b.data.floorId
+          ? 0
+          : calculateWeight(a.data.x, a.data.y, b.data.x, b.data.y),
       blocked: (_from: Node<NavNodeData>, _to: Node<NavNodeData>, link: Link<NavEdgeData>) =>
         !link.data.accessible,
     })
