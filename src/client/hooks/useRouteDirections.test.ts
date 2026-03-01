@@ -1,5 +1,5 @@
 import type { PathResult } from '@shared/pathfinding/types'
-import type { NavNode } from '@shared/types'
+import type { NavFloor, NavNode } from '@shared/types'
 import { describe, expect, it } from 'vitest'
 import { type DirectionStep, generateDirections, routesAreIdentical } from './useRouteDirections'
 
@@ -237,6 +237,108 @@ describe('generateDirections — isAccessibleSegment', () => {
     const result = generateDirections(['a', 'b', 'c'], nodeMap, 'standard')
     const step = result.steps[0] as DirectionStep
     expect(step.isAccessibleSegment).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Floor-change direction steps (new in 17-03)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a minimal NavFloor with the given id and floorNumber.
+ */
+function makeFloor(id: number, floorNumber: number): NavFloor {
+  return {
+    id,
+    floorNumber,
+    imagePath: '',
+    updatedAt: '',
+    nodes: [],
+    edges: [],
+  }
+}
+
+/**
+ * Build a Map<number, NavFloor> from an array of [id, floorNumber] pairs.
+ */
+function makeFloorMap(entries: [number, number][]): Map<number, NavFloor> {
+  return new Map(entries.map(([id, floorNumber]) => [id, makeFloor(id, floorNumber)]))
+}
+
+describe('generateDirections — floor-change steps', () => {
+  // Shared layout: a(0,0) → b(0.5,0) → c(1,0)
+  // b is the connector node (stairs/elevator/ramp) on floor 1; c is on floor 2
+
+  it('Test 1: stairs-up — curr on floor 1, next on floor 2', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 1 })
+    const c = makeNode('c', 1, 0, { floorId: 2 })
+    const floorMap = makeFloorMap([[1, 1], [2, 2]])
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+    expect(step.icon).toBe('stairs-up')
+    expect(step.instruction).toBe('Take the stairs to Floor 2')
+    expect(step.isAccessibleSegment).toBe(false)
+  })
+
+  it('Test 2: stairs-down — curr on floor 2, next on floor 1', () => {
+    const a = makeNode('a', 0, 0, { floorId: 2 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 2 })
+    const c = makeNode('c', 1, 0, { floorId: 1 })
+    const floorMap = makeFloorMap([[1, 1], [2, 2]])
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+    expect(step.icon).toBe('stairs-down')
+    expect(step.instruction).toBe('Take the stairs to Floor 1')
+  })
+
+  it('Test 3: elevator floor change — isAccessibleSegment true', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0, { type: 'elevator', floorId: 1 })
+    const c = makeNode('c', 1, 0, { floorId: 2 })
+    const floorMap = makeFloorMap([[1, 1], [2, 2]])
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+    expect(step.icon).toBe('elevator')
+    expect(step.instruction).toBe('Take the elevator to Floor 2')
+    expect(step.isAccessibleSegment).toBe(true)
+  })
+
+  it('Test 4: ramp floor change — isAccessibleSegment true', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0, { type: 'ramp', floorId: 1 })
+    const c = makeNode('c', 1, 0, { floorId: 2 })
+    const floorMap = makeFloorMap([[1, 1], [2, 2]])
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+    expect(step.icon).toBe('ramp')
+    expect(step.instruction).toBe('Take the ramp to Floor 2')
+    expect(step.isAccessibleSegment).toBe(true)
+  })
+
+  it('Test 5: floorMap omitted — instruction falls back to floorId as floor number', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 1 })
+    const c = makeNode('c', 1, 0, { floorId: 2 })
+    // No floorMap passed — generateDirections uses undefined (empty Map default)
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard')
+    const step = result.steps[0] as DirectionStep
+    expect(step.icon).toBe('stairs-up')
+    // Fallback: floorNumber ?? next.floorId → uses next.floorId = 2
+    expect(step.instruction).toBe('Take the stairs to Floor 2')
+  })
+
+  it('Test 6: same-floor nodes — no floor-change step emitted', () => {
+    // All nodes on floorId=1 — normal turn classification
+    const a = makeNode('a', 0, 0.5, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0.5, { type: 'hallway', floorId: 1 })
+    const c = makeNode('c', 1, 0.5, { floorId: 1 })
+    const floorMap = makeFloorMap([[1, 1]])
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+    // Should be a straight step, not a floor-change step
+    expect(step.icon).toBe('straight')
+    expect(step.instruction).toBe('Continue straight')
   })
 })
 
