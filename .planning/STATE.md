@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-03-01T15:37:23.120Z"
+progress:
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 17
+  completed_plans: 14
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-03-01T12:41:36.867Z"
 progress:
   total_phases: 4
@@ -153,9 +166,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 18-admin-multi-floor-editor
-Plan: 01 complete (1/? plans done — Phase 18 In Progress)
-Status: In Progress (Plan 02 next)
-Last activity: 2026-03-01 — Completed 18-01: Added connectsToBuildingId nullable FK to nodes table (Drizzle schema + migration 0002_campus_entrance_bridge.sql), updated NavNodeData TypeScript interface, wired field through GET /api/map and POST /api/admin/graph. Requirements MFLR-04, CAMP-02, CAMP-03, CAMP-04 satisfied.
+Plan: 03 complete (3/? plans done — Phase 18 In Progress)
+Status: In Progress (Plan 04 next)
+Last activity: 2026-03-01 — Completed 18-03: Extended useEditorState with multi-floor context (activeBuildingId, activeFloorId, floorSnapshots, campusSnapshot), added SWITCH_FLOOR/SWITCH_TO_CAMPUS/SWITCH_BUILDING actions to reducer, and switchFloor/switchToCampus helpers that reset undo history. Full backward compatibility with MapEditorCanvas.
 
 ## Performance Metrics
 
@@ -225,6 +238,7 @@ Last activity: 2026-03-01 — Completed 18-01: Added connectsToBuildingId nullab
 | Phase 17-multi-floor-pathfinding-engine P02 | 5 | 2 tasks | 2 files |
 | Phase 17-multi-floor-pathfinding-engine P04 | 5 | 1 tasks | 2 files |
 | Phase 18-admin-multi-floor-editor P01 | 2 min | 2 tasks | 5 files |
+| Phase 18-admin-multi-floor-editor P03 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -375,6 +389,8 @@ Recent decisions affecting current work:
 - [Phase 18-01]: connectsToBuildingId nullable (no .notNull()) — only entrance nodes on campus map will have this set; all others leave null
 - [Phase 18-01]: Renamed auto-generated migration 0002_melodic_richard_fisk.sql to 0002_campus_entrance_bridge.sql; updated _journal.json tag — Drizzle applies migrations by journal tag, not filename
 - [Phase 18-01]: Conditional spread pattern ...(n.connectsToBuildingId != null && { connectsToBuildingId }) matches existing nullable FK field pattern in GET /api/map
+- [Phase 18-03]: switchFloor and switchToCampus are helper wrappers (not raw dispatch) because history refs live outside reducer — dispatch alone cannot reset history
+- [Phase 18-03]: floorSnapshots cache keyed by DB floor id (number) — prevents re-fetch when user returns to a previously loaded floor
 
 ### Pending Todos
 
