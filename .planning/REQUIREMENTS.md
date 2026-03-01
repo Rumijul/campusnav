@@ -15,7 +15,7 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 
 - [x] **MFLR-01**: Each building floor is a first-class data entity with its own floor plan image reference and node graph
 - [x] **MFLR-02**: Floor connector nodes (staircase/elevator/ramp) carry floor-linkage metadata (which floor above/below they connect to)
-- [ ] **MFLR-03**: Pathfinding engine routes across floors via floor connector nodes, preferring accessible connectors for wheelchair routes
+- [x] **MFLR-03**: Pathfinding engine routes across floors via floor connector nodes, preferring accessible connectors for wheelchair routes
 - [ ] **MFLR-04**: Admin can add/remove floors per building and upload a distinct floor plan image for each floor
 - [ ] **MFLR-05**: Student sees per-floor route segments — each segment displayed on that floor's map
 - [ ] **MFLR-06**: Student can switch between floor tabs to browse any floor's map independently of the active route
@@ -59,7 +59,7 @@ Which phases cover which requirements.
 | MFLR-01 | Phase 16: Multi-floor Data Model | Complete |
 | MFLR-02 | Phase 16: Multi-floor Data Model | Complete |
 | CAMP-01 | Phase 16: Multi-floor Data Model | Complete |
-| MFLR-03 | Phase 17: Multi-floor Pathfinding Engine | Pending |
+| MFLR-03 | Phase 17: Multi-floor Pathfinding Engine | Complete |
 | MFLR-04 | Phase 18: Admin Multi-floor Editor | Pending |
 | CAMP-02 | Phase 18: Admin Multi-floor Editor | Pending |
 | CAMP-03 | Phase 18: Admin Multi-floor Editor | Pending |
