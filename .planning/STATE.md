@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T12:24:30.264Z"
+last_updated: "2026-03-01T12:28:30.484Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 ---
@@ -223,6 +223,7 @@ Last activity: 2026-03-01 — Completed 16-04: Human-verified multi-floor data m
 | Phase 17-multi-floor-pathfinding-engine P01 | 2 | 3 tasks | 3 files |
 | Phase 17-multi-floor-pathfinding-engine P03 | 3 | 1 tasks | 2 files |
 | Phase 17-multi-floor-pathfinding-engine P02 | 5 | 2 tasks | 2 files |
+| Phase 17-multi-floor-pathfinding-engine P04 | 5 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -369,6 +370,7 @@ Recent decisions affecting current work:
 - [Phase 17-03]: useRouteDirections hook signature unchanged; Phase 19 will wire real floorMap for per-floor routing
 - [Phase 17-02]: Return 0 for cross-floor A* heuristic pairs: Euclidean x,y across floors is inadmissible; 0 keeps heuristic conservative while inter-floor edge costs provide signal
 - [Phase 17-02]: Both standardFinder and accessibleFinder heuristics updated with same floor-aware check: a.data.floorId !== b.data.floorId ? 0 : calculateWeight(...)
+- [Phase 17-04]: floorMap optional 4th param in useRouteDirections — backward compatible; floorMap useMemo depends on graphState; flattenNavGraph not imported by FloorPlanCanvas
 
 ### Pending Todos
 
