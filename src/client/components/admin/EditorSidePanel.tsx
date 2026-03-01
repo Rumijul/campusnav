@@ -1,4 +1,4 @@
-import type { NavEdge, NavNode, NavNodeType } from '@shared/types'
+import type { NavBuilding, NavEdge, NavNode, NavNodeType } from '@shared/types'
 
 /* ──────────────── Helpers ──────────────── */
 
@@ -36,6 +36,8 @@ interface EditorSidePanelProps {
   onDeleteNode: (id: string) => void
   onDeleteEdge: (id: string) => void
   onClose: () => void
+  isCampusActive?: boolean
+  buildings?: NavBuilding[]
 }
 
 /* ──────────────── Component ──────────────── */
@@ -48,6 +50,8 @@ export default function EditorSidePanel({
   onDeleteNode,
   onDeleteEdge,
   onClose,
+  isCampusActive,
+  buildings,
 }: EditorSidePanelProps) {
   if (!selectedNode && !selectedEdge) return null
 
@@ -123,6 +127,42 @@ export default function EditorSidePanel({
               </optgroup>
             </select>
           </div>
+
+          {/* Links to Building — campus entrance only */}
+          {isCampusActive && selectedNode.type === 'entrance' && (
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="node-building-link"
+                className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+              >
+                Links to Building
+              </label>
+              <select
+                id="node-building-link"
+                value={selectedNode.connectsToBuildingId ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  onUpdateNode(
+                    selectedNode.id,
+                    val ? { connectsToBuildingId: Number(val) } : {},
+                  )
+                }}
+                className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">— None —</option>
+                {(buildings ?? []).map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">
+                {selectedNode.connectsToBuildingId
+                  ? 'This entrance bridges to a building for cross-building routing.'
+                  : 'Select a building to enable cross-building pathfinding.'}
+              </p>
+            </div>
+          )}
 
           {/* Category (read-only display, no input to associate) */}
           <div className="flex flex-col gap-1">

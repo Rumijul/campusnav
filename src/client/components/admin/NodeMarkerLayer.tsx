@@ -19,6 +19,9 @@ const TYPE_COLORS: Record<string, string> = {
   landmark: '#ef4444', // red
 }
 
+/** Amber color for campus entrance nodes that bridge to a building — visually distinct from standard entrance green */
+const CAMPUS_ENTRANCE_COLOR = '#f59e0b'
+
 /* ──────────────── Props ──────────────── */
 
 interface NodeMarkerLayerProps {
@@ -29,6 +32,7 @@ interface NodeMarkerLayerProps {
   mode: EditorMode
   onNodeClick: (nodeId: string) => void
   onNodeDragEnd: (nodeId: string, normX: number, normY: number) => void
+  isCampusActive?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -41,6 +45,7 @@ export default function NodeMarkerLayer({
   mode,
   onNodeClick,
   onNodeDragEnd,
+  isCampusActive,
 }: NodeMarkerLayerProps) {
   if (!imageRect) return null
 
@@ -53,7 +58,13 @@ export default function NodeMarkerLayer({
         const pixelY = imageRect.y + node.y * imageRect.height
         const isSelected = node.id === selectedNodeId
         const isLandmark = LANDMARK_TYPES.has(node.type)
-        const fill = isLandmark ? (TYPE_COLORS[node.type] ?? '#ef4444') : '#9ca3af'
+        const isCampusEntrance =
+          isCampusActive && node.type === 'entrance' && node.connectsToBuildingId != null
+        const fill = isCampusEntrance
+          ? CAMPUS_ENTRANCE_COLOR
+          : isLandmark
+            ? (TYPE_COLORS[node.type] ?? '#ef4444')
+            : '#9ca3af'
         const radius = isLandmark ? LANDMARK_RADIUS : NAV_RADIUS
 
         return (
