@@ -127,9 +127,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 16-multi-floor-data-model
-Plan: 03 complete (3/4 plans done — Phase 16 In Progress)
-Status: In Progress
-Last activity: 2026-03-01 — Completed 16-03: GET /api/map now queries buildings/floors/nodes/edges in parallel and assembles nested NavGraph; POST /api/admin/graph iterates buildings[].floors[] with FK-safe delete/re-insert; new GET /api/floor-plan/:buildingId/:floorNumber endpoint; flattenNavGraph shim in graph-builder.ts; all NavGraph type consumers updated project-wide; tsc --noEmit exits with zero errors.
+Plan: 04 complete (4/4 plans done — Phase 16 COMPLETE)
+Status: In Progress (Phase 17 next)
+Last activity: 2026-03-01 — Completed 16-04: Human-verified multi-floor data model end-to-end — migration runs, seed inserts 48 nodes under buildings/floors hierarchy, GET /api/map returns nested NavGraph with buildings[0].floors[0].nodes length=48, both floor-plan endpoints return 200, seed guard fires on restart. Bug fixed: seed.ts now reuses existing building from migration instead of inserting duplicate (commit 23b6a6b). Requirements MFLR-01, MFLR-02, CAMP-01 satisfied. Phase 16 complete.
 
 ## Performance Metrics
 
@@ -193,6 +193,7 @@ Last activity: 2026-03-01 — Completed 16-03: GET /api/map now queries building
 | Phase 16-multi-floor-data-model P01 | 2.5 min | 2 tasks | 4 files |
 | Phase 16-multi-floor-data-model P02 | 4 min | 2 tasks | 3 files |
 | Phase 16-multi-floor-data-model P03 | 5 | 2 tasks | 13 files |
+| Phase 16-multi-floor-data-model P04 | 0 | 1 task (human-verify) | 1 file |
 
 ## Accumulated Context
 
@@ -331,6 +332,7 @@ Recent decisions affecting current work:
 - [Phase 16-02]: floorId NOT in campus-graph.json nodes; seeder assigns from RETURNING floor.id; onConflictDoNothing not used on buildings/floors inserts
 - [Phase 16-03]: flattenNavGraph documented as Phase 17 replacement target — shim keeps engine compiling without cross-floor routing
 - [Phase 16-03]: Admin editor flattens NavGraph on load, wraps flat state into single-building NavGraph on save
+- [Phase 16-04]: seed.ts must SELECT-before-INSERT for buildings — migration pre-creates "Main Building" (ID 1); unconditional seed insert creates ID 2 with all nodes, leaving buildings[0] empty; fix: query by name and reuse existing ID
 
 ### Pending Todos
 
@@ -348,6 +350,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 16-multi-floor-data-model 16-01-PLAN.md
+Stopped at: Completed 16-multi-floor-data-model 16-04-PLAN.md (Phase 16 complete)
 Resume file: None
-Next action: /gsd:execute-phase 16 plan 02 (update types.ts, seed.ts, index.ts, pathfinding for multi-floor NavGraph shape)
+Next action: /gsd:execute-phase 17 (Multi-floor Pathfinding Engine — replace flattenNavGraph shim with true cross-floor routing)
