@@ -35,7 +35,12 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 <summary>🔄 v1.5 General Support Update (Phases 15–20) — IN PROGRESS</summary>
 
 - [x] Phase 15: PostgreSQL Migration (3 plans) (completed 2026-03-01)
-- [ ] Phase 16: Multi-floor Data Model (— plans)
+- [ ] Phase 16: Multi-floor Data Model (4 plans)
+  Plans:
+  - [ ] 16-01-PLAN.md — Schema + Migration (buildings/floors tables, nodes FK columns, drizzle migration SQL)
+  - [ ] 16-02-PLAN.md — Types + Seed (NavGraph nested type, campus-graph.json reformatted, seed.ts updated)
+  - [ ] 16-03-PLAN.md — API + Pathfinding compatibility (GET /api/map, POST /api/admin/graph, flattenNavGraph shim)
+  - [ ] 16-04-PLAN.md — Human verification (end-to-end: migration, seed, API response shape)
 - [ ] Phase 17: Multi-floor Pathfinding Engine (— plans)
 - [ ] Phase 18: Admin Multi-floor Editor (— plans)
 - [ ] Phase 19: Student Floor Tab UI (— plans)
@@ -64,7 +69,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 14. Documentation Cleanup | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 14.1. Node Selection Fixes & Room # Edit (INSERTED) | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 15. PostgreSQL Migration | 3/3 | Complete    | 2026-03-01 | — |
-| 16. Multi-floor Data Model | v1.5 | 0/— | Not started | — |
+| 16. Multi-floor Data Model | v1.5 | 0/4 | Not started | — |
 | 17. Multi-floor Pathfinding Engine | v1.5 | 0/— | Not started | — |
 | 18. Admin Multi-floor Editor | v1.5 | 0/— | Not started | — |
 | 19. Student Floor Tab UI | v1.5 | 0/— | Not started | — |
