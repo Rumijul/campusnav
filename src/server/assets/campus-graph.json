@@ -1,897 +1,856 @@
 {
-  "nodes": [
+  "buildings": [
     {
-      "id": "room-new-node-1771677125414",
-      "x": 0.9327003751002229,
-      "y": 0.20166337728180692,
-      "label": "Private Area Entrance",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677149173",
-      "x": 0.8636882033745688,
-      "y": 0.20276305301401384,
-      "label": "Stairs",
-      "type": "stairs",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677180735",
-      "x": 0.6279152345994261,
-      "y": 0.20223439117390035,
-      "label": "Main Lobby",
-      "type": "landmark",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677245869",
-      "x": 0.4000793411626315,
-      "y": 0.19066126642181322,
-      "label": "Stairs 2",
-      "type": "stairs",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677269015",
-      "x": 0.4000793411626315,
-      "y": 0.21362224428159185,
-      "label": "Ramp",
-      "type": "ramp",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677437466",
-      "x": 0.3340178203580576,
-      "y": 0.1691245126801135,
-      "label": "GS Faculty Side Entrance",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677471831",
-      "x": 0.3340178203580576,
-      "y": 0.185729678731774,
-      "label": "Principal's Office",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677539230",
-      "x": 0.9072238178230801,
-      "y": 0.20256523507897228,
-      "label": "Hallway1",
-      "type": "hallway",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677570100",
-      "x": 0.9076000435645638,
-      "y": 0.24133115442547626,
-      "label": "Junction1",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677591600",
-      "x": 0.8855329492416858,
-      "y": 0.24136190473297933,
-      "label": "Side Ramp East",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677677453",
-      "x": 0.6285054055955257,
-      "y": 0.2445749104240866,
-      "label": "Center Lobby TOP",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677694231",
-      "x": 0.4240228106597222,
-      "y": 0.24543118348681725,
-      "label": "Side Ramp CONT",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677716032",
-      "x": 0.4243006131773329,
-      "y": 0.27782460292101163,
-      "label": "Side Ramp West",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677734039",
-      "x": 0.41219168279845997,
-      "y": 0.2776048724640621,
-      "label": "CSS NORTH",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677752153",
-      "x": 0.8726486442025,
-      "y": 0.24178368550219245,
-      "label": "CSS Junc",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771677772523",
-      "x": 0.8730281299174248,
-      "y": 0.27591652683060575,
-      "label": "CSS EAST",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678075791",
-      "x": 0.3979788172749909,
-      "y": 0.2778653736532006,
-      "label": "Activity Area EAST",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678103229",
-      "x": 0.2327901636650778,
-      "y": 0.2261222340468044,
-      "label": "Activity Area NORTH",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678133816",
-      "x": 0.3339720014877967,
-      "y": 0.20246375277516526,
-      "label": "Hallway 2",
-      "type": "hallway",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678141327",
-      "x": 0.23264931560287053,
-      "y": 0.2009262374000115,
-      "label": "Junction3",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678215701",
-      "x": 0.21375719738154925,
-      "y": 0.20075650981373278,
-      "label": "Swimming Pool",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678273552",
-      "x": 0.23249378637694978,
-      "y": 0.17411623504211338,
-      "label": "Service Area",
-      "type": "landmark",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678372632",
-      "x": 0.3632169358305672,
-      "y": 0.9334723795724833,
-      "label": "Cafeteria/Act. Area SOUTH",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678397917",
-      "x": 0.41179110734094365,
-      "y": 0.8695117399660872,
-      "label": "CSS SOUTH",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678411662",
-      "x": 0.3632419176714133,
-      "y": 0.8703567985996554,
-      "label": "junc4",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678554340",
-      "x": 0.459291763513414,
-      "y": 0.932643378538815,
-      "label": "Restroom",
-      "type": "restroom",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678578950",
-      "x": 0.5484688146886519,
-      "y": 0.9343307969986756,
-      "label": "3 - Pilandok",
-      "type": "room",
-      "searchable": true,
-      "floor": 1,
-      "roomNumber": "109"
-    },
-    {
-      "id": "room-new-node-1771678595698",
-      "x": 0.6365039152392808,
-      "y": 0.9326242779334855,
-      "label": "3 - Pahiyas",
-      "type": "room",
-      "searchable": true,
-      "floor": 1,
-      "roomNumber": "108"
-    },
-    {
-      "id": "room-new-node-1771678600977",
-      "x": 0.7210893836674477,
-      "y": 0.9313815672104645,
-      "label": "3 - Pahimis",
-      "type": "room",
-      "searchable": true,
-      "floor": 1,
-      "roomNumber": "107"
-    },
-    {
-      "id": "room-new-node-1771678682793",
-      "x": 0.8073693280586817,
-      "y": 0.9312730965393173,
-      "label": "3 - Kahimba",
-      "type": "room",
-      "searchable": true,
-      "floor": 1,
-      "roomNumber": "106"
-    },
-    {
-      "id": "room-new-node-1771678757606",
-      "x": 0.9069102415724474,
-      "y": 0.3101455698198875,
-      "label": "junction5",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678769152",
-      "x": 0.9310030594710914,
-      "y": 0.298245672065898,
-      "label": "2nd Floor Ramp",
-      "type": "stairs",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678779712",
-      "x": 0.9458271488997161,
-      "y": 0.31883559638808784,
-      "label": "2nd Floor Stairs NORTH",
-      "type": "stairs",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678813546",
-      "x": 0.9238371863929945,
-      "y": 0.3794499556986771,
-      "label": "Restroom Girls",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678818940",
-      "x": 0.9245961578228442,
-      "y": 0.48154097660888623,
-      "label": "Restroom Boys",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678834704",
-      "x": 0.9067603292213778,
-      "y": 0.37975745877370787,
-      "label": "Junc6",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678861286",
-      "x": 0.9066337707354503,
-      "y": 0.48165044770359716,
-      "label": "junc7",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678913985",
-      "x": 0.9069736676002828,
-      "y": 0.1808179468761677,
-      "label": "Clinic",
-      "type": "landmark",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678938076",
-      "x": 0.905447542358843,
-      "y": 0.5640215168201181,
-      "label": "SSC Room",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678965635",
-      "x": 0.9051214222316044,
-      "y": 0.7110149140324238,
-      "label": "Storage Room",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771678969435",
-      "x": 0.9050295866885926,
-      "y": 0.8230106089893734,
-      "label": "Guidance Office",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679008650",
-      "x": 0.9052528268467089,
-      "y": 0.8815881328960775,
-      "label": "junc9",
-      "type": "junction",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679012104",
-      "x": 0.9050232379891796,
-      "y": 0.9316699287140358,
-      "label": "Hallway 3",
-      "type": "hallway",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679035205",
-      "x": 0.9443977270554912,
-      "y": 0.8811788463032116,
-      "label": "Chapel Entrance",
-      "type": "entrance",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679095356",
-      "x": 0.9301300023553867,
-      "y": 0.931401071389998,
-      "label": "2nd Floor Stairs SOUTH",
-      "type": "stairs",
-      "searchable": false,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679137642",
-      "x": 1,
-      "y": 0.30625327062005986,
-      "label": "2nd Floor NE",
-      "type": "landmark",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771679167886",
-      "x": 0.9902403043468005,
-      "y": 0.932464097803332,
-      "label": "2nd Floor SE",
-      "type": "room",
-      "searchable": true,
-      "floor": 1
-    },
-    {
-      "id": "room-new-node-1771682991181",
-      "x": 0.23261653838414545,
-      "y": 0.26701588477563454,
-      "label": "Cafeteria NORTH",
-      "type": "landmark",
-      "searchable": true,
-      "floor": 1
+      "id": 1,
+      "name": "Main Building",
+      "floors": [
+        {
+          "floorNumber": 1,
+          "imagePath": "floor-plan.png",
+          "nodes": [
+            {
+              "id": "room-new-node-1771677125414",
+              "x": 0.9327003751002229,
+              "y": 0.20166337728180692,
+              "label": "Private Area Entrance",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677149173",
+              "x": 0.8636882033745688,
+              "y": 0.20276305301401384,
+              "label": "Stairs",
+              "type": "stairs",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677180735",
+              "x": 0.6279152345994261,
+              "y": 0.20223439117390035,
+              "label": "Main Lobby",
+              "type": "landmark",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677245869",
+              "x": 0.4000793411626315,
+              "y": 0.19066126642181322,
+              "label": "Stairs 2",
+              "type": "stairs",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677269015",
+              "x": 0.4000793411626315,
+              "y": 0.21362224428159185,
+              "label": "Ramp",
+              "type": "ramp",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677437466",
+              "x": 0.3340178203580576,
+              "y": 0.1691245126801135,
+              "label": "GS Faculty Side Entrance",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677471831",
+              "x": 0.3340178203580576,
+              "y": 0.185729678731774,
+              "label": "Principal's Office",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677539230",
+              "x": 0.9072238178230801,
+              "y": 0.20256523507897228,
+              "label": "Hallway1",
+              "type": "hallway",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677570100",
+              "x": 0.9076000435645638,
+              "y": 0.24133115442547626,
+              "label": "Junction1",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677591600",
+              "x": 0.8855329492416858,
+              "y": 0.24136190473297933,
+              "label": "Side Ramp East",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677677453",
+              "x": 0.6285054055955257,
+              "y": 0.2445749104240866,
+              "label": "Center Lobby TOP",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677694231",
+              "x": 0.4240228106597222,
+              "y": 0.24543118348681725,
+              "label": "Side Ramp CONT",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677716032",
+              "x": 0.4243006131773329,
+              "y": 0.27782460292101163,
+              "label": "Side Ramp West",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677734039",
+              "x": 0.41219168279845997,
+              "y": 0.2776048724640621,
+              "label": "CSS NORTH",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771677752153",
+              "x": 0.8726486442025,
+              "y": 0.24178368550219245,
+              "label": "CSS Junc",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771677772523",
+              "x": 0.8730281299174248,
+              "y": 0.27591652683060575,
+              "label": "CSS EAST",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678075791",
+              "x": 0.3979788172749909,
+              "y": 0.2778653736532006,
+              "label": "Activity Area EAST",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678103229",
+              "x": 0.2327901636650778,
+              "y": 0.2261222340468044,
+              "label": "Activity Area NORTH",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678133816",
+              "x": 0.3339720014877967,
+              "y": 0.20246375277516526,
+              "label": "Hallway 2",
+              "type": "hallway",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678141327",
+              "x": 0.23264931560287053,
+              "y": 0.2009262374000115,
+              "label": "Junction3",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678215701",
+              "x": 0.21375719738154925,
+              "y": 0.20075650981373278,
+              "label": "Swimming Pool",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678273552",
+              "x": 0.23249378637694978,
+              "y": 0.17411623504211338,
+              "label": "Service Area",
+              "type": "landmark",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678372632",
+              "x": 0.3632169358305672,
+              "y": 0.9334723795724833,
+              "label": "Cafeteria/Act. Area SOUTH",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678397917",
+              "x": 0.41179110734094365,
+              "y": 0.8695117399660872,
+              "label": "CSS SOUTH",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678411662",
+              "x": 0.3632419176714133,
+              "y": 0.8703567985996554,
+              "label": "junc4",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678554340",
+              "x": 0.459291763513414,
+              "y": 0.932643378538815,
+              "label": "Restroom",
+              "type": "restroom",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678578950",
+              "x": 0.5484688146886519,
+              "y": 0.9343307969986756,
+              "label": "3 - Pilandok",
+              "type": "room",
+              "searchable": true,
+              "roomNumber": "109"
+            },
+            {
+              "id": "room-new-node-1771678595698",
+              "x": 0.6365039152392808,
+              "y": 0.9326242779334855,
+              "label": "3 - Pahiyas",
+              "type": "room",
+              "searchable": true,
+              "roomNumber": "108"
+            },
+            {
+              "id": "room-new-node-1771678600977",
+              "x": 0.7210893836674477,
+              "y": 0.9313815672104645,
+              "label": "3 - Pahimis",
+              "type": "room",
+              "searchable": true,
+              "roomNumber": "107"
+            },
+            {
+              "id": "room-new-node-1771678682793",
+              "x": 0.8073693280586817,
+              "y": 0.9312730965393173,
+              "label": "3 - Kahimba",
+              "type": "room",
+              "searchable": true,
+              "roomNumber": "106"
+            },
+            {
+              "id": "room-new-node-1771678757606",
+              "x": 0.9069102415724474,
+              "y": 0.3101455698198875,
+              "label": "junction5",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678769152",
+              "x": 0.9310030594710914,
+              "y": 0.298245672065898,
+              "label": "2nd Floor Ramp",
+              "type": "stairs",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678779712",
+              "x": 0.9458271488997161,
+              "y": 0.31883559638808784,
+              "label": "2nd Floor Stairs NORTH",
+              "type": "stairs",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678813546",
+              "x": 0.9238371863929945,
+              "y": 0.3794499556986771,
+              "label": "Restroom Girls",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678818940",
+              "x": 0.9245961578228442,
+              "y": 0.48154097660888623,
+              "label": "Restroom Boys",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678834704",
+              "x": 0.9067603292213778,
+              "y": 0.37975745877370787,
+              "label": "Junc6",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678861286",
+              "x": 0.9066337707354503,
+              "y": 0.48165044770359716,
+              "label": "junc7",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771678913985",
+              "x": 0.9069736676002828,
+              "y": 0.1808179468761677,
+              "label": "Clinic",
+              "type": "landmark",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678938076",
+              "x": 0.905447542358843,
+              "y": 0.5640215168201181,
+              "label": "SSC Room",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678965635",
+              "x": 0.9051214222316044,
+              "y": 0.7110149140324238,
+              "label": "Storage Room",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771678969435",
+              "x": 0.9050295866885926,
+              "y": 0.8230106089893734,
+              "label": "Guidance Office",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771679008650",
+              "x": 0.9052528268467089,
+              "y": 0.8815881328960775,
+              "label": "junc9",
+              "type": "junction",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771679012104",
+              "x": 0.9050232379891796,
+              "y": 0.9316699287140358,
+              "label": "Hallway 3",
+              "type": "hallway",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771679035205",
+              "x": 0.9443977270554912,
+              "y": 0.8811788463032116,
+              "label": "Chapel Entrance",
+              "type": "entrance",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771679095356",
+              "x": 0.9301300023553867,
+              "y": 0.931401071389998,
+              "label": "2nd Floor Stairs SOUTH",
+              "type": "stairs",
+              "searchable": false
+            },
+            {
+              "id": "room-new-node-1771679137642",
+              "x": 1,
+              "y": 0.30625327062005986,
+              "label": "2nd Floor NE",
+              "type": "landmark",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771679167886",
+              "x": 0.9902403043468005,
+              "y": 0.932464097803332,
+              "label": "2nd Floor SE",
+              "type": "room",
+              "searchable": true
+            },
+            {
+              "id": "room-new-node-1771682991181",
+              "x": 0.23261653838414545,
+              "y": 0.26701588477563454,
+              "label": "Cafeteria NORTH",
+              "type": "landmark",
+              "searchable": true
+            }
+          ],
+          "edges": [
+            {
+              "id": "edge-room-new-node-1771677149173-room-new-node-1771677180735-1771677206342",
+              "sourceId": "room-new-node-1771677149173",
+              "targetId": "room-new-node-1771677180735",
+              "standardWeight": 0.23577952782159847,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677180735-room-new-node-1771677245869-1771677338041",
+              "sourceId": "room-new-node-1771677180735",
+              "targetId": "room-new-node-1771677245869",
+              "standardWeight": 0.2281296376069313,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677180735-room-new-node-1771677269015-1771677340832",
+              "sourceId": "room-new-node-1771677180735",
+              "targetId": "room-new-node-1771677269015",
+              "standardWeight": 0.22812031373059433,
+              "accessibleWeight": 0.22812031373059433,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677245869-room-new-node-1771677471831-1771677492970",
+              "sourceId": "room-new-node-1771677245869",
+              "targetId": "room-new-node-1771677471831",
+              "standardWeight": 0.06624534012410001,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677269015-room-new-node-1771677471831-1771677495061",
+              "sourceId": "room-new-node-1771677269015",
+              "targetId": "room-new-node-1771677471831",
+              "standardWeight": 0.07170857510761201,
+              "accessibleWeight": 0.07170857510761201,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677471831-room-new-node-1771677437466-1771677496146",
+              "sourceId": "room-new-node-1771677471831",
+              "targetId": "room-new-node-1771677437466",
+              "standardWeight": 0.016605166051660514,
+              "accessibleWeight": 0.016605166051660514,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677125414-room-new-node-1771677539230-1771677553785",
+              "sourceId": "room-new-node-1771677125414",
+              "targetId": "room-new-node-1771677539230",
+              "standardWeight": 0.02339344106965622,
+              "accessibleWeight": 0.02339344106965622,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677539230-room-new-node-1771677149173-1771677556016",
+              "sourceId": "room-new-node-1771677539230",
+              "targetId": "room-new-node-1771677149173",
+              "standardWeight": 0.0456289337336665,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677539230-room-new-node-1771677570100-1771677626953",
+              "sourceId": "room-new-node-1771677539230",
+              "targetId": "room-new-node-1771677570100",
+              "standardWeight": 0.039085805380660386,
+              "accessibleWeight": 0.039085805380660386,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677570100-room-new-node-1771677591600-1771677627860",
+              "sourceId": "room-new-node-1771677570100",
+              "targetId": "room-new-node-1771677591600",
+              "standardWeight": 0.021500526672082198,
+              "accessibleWeight": 0.021500526672082198,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677591600-room-new-node-1771677752153-1771677778330",
+              "sourceId": "room-new-node-1771677591600",
+              "targetId": "room-new-node-1771677752153",
+              "standardWeight": 0.012511930520494754,
+              "accessibleWeight": 0.012511930520494754,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677752153-room-new-node-1771677772523-1771677779338",
+              "sourceId": "room-new-node-1771677752153",
+              "targetId": "room-new-node-1771677772523",
+              "standardWeight": 0.034132841328413294,
+              "accessibleWeight": 0.034132841328413294,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677752153-room-new-node-1771677677453-1771677786550",
+              "sourceId": "room-new-node-1771677752153",
+              "targetId": "room-new-node-1771677677453",
+              "standardWeight": 0.24395372057433384,
+              "accessibleWeight": 0.24395372057433384,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677677453-room-new-node-1771677180735-1771677789540",
+              "sourceId": "room-new-node-1771677677453",
+              "targetId": "room-new-node-1771677180735",
+              "standardWeight": 0.03988812002517656,
+              "accessibleWeight": 0.03988812002517656,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677677453-room-new-node-1771677694231-1771677791446",
+              "sourceId": "room-new-node-1771677677453",
+              "targetId": "room-new-node-1771677694231",
+              "standardWeight": 0.2073604047271144,
+              "accessibleWeight": 0.2073604047271144,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677694231-room-new-node-1771677716032-1771677793134",
+              "sourceId": "room-new-node-1771677694231",
+              "targetId": "room-new-node-1771677716032",
+              "standardWeight": 0.03208711895521372,
+              "accessibleWeight": 0.03208711895521372,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677716032-room-new-node-1771677734039-1771677794096",
+              "sourceId": "room-new-node-1771677716032",
+              "targetId": "room-new-node-1771677734039",
+              "standardWeight": 0.00950636628168652,
+              "accessibleWeight": 0.00950636628168652,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677734039-room-new-node-1771678075791-1771678120804",
+              "sourceId": "room-new-node-1771677734039",
+              "targetId": "room-new-node-1771678075791",
+              "standardWeight": 0.014793002896736813,
+              "accessibleWeight": 0.014793002896736813,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678141327-room-new-node-1771678133816-1771678150483",
+              "sourceId": "room-new-node-1771678141327",
+              "targetId": "room-new-node-1771678133816",
+              "standardWeight": 0.10135254508876047,
+              "accessibleWeight": 0.10135254508876047,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678133816-room-new-node-1771677471831-1771678151841",
+              "sourceId": "room-new-node-1771678133816",
+              "targetId": "room-new-node-1771677471831",
+              "standardWeight": 0.01765664271841516,
+              "accessibleWeight": 0.01765664271841516,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678141327-room-new-node-1771678103229-1771678157942",
+              "sourceId": "room-new-node-1771678141327",
+              "targetId": "room-new-node-1771678103229",
+              "standardWeight": 0.02396826435228454,
+              "accessibleWeight": 0.02396826435228454,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678141327-room-new-node-1771678215701-1771678232532",
+              "sourceId": "room-new-node-1771678141327",
+              "targetId": "room-new-node-1771678215701",
+              "standardWeight": 0.019322370196875962,
+              "accessibleWeight": 0.019322370196875962,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678141327-room-new-node-1771678273552-1771678291585",
+              "sourceId": "room-new-node-1771678141327",
+              "targetId": "room-new-node-1771678273552",
+              "standardWeight": 0.026810453479391552,
+              "accessibleWeight": 0.026810453479391552,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678372632-room-new-node-1771678411662-1771678426942",
+              "sourceId": "room-new-node-1771678372632",
+              "targetId": "room-new-node-1771678411662",
+              "standardWeight": 0.06311837804912913,
+              "accessibleWeight": 0.06311837804912913,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678397917-room-new-node-1771678411662-1771678428356",
+              "sourceId": "room-new-node-1771678397917",
+              "targetId": "room-new-node-1771678411662",
+              "standardWeight": 0.04497881954537448,
+              "accessibleWeight": 0.04497881954537448,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677570100-room-new-node-1771678757606-1771678788041",
+              "sourceId": "room-new-node-1771677570100",
+              "targetId": "room-new-node-1771678757606",
+              "standardWeight": 0.06973830611233636,
+              "accessibleWeight": 0.06973830611233636,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678757606-room-new-node-1771678769152-1771678788952",
+              "sourceId": "room-new-node-1771678757606",
+              "targetId": "room-new-node-1771678769152",
+              "standardWeight": 0.026301370329255284,
+              "accessibleWeight": 0.026301370329255284,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678757606-room-new-node-1771678779712-1771678790246",
+              "sourceId": "room-new-node-1771678757606",
+              "targetId": "room-new-node-1771678779712",
+              "standardWeight": 0.04669789486665498,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678757606-room-new-node-1771678834704-1771678858094",
+              "sourceId": "room-new-node-1771678757606",
+              "targetId": "room-new-node-1771678834704",
+              "standardWeight": 0.069955170827731,
+              "accessibleWeight": 0.069955170827731,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678834704-room-new-node-1771678861286-1771678875930",
+              "sourceId": "room-new-node-1771678834704",
+              "targetId": "room-new-node-1771678861286",
+              "standardWeight": 0.10128369072801388,
+              "accessibleWeight": 0.10128369072801388,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678834704-room-new-node-1771678813546-1771678883088",
+              "sourceId": "room-new-node-1771678834704",
+              "targetId": "room-new-node-1771678813546",
+              "standardWeight": 0.017145932590227623,
+              "accessibleWeight": 0.017145932590227623,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678861286-room-new-node-1771678818940-1771678884038",
+              "sourceId": "room-new-node-1771678861286",
+              "targetId": "room-new-node-1771678818940",
+              "standardWeight": 0.016904353970089558,
+              "accessibleWeight": 0.016904353970089558,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771677539230-room-new-node-1771678913985-1771678922305",
+              "sourceId": "room-new-node-1771677539230",
+              "targetId": "room-new-node-1771678913985",
+              "standardWeight": 0.02175173671452245,
+              "accessibleWeight": 0.02175173671452245,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678861286-room-new-node-1771678938076-1771678958707",
+              "sourceId": "room-new-node-1771678861286",
+              "targetId": "room-new-node-1771678938076",
+              "standardWeight": 0.08196384605295304,
+              "accessibleWeight": 0.08196384605295304,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678938076-room-new-node-1771678965635-1771678980497",
+              "sourceId": "room-new-node-1771678938076",
+              "targetId": "room-new-node-1771678965635",
+              "standardWeight": 0.14741755607017923,
+              "accessibleWeight": 0.14741755607017923,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678965635-room-new-node-1771678969435-1771678981339",
+              "sourceId": "room-new-node-1771678965635",
+              "targetId": "room-new-node-1771678969435",
+              "standardWeight": 0.11199946011292257,
+              "accessibleWeight": 0.11199946011292257,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678969435-room-new-node-1771679008650-1771679022570",
+              "sourceId": "room-new-node-1771678969435",
+              "targetId": "room-new-node-1771679008650",
+              "standardWeight": 0.0589920596732937,
+              "accessibleWeight": 0.0589920596732937,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771679008650-room-new-node-1771679012104-1771679023407",
+              "sourceId": "room-new-node-1771679008650",
+              "targetId": "room-new-node-1771679012104",
+              "standardWeight": 0.05443570268640813,
+              "accessibleWeight": 0.05443570268640813,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771679008650-room-new-node-1771679035205-1771679046810",
+              "sourceId": "room-new-node-1771679008650",
+              "targetId": "room-new-node-1771679035205",
+              "standardWeight": 0.039147039835351796,
+              "accessibleWeight": 0.039147039835351796,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771679012104-room-new-node-1771678682793-1771679050362",
+              "sourceId": "room-new-node-1771679012104",
+              "targetId": "room-new-node-1771678682793",
+              "standardWeight": 0.09885462837005253,
+              "accessibleWeight": 0.09885462837005253,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678578950-room-new-node-1771678554340-1771679056517",
+              "sourceId": "room-new-node-1771678578950",
+              "targetId": "room-new-node-1771678554340",
+              "standardWeight": 0.09177012590549577,
+              "accessibleWeight": 0.09177012590549577,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678682793-room-new-node-1771678600977-1771679067042",
+              "sourceId": "room-new-node-1771678682793",
+              "targetId": "room-new-node-1771678600977",
+              "standardWeight": 0.0855912465516741,
+              "accessibleWeight": 0.0855912465516741,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678600977-room-new-node-1771678595698-1771679068130",
+              "sourceId": "room-new-node-1771678600977",
+              "targetId": "room-new-node-1771678595698",
+              "standardWeight": 0.08481730645639105,
+              "accessibleWeight": 0.08481730645639105,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678595698-room-new-node-1771678578950-1771679069143",
+              "sourceId": "room-new-node-1771678595698",
+              "targetId": "room-new-node-1771678578950",
+              "standardWeight": 0.0875925480153508,
+              "accessibleWeight": 0.0875925480153508,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678554340-room-new-node-1771678372632-1771679072231",
+              "sourceId": "room-new-node-1771678554340",
+              "targetId": "room-new-node-1771678372632",
+              "standardWeight": 0.09378461062867335,
+              "accessibleWeight": 0.09378461062867335,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771679012104-room-new-node-1771679095356-1771679116845",
+              "sourceId": "room-new-node-1771679012104",
+              "targetId": "room-new-node-1771679095356",
+              "standardWeight": 0.025108203862501472,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771679095356-room-new-node-1771679167886-1771679197312",
+              "sourceId": "room-new-node-1771679095356",
+              "targetId": "room-new-node-1771679167886",
+              "standardWeight": 0.06011970085300176,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678779712-room-new-node-1771679137642-1771679200047",
+              "sourceId": "room-new-node-1771678779712",
+              "targetId": "room-new-node-1771679137642",
+              "standardWeight": 0.055614860586594234,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678769152-room-new-node-1771679137642-1771679201247",
+              "sourceId": "room-new-node-1771678769152",
+              "targetId": "room-new-node-1771679137642",
+              "standardWeight": 0.0694600564134119,
+              "accessibleWeight": 0.0694600564134119,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "edge-room-new-node-1771678103229-room-new-node-1771682991181-1771683009405",
+              "sourceId": "room-new-node-1771678103229",
+              "targetId": "room-new-node-1771682991181",
+              "standardWeight": 0.040894019314194695,
+              "accessibleWeight": 0.040894019314194695,
+              "accessible": true,
+              "bidirectional": true
+            }
+          ]
+        }
+      ]
     }
-  ],
-  "edges": [
-    {
-      "id": "edge-room-new-node-1771677149173-room-new-node-1771677180735-1771677206342",
-      "sourceId": "room-new-node-1771677149173",
-      "targetId": "room-new-node-1771677180735",
-      "standardWeight": 0.23577952782159847,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677180735-room-new-node-1771677245869-1771677338041",
-      "sourceId": "room-new-node-1771677180735",
-      "targetId": "room-new-node-1771677245869",
-      "standardWeight": 0.2281296376069313,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677180735-room-new-node-1771677269015-1771677340832",
-      "sourceId": "room-new-node-1771677180735",
-      "targetId": "room-new-node-1771677269015",
-      "standardWeight": 0.22812031373059433,
-      "accessibleWeight": 0.22812031373059433,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677245869-room-new-node-1771677471831-1771677492970",
-      "sourceId": "room-new-node-1771677245869",
-      "targetId": "room-new-node-1771677471831",
-      "standardWeight": 0.06624534012410001,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677269015-room-new-node-1771677471831-1771677495061",
-      "sourceId": "room-new-node-1771677269015",
-      "targetId": "room-new-node-1771677471831",
-      "standardWeight": 0.07170857510761201,
-      "accessibleWeight": 0.07170857510761201,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677471831-room-new-node-1771677437466-1771677496146",
-      "sourceId": "room-new-node-1771677471831",
-      "targetId": "room-new-node-1771677437466",
-      "standardWeight": 0.016605166051660514,
-      "accessibleWeight": 0.016605166051660514,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677125414-room-new-node-1771677539230-1771677553785",
-      "sourceId": "room-new-node-1771677125414",
-      "targetId": "room-new-node-1771677539230",
-      "standardWeight": 0.02339344106965622,
-      "accessibleWeight": 0.02339344106965622,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677539230-room-new-node-1771677149173-1771677556016",
-      "sourceId": "room-new-node-1771677539230",
-      "targetId": "room-new-node-1771677149173",
-      "standardWeight": 0.0456289337336665,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677539230-room-new-node-1771677570100-1771677626953",
-      "sourceId": "room-new-node-1771677539230",
-      "targetId": "room-new-node-1771677570100",
-      "standardWeight": 0.039085805380660386,
-      "accessibleWeight": 0.039085805380660386,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677570100-room-new-node-1771677591600-1771677627860",
-      "sourceId": "room-new-node-1771677570100",
-      "targetId": "room-new-node-1771677591600",
-      "standardWeight": 0.021500526672082198,
-      "accessibleWeight": 0.021500526672082198,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677591600-room-new-node-1771677752153-1771677778330",
-      "sourceId": "room-new-node-1771677591600",
-      "targetId": "room-new-node-1771677752153",
-      "standardWeight": 0.012511930520494754,
-      "accessibleWeight": 0.012511930520494754,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677752153-room-new-node-1771677772523-1771677779338",
-      "sourceId": "room-new-node-1771677752153",
-      "targetId": "room-new-node-1771677772523",
-      "standardWeight": 0.034132841328413294,
-      "accessibleWeight": 0.034132841328413294,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677752153-room-new-node-1771677677453-1771677786550",
-      "sourceId": "room-new-node-1771677752153",
-      "targetId": "room-new-node-1771677677453",
-      "standardWeight": 0.24395372057433384,
-      "accessibleWeight": 0.24395372057433384,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677677453-room-new-node-1771677180735-1771677789540",
-      "sourceId": "room-new-node-1771677677453",
-      "targetId": "room-new-node-1771677180735",
-      "standardWeight": 0.03988812002517656,
-      "accessibleWeight": 0.03988812002517656,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677677453-room-new-node-1771677694231-1771677791446",
-      "sourceId": "room-new-node-1771677677453",
-      "targetId": "room-new-node-1771677694231",
-      "standardWeight": 0.2073604047271144,
-      "accessibleWeight": 0.2073604047271144,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677694231-room-new-node-1771677716032-1771677793134",
-      "sourceId": "room-new-node-1771677694231",
-      "targetId": "room-new-node-1771677716032",
-      "standardWeight": 0.03208711895521372,
-      "accessibleWeight": 0.03208711895521372,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677716032-room-new-node-1771677734039-1771677794096",
-      "sourceId": "room-new-node-1771677716032",
-      "targetId": "room-new-node-1771677734039",
-      "standardWeight": 0.00950636628168652,
-      "accessibleWeight": 0.00950636628168652,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677734039-room-new-node-1771678075791-1771678120804",
-      "sourceId": "room-new-node-1771677734039",
-      "targetId": "room-new-node-1771678075791",
-      "standardWeight": 0.014793002896736813,
-      "accessibleWeight": 0.014793002896736813,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678141327-room-new-node-1771678133816-1771678150483",
-      "sourceId": "room-new-node-1771678141327",
-      "targetId": "room-new-node-1771678133816",
-      "standardWeight": 0.10135254508876047,
-      "accessibleWeight": 0.10135254508876047,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678133816-room-new-node-1771677471831-1771678151841",
-      "sourceId": "room-new-node-1771678133816",
-      "targetId": "room-new-node-1771677471831",
-      "standardWeight": 0.01765664271841516,
-      "accessibleWeight": 0.01765664271841516,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678141327-room-new-node-1771678103229-1771678157942",
-      "sourceId": "room-new-node-1771678141327",
-      "targetId": "room-new-node-1771678103229",
-      "standardWeight": 0.02396826435228454,
-      "accessibleWeight": 0.02396826435228454,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678141327-room-new-node-1771678215701-1771678232532",
-      "sourceId": "room-new-node-1771678141327",
-      "targetId": "room-new-node-1771678215701",
-      "standardWeight": 0.019322370196875962,
-      "accessibleWeight": 0.019322370196875962,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678141327-room-new-node-1771678273552-1771678291585",
-      "sourceId": "room-new-node-1771678141327",
-      "targetId": "room-new-node-1771678273552",
-      "standardWeight": 0.026810453479391552,
-      "accessibleWeight": 0.026810453479391552,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678372632-room-new-node-1771678411662-1771678426942",
-      "sourceId": "room-new-node-1771678372632",
-      "targetId": "room-new-node-1771678411662",
-      "standardWeight": 0.06311837804912913,
-      "accessibleWeight": 0.06311837804912913,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678397917-room-new-node-1771678411662-1771678428356",
-      "sourceId": "room-new-node-1771678397917",
-      "targetId": "room-new-node-1771678411662",
-      "standardWeight": 0.04497881954537448,
-      "accessibleWeight": 0.04497881954537448,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677570100-room-new-node-1771678757606-1771678788041",
-      "sourceId": "room-new-node-1771677570100",
-      "targetId": "room-new-node-1771678757606",
-      "standardWeight": 0.06973830611233636,
-      "accessibleWeight": 0.06973830611233636,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678757606-room-new-node-1771678769152-1771678788952",
-      "sourceId": "room-new-node-1771678757606",
-      "targetId": "room-new-node-1771678769152",
-      "standardWeight": 0.026301370329255284,
-      "accessibleWeight": 0.026301370329255284,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678757606-room-new-node-1771678779712-1771678790246",
-      "sourceId": "room-new-node-1771678757606",
-      "targetId": "room-new-node-1771678779712",
-      "standardWeight": 0.04669789486665498,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678757606-room-new-node-1771678834704-1771678858094",
-      "sourceId": "room-new-node-1771678757606",
-      "targetId": "room-new-node-1771678834704",
-      "standardWeight": 0.069955170827731,
-      "accessibleWeight": 0.069955170827731,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678834704-room-new-node-1771678861286-1771678875930",
-      "sourceId": "room-new-node-1771678834704",
-      "targetId": "room-new-node-1771678861286",
-      "standardWeight": 0.10128369072801388,
-      "accessibleWeight": 0.10128369072801388,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678834704-room-new-node-1771678813546-1771678883088",
-      "sourceId": "room-new-node-1771678834704",
-      "targetId": "room-new-node-1771678813546",
-      "standardWeight": 0.017145932590227623,
-      "accessibleWeight": 0.017145932590227623,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678861286-room-new-node-1771678818940-1771678884038",
-      "sourceId": "room-new-node-1771678861286",
-      "targetId": "room-new-node-1771678818940",
-      "standardWeight": 0.016904353970089558,
-      "accessibleWeight": 0.016904353970089558,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771677539230-room-new-node-1771678913985-1771678922305",
-      "sourceId": "room-new-node-1771677539230",
-      "targetId": "room-new-node-1771678913985",
-      "standardWeight": 0.02175173671452245,
-      "accessibleWeight": 0.02175173671452245,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678861286-room-new-node-1771678938076-1771678958707",
-      "sourceId": "room-new-node-1771678861286",
-      "targetId": "room-new-node-1771678938076",
-      "standardWeight": 0.08196384605295304,
-      "accessibleWeight": 0.08196384605295304,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678938076-room-new-node-1771678965635-1771678980497",
-      "sourceId": "room-new-node-1771678938076",
-      "targetId": "room-new-node-1771678965635",
-      "standardWeight": 0.14741755607017923,
-      "accessibleWeight": 0.14741755607017923,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678965635-room-new-node-1771678969435-1771678981339",
-      "sourceId": "room-new-node-1771678965635",
-      "targetId": "room-new-node-1771678969435",
-      "standardWeight": 0.11199946011292257,
-      "accessibleWeight": 0.11199946011292257,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678969435-room-new-node-1771679008650-1771679022570",
-      "sourceId": "room-new-node-1771678969435",
-      "targetId": "room-new-node-1771679008650",
-      "standardWeight": 0.0589920596732937,
-      "accessibleWeight": 0.0589920596732937,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771679008650-room-new-node-1771679012104-1771679023407",
-      "sourceId": "room-new-node-1771679008650",
-      "targetId": "room-new-node-1771679012104",
-      "standardWeight": 0.05443570268640813,
-      "accessibleWeight": 0.05443570268640813,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771679008650-room-new-node-1771679035205-1771679046810",
-      "sourceId": "room-new-node-1771679008650",
-      "targetId": "room-new-node-1771679035205",
-      "standardWeight": 0.039147039835351796,
-      "accessibleWeight": 0.039147039835351796,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771679012104-room-new-node-1771678682793-1771679050362",
-      "sourceId": "room-new-node-1771679012104",
-      "targetId": "room-new-node-1771678682793",
-      "standardWeight": 0.09885462837005253,
-      "accessibleWeight": 0.09885462837005253,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678578950-room-new-node-1771678554340-1771679056517",
-      "sourceId": "room-new-node-1771678578950",
-      "targetId": "room-new-node-1771678554340",
-      "standardWeight": 0.09177012590549577,
-      "accessibleWeight": 0.09177012590549577,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678682793-room-new-node-1771678600977-1771679067042",
-      "sourceId": "room-new-node-1771678682793",
-      "targetId": "room-new-node-1771678600977",
-      "standardWeight": 0.0855912465516741,
-      "accessibleWeight": 0.0855912465516741,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678600977-room-new-node-1771678595698-1771679068130",
-      "sourceId": "room-new-node-1771678600977",
-      "targetId": "room-new-node-1771678595698",
-      "standardWeight": 0.08481730645639105,
-      "accessibleWeight": 0.08481730645639105,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678595698-room-new-node-1771678578950-1771679069143",
-      "sourceId": "room-new-node-1771678595698",
-      "targetId": "room-new-node-1771678578950",
-      "standardWeight": 0.0875925480153508,
-      "accessibleWeight": 0.0875925480153508,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678554340-room-new-node-1771678372632-1771679072231",
-      "sourceId": "room-new-node-1771678554340",
-      "targetId": "room-new-node-1771678372632",
-      "standardWeight": 0.09378461062867335,
-      "accessibleWeight": 0.09378461062867335,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771679012104-room-new-node-1771679095356-1771679116845",
-      "sourceId": "room-new-node-1771679012104",
-      "targetId": "room-new-node-1771679095356",
-      "standardWeight": 0.025108203862501472,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771679095356-room-new-node-1771679167886-1771679197312",
-      "sourceId": "room-new-node-1771679095356",
-      "targetId": "room-new-node-1771679167886",
-      "standardWeight": 0.06011970085300176,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678779712-room-new-node-1771679137642-1771679200047",
-      "sourceId": "room-new-node-1771678779712",
-      "targetId": "room-new-node-1771679137642",
-      "standardWeight": 0.055614860586594234,
-      "accessibleWeight": 10000000000,
-      "accessible": false,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678769152-room-new-node-1771679137642-1771679201247",
-      "sourceId": "room-new-node-1771678769152",
-      "targetId": "room-new-node-1771679137642",
-      "standardWeight": 0.0694600564134119,
-      "accessibleWeight": 0.0694600564134119,
-      "accessible": true,
-      "bidirectional": true
-    },
-    {
-      "id": "edge-room-new-node-1771678103229-room-new-node-1771682991181-1771683009405",
-      "sourceId": "room-new-node-1771678103229",
-      "targetId": "room-new-node-1771682991181",
-      "standardWeight": 0.040894019314194695,
-      "accessibleWeight": 0.040894019314194695,
-      "accessible": true,
-      "bidirectional": true
-    }
-  ],
-  "metadata": {
-    "buildingName": "Main Building",
-    "floor": 1,
-    "lastUpdated": "2026-02-21T14:33:45.593Z"
-  }
+  ]
 }
