@@ -15,6 +15,13 @@
       "when": 1772346900000,
       "tag": "0001_multi_floor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772379071572,
+      "tag": "0002_campus_entrance_bridge",
+      "breakpoints": true
     }
   ]
 }

@@ -164,6 +164,7 @@ app.get('/api/map', async (c) => {
             ...(n.connectsToFloorBelowId != null && { connectsToFloorBelowId: n.connectsToFloorBelowId }),
             ...(n.connectsToNodeAboveId != null && { connectsToNodeAboveId: n.connectsToNodeAboveId }),
             ...(n.connectsToNodeBelowId != null && { connectsToNodeBelowId: n.connectsToNodeBelowId }),
+            ...(n.connectsToBuildingId != null && { connectsToBuildingId: n.connectsToBuildingId }),
           })),
           edges: (edgesByFloor.get(f.id) ?? []).map((e) => ({
             id: e.id,
@@ -241,6 +242,7 @@ app.post('/api/admin/graph', async (c) => {
               connectsToFloorBelowId: n.connectsToFloorBelowId ?? null,
               connectsToNodeAboveId: n.connectsToNodeAboveId ?? null,
               connectsToNodeBelowId: n.connectsToNodeBelowId ?? null,
+              connectsToBuildingId: n.connectsToBuildingId ?? null,
             })
           }
 
