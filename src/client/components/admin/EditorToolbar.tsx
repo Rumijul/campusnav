@@ -13,6 +13,8 @@ interface EditorToolbarProps {
   canRedo: boolean
   isDirty: boolean
   onLogout: () => void
+  onManageFloors?: () => void
+  isCampusActive?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -28,6 +30,8 @@ export default function EditorToolbar({
   canRedo,
   isDirty,
   onLogout,
+  onManageFloors,
+  isCampusActive,
 }: EditorToolbarProps) {
   const modeButtonClass = (m: EditorMode) =>
     m === mode
@@ -73,8 +77,17 @@ export default function EditorToolbar({
           className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded text-sm font-medium hover:bg-gray-50"
           onClick={onUpload}
         >
-          Upload Floor Plan
+          {isCampusActive ? 'Upload Campus Map' : 'Upload Floor Plan'}
         </button>
+        {!isCampusActive && onManageFloors && (
+          <button
+            type="button"
+            className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded text-sm font-medium hover:bg-gray-50"
+            onClick={onManageFloors}
+          >
+            Manage Floors
+          </button>
+        )}
         <button
           type="button"
           className={`px-3 py-1 rounded text-sm font-medium border ${
