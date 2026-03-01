@@ -1,0 +1,64 @@
+{
+  "name": "coding-team",
+  "description": "Leader/worker team with 2 workers",
+  "leadAgentId": "coding-team-lead",
+  "createdAt": "2026-02-27T19:21:12.515Z",
+  "members": [
+    {
+      "agentId": "coding-team-lead",
+      "name": "Lead",
+      "agentType": "coordinator",
+      "tools": [
+        "Read",
+        "Write",
+        "Bash",
+        "Glob",
+        "Grep",
+        "TaskCreate",
+        "TaskList",
+        "TaskGet",
+        "TaskUpdate",
+        "SendMessage",
+        "TeammateTool"
+      ]
+    },
+    {
+      "agentId": "coding-team-worker-1",
+      "name": "Worker 1",
+      "agentType": "worker",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Glob",
+        "Grep",
+        "WebFetch",
+        "WebSearch",
+        "TaskGet",
+        "TaskUpdate",
+        "SendMessage"
+      ]
+    },
+    {
+      "agentId": "coding-team-worker-2",
+      "name": "Worker 2",
+      "agentType": "worker",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Glob",
+        "Grep",
+        "WebFetch",
+        "WebSearch",
+        "TaskGet",
+        "TaskUpdate",
+        "SendMessage"
+      ]
+    }
+  ],
+  "version": 1,
+  "topology": "leader-worker"
+}

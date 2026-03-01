@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd:progress)",
+      "Bash(node -e:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(node:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)",
+      "Bash(npx biome check:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "WebSearch",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(git:*)",
+      "Bash(rtk git log:*)",
+      "Bash(rtk git status:*)",
+      "Bash(rtk git add:*)",
+      "Bash(rtk git:*)",
+      "Bash(cd /c/Users/admin/Desktop/projects/campusnav && npx tsx --env-file=.env -e \"\nimport { db } from './src/server/db/client.ts'\nimport { nodes, edges, graphMetadata } from './src/server/db/schema.ts'\nimport { writeFileSync } from 'node:fs'\n\nconst nodeRows = db.select\\(\\).from\\(nodes\\).all\\(\\)\nconst edgeRows = db.select\\(\\).from\\(edges\\).all\\(\\)\nconst metaRows = db.select\\(\\).from\\(graphMetadata\\).limit\\(1\\).all\\(\\)\nconst meta = metaRows[0]\n\nconst graph = {\n  nodes: nodeRows.map\\(n => \\({\n    id: n.id, x: n.x, y: n.y, label: n.label, type: n.type,\n    searchable: n.searchable, floor: n.floor,\n    ...\\(n.roomNumber != null && { roomNumber: n.roomNumber }\\),\n    ...\\(n.description != null && { description: n.description }\\),\n    ...\\(n.buildingName != null && { buildingName: n.buildingName }\\),\n    ...\\(n.accessibilityNotes != null && { accessibilityNotes: n.accessibilityNotes }\\),\n  }\\)\\),\n  edges: edgeRows.map\\(e => \\({\n    id: e.id, sourceId: e.sourceId, targetId: e.targetId,\n    standardWeight: e.standardWeight, accessibleWeight: e.accessibleWeight,\n    accessible: e.accessible, bidirectional: e.bidirectional,\n    ...\\(e.accessibilityNotes != null && { accessibilityNotes: e.accessibilityNotes }\\),\n  }\\)\\),\n  metadata: { buildingName: meta.buildingName, floor: meta.floor, lastUpdated: meta.lastUpdated }\n}\n\nwriteFileSync\\('./src/server/assets/campus-graph.json', JSON.stringify\\(graph, null, 2\\)\\)\nconsole.log\\('Exported', nodeRows.length, 'nodes,', edgeRows.length, 'edges'\\)\n\" 2>&1)",
+      "Bash(cd:*)",
+      "Skill(commit-commands:commit)",
+      "Bash(rtk grep:*)",
+      "Bash(tail:*)",
+      "Bash(cd C:/Users/admin/Desktop/projects/campusnav && npm run lint 2>&1)",
+      "Bash(test:*)",
+      "Bash(timeout 10 npx tsx:*)",
+      "Bash(netstat:*)",
+      "Bash(npx tsx:*)",
+      "Bash(tasklist:*)",
+      "Bash(do:*)",
+      "Bash(wmic process:*)",
+      "Bash(powershell:*)",
+      "Bash(timeout 8 npx tsx:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(grep:*)",
+      "Bash(rtk read:*)"
+    ]
+  }
+}
