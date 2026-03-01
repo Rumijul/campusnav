@@ -7,10 +7,11 @@
  *    fields stored on ngraph.graph's Node and Link objects via
  *    `graph.addNode(id, data)` and `graph.addLink(from, to, data)`.
  *
- * 2. **Serialization types** — `NavNode`, `NavEdge`, and `NavGraph` are the JSON
- *    shapes used for API transport (GET /api/map) and file storage. The client
- *    loads a `NavGraph`, destructures each node/edge into `(id, data)`, and feeds
- *    them into ngraph.graph.
+ * 2. **Serialization types** — `NavNode`, `NavEdge`, `NavFloor`, `NavBuilding`,
+ *    and `NavGraph` are the JSON shapes used for API transport (GET /api/map) and
+ *    file storage. The client loads a `NavGraph`, iterates `buildings[].floors[]`,
+ *    destructures each node/edge into `(id, data)`, and feeds them into ngraph.graph.
+ *    `NavNode` objects live inside `NavFloor.nodes[]`.
  *
  * All coordinates are **NORMALIZED** (0.0–1.0), representing percentages of the
  * floor plan image dimensions. Convert to pixels only at render time:
@@ -64,16 +65,24 @@ export interface NavNodeData {
   type: NavNodeType
   /** Whether this node appears in student search results */
   searchable: boolean
-  /** Floor number (1-based). Enables multi-floor routing in later phases. */
-  floor: number
+  /** ID of the floors record this node belongs to (FK → floors.id) */
+  floorId: number
+  // buildingName REMOVED — derived transitively via floor → building
   /** Room/office number identifier (e.g. "204", "A-102") */
   roomNumber?: string
   /** Human-readable description shown in location detail sheet */
   description?: string
-  /** Building name for multi-building campuses */
-  buildingName?: string
   /** Accessibility information shown in detail sheet */
   accessibilityNotes?: string
+  // Floor connector linkage — only set on stairs, elevator, ramp nodes
+  /** ID of the floor above that this connector node links to */
+  connectsToFloorAboveId?: number
+  /** ID of the floor below that this connector node links to */
+  connectsToFloorBelowId?: number
+  /** ID of the corresponding node on the floor above */
+  connectsToNodeAboveId?: string
+  /** ID of the corresponding node on the floor below */
+  connectsToNodeBelowId?: string
 }
 
 // ============================================================
@@ -118,6 +127,7 @@ export interface NavEdgeData {
 /**
  * A serialized node for JSON transport (API responses, file storage).
  * Combines the node's unique ID with its data fields.
+ * NavNode inherits `floorId` from NavNodeData — no direct change needed.
  */
 export interface NavNode extends NavNodeData {
   /** Unique identifier for this node (e.g. "room-204", "entrance-main") */
@@ -138,23 +148,54 @@ export interface NavEdge extends NavEdgeData {
 }
 
 /**
+ * A single floor within a building, containing all nodes and edges on that floor.
+ */
+export interface NavFloor {
+  /** Database ID of this floor record (floors.id) */
+  id: number
+  /** Floor number (1-based) */
+  floorNumber: number
+  /** Path to the floor plan image asset */
+  imagePath: string
+  /** ISO 8601 timestamp of last graph modification */
+  updatedAt: string
+  /** All navigation nodes on this floor */
+  nodes: NavNode[]
+  /** All navigation edges on this floor */
+  edges: NavEdge[]
+}
+
+/**
+ * A building containing one or more floors.
+ */
+export interface NavBuilding {
+  /** Database ID of this building record (buildings.id) */
+  id: number
+  /** Display name of the building */
+  name: string
+  /** All floors within this building */
+  floors: NavFloor[]
+}
+
+/**
  * Complete navigation graph as JSON — returned by `GET /api/map`.
  *
- * The client loads this on page init and builds an ngraph.graph instance:
+ * The client loads this on page init and builds an ngraph.graph instance
+ * by iterating the nested buildings → floors → nodes/edges structure:
  * ```ts
  * const graph = createGraph<NavNodeData, NavEdgeData>()
- * for (const { id, ...data } of navGraph.nodes) graph.addNode(id, data)
- * for (const { id, sourceId, targetId, ...data } of navGraph.edges)
- *   graph.addLink(sourceId, targetId, data)
+ * for (const building of navGraph.buildings) {
+ *   for (const floor of building.floors) {
+ *     for (const { id, ...data } of floor.nodes) graph.addNode(id, data)
+ *     for (const { id, sourceId, targetId, ...data } of floor.edges)
+ *       graph.addLink(sourceId, targetId, data)
+ *   }
+ * }
  * ```
  */
 export interface NavGraph {
-  nodes: NavNode[]
-  edges: NavEdge[]
-  metadata: {
-    buildingName: string
-    floor: number
-    /** ISO 8601 timestamp of last graph modification */
-    lastUpdated: string
-  }
+  /** All buildings in the campus, each containing floors with nodes and edges */
+  buildings: NavBuilding[]
+  // nodes and edges now live under buildings[].floors[].nodes/edges
+  // metadata replaced by floors[].updatedAt
 }
