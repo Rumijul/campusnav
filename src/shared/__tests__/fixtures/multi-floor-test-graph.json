@@ -1,0 +1,146 @@
+{
+  "buildings": [
+    {
+      "id": 1,
+      "name": "Test Building",
+      "floors": [
+        {
+          "id": 1,
+          "floorNumber": 1,
+          "imagePath": "floor-plan-1.png",
+          "updatedAt": "2026-01-01T00:00:00Z",
+          "nodes": [
+            {
+              "id": "entrance",
+              "x": 0.1,
+              "y": 0.5,
+              "label": "Main Entrance",
+              "type": "hallway",
+              "searchable": true,
+              "floorId": 1
+            },
+            {
+              "id": "corridor-1",
+              "x": 0.3,
+              "y": 0.5,
+              "label": "Corridor 1",
+              "type": "hallway",
+              "searchable": false,
+              "floorId": 1
+            },
+            {
+              "id": "stairs-f1",
+              "x": 0.5,
+              "y": 0.3,
+              "label": "Stairs (Floor 1)",
+              "type": "stairs",
+              "searchable": false,
+              "floorId": 1,
+              "connectsToFloorAboveId": 2,
+              "connectsToNodeAboveId": "stairs-f2"
+            },
+            {
+              "id": "elevator-f1",
+              "x": 0.5,
+              "y": 0.7,
+              "label": "Elevator (Floor 1)",
+              "type": "elevator",
+              "searchable": false,
+              "floorId": 1,
+              "connectsToFloorAboveId": 2,
+              "connectsToNodeAboveId": "elevator-f2"
+            }
+          ],
+          "edges": [
+            {
+              "id": "e1",
+              "sourceId": "entrance",
+              "targetId": "corridor-1",
+              "standardWeight": 0.2,
+              "accessibleWeight": 0.2,
+              "accessible": true,
+              "bidirectional": true
+            },
+            {
+              "id": "e2",
+              "sourceId": "corridor-1",
+              "targetId": "stairs-f1",
+              "standardWeight": 0.2,
+              "accessibleWeight": 1e10,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "e3",
+              "sourceId": "corridor-1",
+              "targetId": "elevator-f1",
+              "standardWeight": 0.2,
+              "accessibleWeight": 0.2,
+              "accessible": true,
+              "bidirectional": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "floorNumber": 2,
+          "imagePath": "floor-plan-2.png",
+          "updatedAt": "2026-01-01T00:00:00Z",
+          "nodes": [
+            {
+              "id": "stairs-f2",
+              "x": 0.5,
+              "y": 0.3,
+              "label": "Stairs (Floor 2)",
+              "type": "stairs",
+              "searchable": false,
+              "floorId": 2,
+              "connectsToFloorBelowId": 1,
+              "connectsToNodeBelowId": "stairs-f1"
+            },
+            {
+              "id": "elevator-f2",
+              "x": 0.5,
+              "y": 0.7,
+              "label": "Elevator (Floor 2)",
+              "type": "elevator",
+              "searchable": false,
+              "floorId": 2,
+              "connectsToFloorBelowId": 1,
+              "connectsToNodeBelowId": "elevator-f1"
+            },
+            {
+              "id": "room-201",
+              "x": 0.8,
+              "y": 0.5,
+              "label": "Room 201",
+              "type": "room",
+              "searchable": true,
+              "floorId": 2
+            }
+          ],
+          "edges": [
+            {
+              "id": "e4",
+              "sourceId": "stairs-f2",
+              "targetId": "room-201",
+              "standardWeight": 0.3,
+              "accessibleWeight": 1e10,
+              "accessible": false,
+              "bidirectional": true
+            },
+            {
+              "id": "e5",
+              "sourceId": "elevator-f2",
+              "targetId": "room-201",
+              "standardWeight": 0.3,
+              "accessibleWeight": 0.3,
+              "accessible": true,
+              "bidirectional": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
