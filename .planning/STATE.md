@@ -152,10 +152,10 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 16-multi-floor-data-model
-Plan: 04 complete (4/4 plans done — Phase 16 COMPLETE)
-Status: In Progress (Phase 17 next)
-Last activity: 2026-03-01 — Completed 16-04: Human-verified multi-floor data model end-to-end — migration runs, seed inserts 48 nodes under buildings/floors hierarchy, GET /api/map returns nested NavGraph with buildings[0].floors[0].nodes length=48, both floor-plan endpoints return 200, seed guard fires on restart. Bug fixed: seed.ts now reuses existing building from migration instead of inserting duplicate (commit 23b6a6b). Requirements MFLR-01, MFLR-02, CAMP-01 satisfied. Phase 16 complete.
+Phase: 18-admin-multi-floor-editor
+Plan: 01 complete (1/? plans done — Phase 18 In Progress)
+Status: In Progress (Plan 02 next)
+Last activity: 2026-03-01 — Completed 18-01: Added connectsToBuildingId nullable FK to nodes table (Drizzle schema + migration 0002_campus_entrance_bridge.sql), updated NavNodeData TypeScript interface, wired field through GET /api/map and POST /api/admin/graph. Requirements MFLR-04, CAMP-02, CAMP-03, CAMP-04 satisfied.
 
 ## Performance Metrics
 
@@ -224,6 +224,7 @@ Last activity: 2026-03-01 — Completed 16-04: Human-verified multi-floor data m
 | Phase 17-multi-floor-pathfinding-engine P03 | 3 | 1 tasks | 2 files |
 | Phase 17-multi-floor-pathfinding-engine P02 | 5 | 2 tasks | 2 files |
 | Phase 17-multi-floor-pathfinding-engine P04 | 5 | 1 tasks | 2 files |
+| Phase 18-admin-multi-floor-editor P01 | 2 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -371,6 +372,9 @@ Recent decisions affecting current work:
 - [Phase 17-02]: Return 0 for cross-floor A* heuristic pairs: Euclidean x,y across floors is inadmissible; 0 keeps heuristic conservative while inter-floor edge costs provide signal
 - [Phase 17-02]: Both standardFinder and accessibleFinder heuristics updated with same floor-aware check: a.data.floorId !== b.data.floorId ? 0 : calculateWeight(...)
 - [Phase 17-04]: floorMap optional 4th param in useRouteDirections — backward compatible; floorMap useMemo depends on graphState; flattenNavGraph not imported by FloorPlanCanvas
+- [Phase 18-01]: connectsToBuildingId nullable (no .notNull()) — only entrance nodes on campus map will have this set; all others leave null
+- [Phase 18-01]: Renamed auto-generated migration 0002_melodic_richard_fisk.sql to 0002_campus_entrance_bridge.sql; updated _journal.json tag — Drizzle applies migrations by journal tag, not filename
+- [Phase 18-01]: Conditional spread pattern ...(n.connectsToBuildingId != null && { connectsToBuildingId }) matches existing nullable FK field pattern in GET /api/map
 
 ### Pending Todos
 
@@ -388,6 +392,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 17-multi-floor-pathfinding-engine 17-01-PLAN.md
+Stopped at: Completed 18-admin-multi-floor-editor 18-01-PLAN.md
 Resume file: None
-Next action: /gsd:execute-phase 17 plan 02 (Multi-floor A* pathfinding with floor-aware routing)
+Next action: /gsd:execute-phase 18 plan 02

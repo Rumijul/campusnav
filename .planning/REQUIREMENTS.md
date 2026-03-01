@@ -16,16 +16,16 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 - [x] **MFLR-01**: Each building floor is a first-class data entity with its own floor plan image reference and node graph
 - [x] **MFLR-02**: Floor connector nodes (staircase/elevator/ramp) carry floor-linkage metadata (which floor above/below they connect to)
 - [x] **MFLR-03**: Pathfinding engine routes across floors via floor connector nodes, preferring accessible connectors for wheelchair routes
-- [ ] **MFLR-04**: Admin can add/remove floors per building and upload a distinct floor plan image for each floor
+- [x] **MFLR-04**: Admin can add/remove floors per building and upload a distinct floor plan image for each floor
 - [ ] **MFLR-05**: Student sees per-floor route segments — each segment displayed on that floor's map
 - [ ] **MFLR-06**: Student can switch between floor tabs to browse any floor's map independently of the active route
 
 ### Multi-building / Campus
 
 - [x] **CAMP-01**: Multi-building data model stores buildings as parent entities, each containing one or more floors
-- [ ] **CAMP-02**: Admin uploads a hand-drawn overhead image as the campus-level outdoor map
-- [ ] **CAMP-03**: Admin places outdoor path nodes and building entrance markers on the campus map
-- [ ] **CAMP-04**: Building entrance nodes bridge the outdoor graph to floor 1 of each building, enabling cross-building routes
+- [x] **CAMP-02**: Admin uploads a hand-drawn overhead image as the campus-level outdoor map
+- [x] **CAMP-03**: Admin places outdoor path nodes and building entrance markers on the campus map
+- [x] **CAMP-04**: Building entrance nodes bridge the outdoor graph to floor 1 of each building, enabling cross-building routes
 - [ ] **CAMP-05**: Routes crossing buildings display an outdoor campus segment between each building's floor segments
 
 ### Deployment
@@ -60,10 +60,10 @@ Which phases cover which requirements.
 | MFLR-02 | Phase 16: Multi-floor Data Model | Complete |
 | CAMP-01 | Phase 16: Multi-floor Data Model | Complete |
 | MFLR-03 | Phase 17: Multi-floor Pathfinding Engine | Complete |
-| MFLR-04 | Phase 18: Admin Multi-floor Editor | Pending |
-| CAMP-02 | Phase 18: Admin Multi-floor Editor | Pending |
-| CAMP-03 | Phase 18: Admin Multi-floor Editor | Pending |
-| CAMP-04 | Phase 18: Admin Multi-floor Editor | Pending |
+| MFLR-04 | Phase 18: Admin Multi-floor Editor | Complete |
+| CAMP-02 | Phase 18: Admin Multi-floor Editor | Complete |
+| CAMP-03 | Phase 18: Admin Multi-floor Editor | Complete |
+| CAMP-04 | Phase 18: Admin Multi-floor Editor | Complete |
 | MFLR-05 | Phase 19: Student Floor Tab UI | Pending |
 | MFLR-06 | Phase 19: Student Floor Tab UI | Pending |
 | CAMP-05 | Phase 19: Student Floor Tab UI | Pending |
