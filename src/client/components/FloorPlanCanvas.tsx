@@ -1,6 +1,6 @@
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
-import type { NavNode } from '@shared/types'
+import type { NavFloor, NavNode } from '@shared/types'
 import type Konva from 'konva'
 import KonvaModule from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -77,12 +77,21 @@ export default function FloorPlanCanvas() {
     return new Map(nodes.map((n) => [n.id, n]))
   }, [nodes])
 
+  // Floor map for floor-change direction step lookup (floor number by floor ID)
+  const floorMap = useMemo<Map<number, NavFloor>>(() => {
+    if (graphState.status !== 'loaded') return new Map()
+    return new Map(
+      graphState.data.buildings.flatMap((b) => b.floors).map((f) => [f.id, f]),
+    )
+  }, [graphState])
+
   // Compute turn-by-turn directions for each mode
-  const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard')
+  const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard', floorMap)
   const accessibleDirections = useRouteDirections(
     routeResult?.accessible ?? null,
     nodeMap,
     'accessible',
+    floorMap,
   )
   const routesIdentical = routeResult
     ? routesAreIdentical(routeResult.standard, routeResult.accessible)

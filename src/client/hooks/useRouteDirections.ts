@@ -270,11 +270,12 @@ export function useRouteDirections(
   pathResult: PathResult | null,
   nodeMap: Map<string, NavNode>,
   mode: 'standard' | 'accessible',
+  floorMap?: Map<number, NavFloor>,
 ): DirectionsResult {
   return useMemo(() => {
     if (pathResult === null || !pathResult.found) {
       return { steps: [], totalDistanceNorm: 0, totalDurationSec: 0 }
     }
-    return generateDirections(pathResult.nodeIds, nodeMap, mode)
-  }, [pathResult, nodeMap, mode])
+    return generateDirections(pathResult.nodeIds, nodeMap, mode, floorMap)
+  }, [pathResult, nodeMap, mode, floorMap])
 }
