@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { eq } from 'drizzle-orm'
 import { db } from './client'
 import { buildings, edges, floors, nodes } from './schema'
 
@@ -48,13 +49,20 @@ export async function seedIfEmpty(): Promise<void> {
   let totalEdges = 0
 
   for (const b of graph.buildings) {
-    const buildingRows = await db.insert(buildings).values({ name: b.name }).returning({ id: buildings.id })
-    const building = buildingRows[0]
-    if (!building) throw new Error(`[seed] Failed to insert building: ${b.name}`)
+    // Reuse existing building if the migration already created one with the same name
+    const existingBuilding = await db.select({ id: buildings.id }).from(buildings).where(eq(buildings.name, b.name))
+    let buildingId: number
+    if (existingBuilding.length > 0 && existingBuilding[0]) {
+      buildingId = existingBuilding[0].id
+    } else {
+      const inserted = await db.insert(buildings).values({ name: b.name }).returning({ id: buildings.id })
+      if (!inserted[0]) throw new Error(`[seed] Failed to insert building: ${b.name}`)
+      buildingId = inserted[0].id
+    }
 
     for (const f of b.floors) {
       const floorRows = await db.insert(floors).values({
-        buildingId: building.id,
+        buildingId: buildingId,
         floorNumber: f.floorNumber,
         imagePath: f.imagePath,
         updatedAt: new Date().toISOString(),
