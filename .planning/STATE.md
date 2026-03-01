@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-03-01T15:48:37.846Z"
+progress:
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 17
+  completed_plans: 15
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-03-01T15:37:23.120Z"
 progress:
   total_phases: 5
@@ -166,9 +179,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 18-admin-multi-floor-editor
-Plan: 03 complete (3/? plans done — Phase 18 In Progress)
-Status: In Progress (Plan 04 next)
-Last activity: 2026-03-01 — Completed 18-03: Extended useEditorState with multi-floor context (activeBuildingId, activeFloorId, floorSnapshots, campusSnapshot), added SWITCH_FLOOR/SWITCH_TO_CAMPUS/SWITCH_BUILDING actions to reducer, and switchFloor/switchToCampus helpers that reset undo history. Full backward compatibility with MapEditorCanvas.
+Plan: 04 complete (4/? plans done — Phase 18 In Progress)
+Status: In Progress (Plan 05 next)
+Last activity: 2026-03-01 — Completed 18-04: Created ManageFloorsModal (floor list + replace image + delete confirm + add-floor form), extended EditorToolbar with onManageFloors/isCampusActive, EditorSidePanel with campus entrance building link dropdown (connectsToBuildingId), and NodeMarkerLayer with amber color for campus entrance bridges (CAMPUS_ENTRANCE_COLOR).
 
 ## Performance Metrics
 
@@ -240,6 +253,7 @@ Last activity: 2026-03-01 — Completed 18-03: Extended useEditorState with mult
 | Phase 18-admin-multi-floor-editor P01 | 2 min | 2 tasks | 5 files |
 | Phase 18-admin-multi-floor-editor P02 | 1 min | 2 tasks | 1 files |
 | Phase 18-admin-multi-floor-editor P03 | 1 | 1 tasks | 1 files |
+| Phase 18-admin-multi-floor-editor P04 | 5 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -396,6 +410,9 @@ Recent decisions affecting current work:
 - [Phase 18-02]: Per-floor image naming: floor-plan-{buildingId}-{floorNumber}.{ext} — deterministic, idempotent on re-upload
 - [Phase 18-03]: switchFloor and switchToCampus are helper wrappers (not raw dispatch) because history refs live outside reducer — dispatch alone cannot reset history
 - [Phase 18-03]: floorSnapshots cache keyed by DB floor id (number) — prevents re-fetch when user returns to a previously loaded floor
+- [Phase 18-04]: ManageFloorsModal uses per-row hidden file inputs tracked via useRef<Map> — avoids naming conflicts for multiple floor replace-image inputs
+- [Phase 18-04]: exactOptionalPropertyTypes-safe: onUpdateNode called with {} (not { connectsToBuildingId: undefined }) when clearing building link in EditorSidePanel
+- [Phase 18-04]: CAMPUS_ENTRANCE_COLOR amber (#f59e0b) distinguishes campus entrance bridges from standard entrance green (#22c55e) in NodeMarkerLayer
 
 ### Pending Todos
 
