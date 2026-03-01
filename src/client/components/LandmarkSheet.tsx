@@ -80,18 +80,10 @@ export function LandmarkSheet({ node, onClose }: LandmarkSheetProps) {
                 <p className="text-sm text-gray-700">{node.description}</p>
               </div>
             )}
-            {node?.buildingName && (
-              <div className="mb-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-                  Building
-                </p>
-                <p className="text-sm text-gray-700">{node.buildingName}</p>
-              </div>
-            )}
-            {node?.floor !== undefined && (
+            {node?.floorId !== undefined && (
               <div className="mb-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Floor</p>
-                <p className="text-sm text-gray-700">{node.floor}</p>
+                <p className="text-sm text-gray-700">{node.floorId}</p>
               </div>
             )}
             {node?.accessibilityNotes && (

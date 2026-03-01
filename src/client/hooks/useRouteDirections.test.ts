@@ -18,7 +18,7 @@ function makeNode(id: string, x: number, y: number, overrides: Partial<NavNode> 
     label: id,
     type: 'hallway',
     searchable: false,
-    floor: 1,
+    floorId: 1,
     ...overrides,
   }
 }

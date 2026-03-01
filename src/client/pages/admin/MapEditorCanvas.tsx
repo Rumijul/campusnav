@@ -63,7 +63,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     onScaleChange: setStageScale,
   })
 
-  // Load graph from server on mount
+  // Load graph from server on mount — flatten multi-floor NavGraph into editor state
   useEffect(() => {
     fetch('/api/map', { credentials: 'include' })
       .then((res) => {
@@ -72,7 +72,10 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       })
       .then((graph) => {
         if (!graph) return
-        dispatch({ type: 'LOAD_GRAPH', nodes: graph.nodes, edges: graph.edges })
+        // Flatten buildings → floors → nodes/edges for the flat editor state
+        const nodes = graph.buildings.flatMap((b) => b.floors.flatMap((f) => f.nodes))
+        const edges = graph.buildings.flatMap((b) => b.floors.flatMap((f) => f.edges))
+        dispatch({ type: 'LOAD_GRAPH', nodes, edges })
       })
       .catch(() => {
         // Silently fail — editor starts empty if graph cannot be loaded
@@ -156,7 +159,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           x: normX,
           y: normY,
           searchable: true,
-          floor: 1,
+          floorId: 1,
         }
 
         dispatch({ type: 'PLACE_NODE', node: newNode })
@@ -241,15 +244,27 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   )
 
   // Handle save — POST graph to server
+  // Wraps the flat editor state into the multi-floor NavGraph shape expected by the API.
+  // The admin editor currently operates on a single building/floor; Phase 17 will add
+  // multi-floor editing support.
   const handleSave = useCallback(async () => {
     const graph: NavGraph = {
-      nodes: state.nodes,
-      edges: state.edges,
-      metadata: {
-        buildingName: 'Main Building',
-        floor: 1,
-        lastUpdated: new Date().toISOString(),
-      },
+      buildings: [
+        {
+          id: 1,
+          name: 'Main Building',
+          floors: [
+            {
+              id: 1,
+              floorNumber: 1,
+              imagePath: 'floor-plan.png',
+              updatedAt: new Date().toISOString(),
+              nodes: state.nodes,
+              edges: state.edges,
+            },
+          ],
+        },
+      ],
     }
     const res = await fetch('/api/admin/graph', {
       method: 'POST',

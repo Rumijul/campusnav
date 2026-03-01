@@ -66,17 +66,16 @@ export default function FloorPlanCanvas() {
   const [toast, setToast] = useState<{ message: string; isError: boolean } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Get nodes array when graph is loaded
+  // Get nodes array when graph is loaded — flatten from buildings → floors → nodes
   const nodes = useMemo(() => {
-    if (graphState.status === 'loaded') return graphState.data.nodes
-    return []
+    if (graphState.status !== 'loaded') return []
+    return graphState.data.buildings.flatMap((b) => b.floors.flatMap((f) => f.nodes))
   }, [graphState])
 
   // Node map for direction step lookup
   const nodeMap = useMemo<Map<string, NavNode>>(() => {
-    if (graphState.status !== 'loaded') return new Map()
-    return new Map(graphState.data.nodes.map((n) => [n.id, n]))
-  }, [graphState])
+    return new Map(nodes.map((n) => [n.id, n]))
+  }, [nodes])
 
   // Compute turn-by-turn directions for each mode
   const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard')

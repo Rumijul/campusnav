@@ -54,7 +54,7 @@ export function NodeDataTable({
     return [...filtered].sort((a, b) => {
       const dir = sortDir === 'asc' ? 1 : -1
       if (sortField === 'label') return a.label.localeCompare(b.label) * dir
-      if (sortField === 'floor') return (a.floor - b.floor) * dir
+      if (sortField === 'floor') return (a.floorId - b.floorId) * dir
       return a.type.localeCompare(b.type) * dir
     })
   }, [nodes, filterText, filterType, sortField, sortDir])
@@ -221,7 +221,7 @@ export function NodeDataTable({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2">{node.floor}</td>
+                <td className="px-3 py-2">{node.floorId}</td>
                 <td className="px-3 py-2">{node.searchable ? 'Yes' : 'No'}</td>
                 {/* biome-ignore lint/a11y/useKeyWithClickEvents: td stopPropagation only; button inside handles keyboard */}
                 <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>

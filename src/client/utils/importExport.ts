@@ -23,11 +23,14 @@ const navNodeSchema = z.object({
   label: z.string().min(1),
   type: z.enum(navNodeTypeValues),
   searchable: z.boolean(),
-  floor: z.number().int().positive(),
+  floorId: z.number().int().positive(),
   roomNumber: z.string().optional(),
   description: z.string().optional(),
-  buildingName: z.string().optional(),
   accessibilityNotes: z.string().optional(),
+  connectsToFloorAboveId: z.number().int().positive().optional(),
+  connectsToFloorBelowId: z.number().int().positive().optional(),
+  connectsToNodeAboveId: z.string().optional(),
+  connectsToNodeBelowId: z.string().optional(),
 })
 
 const navEdgeSchema = z.object({
@@ -41,16 +44,23 @@ const navEdgeSchema = z.object({
   accessibilityNotes: z.string().optional(),
 })
 
-const navGraphSchema = z.object({
+const navFloorSchema = z.object({
+  id: z.number().int().positive(),
+  floorNumber: z.number().int().positive(),
+  imagePath: z.string().min(1),
+  updatedAt: z.string().min(1),
   nodes: z.array(navNodeSchema),
   edges: z.array(navEdgeSchema),
-  metadata: z
-    .object({
-      buildingName: z.string(),
-      floor: z.number(),
-      lastUpdated: z.string(),
-    })
-    .optional(),
+})
+
+const navBuildingSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().min(1),
+  floors: z.array(navFloorSchema),
+})
+
+const navGraphSchema = z.object({
+  buildings: z.array(navBuildingSchema),
 })
 
 // ─── Download helper ──────────────────────────────────────────────────────────
@@ -80,15 +90,28 @@ function toCsvRow(values: (string | number | boolean | undefined | null)[]): str
 
 // ─── JSON export ──────────────────────────────────────────────────────────────
 
+/**
+ * Exports nodes and edges as a NavGraph JSON file.
+ * Wraps the flat editor state into a single-building/single-floor NavGraph.
+ */
 export function exportJson(nodes: NavNode[], edges: NavEdge[]): void {
   const graph: NavGraph = {
-    nodes,
-    edges,
-    metadata: {
-      buildingName: 'Main Building',
-      floor: 1,
-      lastUpdated: new Date().toISOString(),
-    },
+    buildings: [
+      {
+        id: 1,
+        name: 'Main Building',
+        floors: [
+          {
+            id: 1,
+            floorNumber: 1,
+            imagePath: 'floor-plan.png',
+            updatedAt: new Date().toISOString(),
+            nodes,
+            edges,
+          },
+        ],
+      },
+    ],
   }
   triggerDownload(JSON.stringify(graph, null, 2), 'application/json', 'campus-graph.json')
 }
@@ -100,13 +123,12 @@ export function exportNodesCsv(nodes: NavNode[]): void {
     'id',
     'label',
     'type',
-    'floor',
+    'floorId',
     'roomNumber',
     'searchable',
     'x',
     'y',
     'description',
-    'buildingName',
     'accessibilityNotes',
   ])
   const rows = nodes.map((n) =>
@@ -114,13 +136,12 @@ export function exportNodesCsv(nodes: NavNode[]): void {
       n.id,
       n.label,
       n.type,
-      n.floor,
+      n.floorId,
       n.roomNumber ?? '',
       n.searchable,
       n.x,
       n.y,
       n.description ?? '',
-      n.buildingName ?? '',
       n.accessibilityNotes ?? '',
     ]),
   )
@@ -159,6 +180,11 @@ export function exportEdgesCsv(edges: NavEdge[]): void {
 
 export type ImportResult<T> = { ok: true; data: T } | { ok: false; errors: string[] }
 
+/**
+ * Parses a NavGraph JSON string and returns the flattened nodes and edges.
+ * Supports both the new multi-floor format (buildings[].floors[]) and
+ * validates against the full NavGraph schema.
+ */
 export function handleJsonImport(
   jsonText: string,
 ): ImportResult<{ nodes: NavNode[]; edges: NavEdge[] }> {
@@ -173,10 +199,10 @@ export function handleJsonImport(
     const errors = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
     return { ok: false, errors }
   }
-  return {
-    ok: true,
-    data: { nodes: result.data.nodes as NavNode[], edges: result.data.edges as NavEdge[] },
-  }
+  // Flatten buildings → floors → nodes/edges for the flat editor state
+  const nodes = result.data.buildings.flatMap((b) => b.floors.flatMap((f) => f.nodes as NavNode[]))
+  const edges = result.data.buildings.flatMap((b) => b.floors.flatMap((f) => f.edges as NavEdge[]))
+  return { ok: true, data: { nodes, edges } }
 }
 
 // ─── CSV import ───────────────────────────────────────────────────────────────
@@ -200,10 +226,9 @@ export function parseNodesCsv(csvText: string): ImportResult<NavNode[]> {
       label: row.label,
       type: row.type,
       searchable: row.searchable === 'true',
-      floor: Number(row.floor),
+      floorId: Number(row.floorId),
       roomNumber: row.roomNumber || undefined,
       description: row.description || undefined,
-      buildingName: row.buildingName || undefined,
       accessibilityNotes: row.accessibilityNotes || undefined,
     })
     if (!parsed.success) {

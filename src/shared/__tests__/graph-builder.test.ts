@@ -21,7 +21,7 @@ describe('buildGraph', () => {
       label: 'Main Entrance',
       type: 'entrance',
       searchable: true,
-      floor: 1,
+      floorId: 1,
     })
   })
 

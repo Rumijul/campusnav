@@ -126,10 +126,11 @@ describe('PathfindingEngine', () => {
 /**
  * Generates a grid graph with cols×rows nodes and edges to adjacent nodes.
  * Each node connects to its right and bottom neighbor (bidirectional).
+ * Returns a NavGraph in the multi-floor format (buildings → floors → nodes/edges).
  */
 function generateGridGraph(cols: number, rows: number): NavGraph {
-  const nodes: NavGraph['nodes'] = []
-  const edges: NavGraph['edges'] = []
+  const nodes: NavGraph['buildings'][number]['floors'][number]['nodes'] = []
+  const edges: NavGraph['buildings'][number]['floors'][number]['edges'] = []
   let edgeId = 0
 
   for (let x = 0; x < cols; x++) {
@@ -141,7 +142,7 @@ function generateGridGraph(cols: number, rows: number): NavGraph {
         label: `Node ${x},${y}`,
         type: 'hallway',
         searchable: false,
-        floor: 1,
+        floorId: 1,
       })
     }
   }
@@ -178,12 +179,21 @@ function generateGridGraph(cols: number, rows: number): NavGraph {
   }
 
   return {
-    nodes,
-    edges,
-    metadata: {
-      buildingName: 'Grid Test Building',
-      floor: 1,
-      lastUpdated: '2026-01-01T00:00:00Z',
-    },
+    buildings: [
+      {
+        id: 1,
+        name: 'Grid Test Building',
+        floors: [
+          {
+            id: 1,
+            floorNumber: 1,
+            imagePath: 'floor-plan.png',
+            updatedAt: '2026-01-01T00:00:00Z',
+            nodes,
+            edges,
+          },
+        ],
+      },
+    ],
   }
 }
