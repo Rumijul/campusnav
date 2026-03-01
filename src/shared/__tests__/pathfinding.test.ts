@@ -1,9 +1,11 @@
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { NavGraph } from '@shared/types'
 import { describe, expect, it } from 'vitest'
+import multiFloorGraphData from './fixtures/multi-floor-test-graph.json'
 import testGraphData from './fixtures/test-graph.json'
 
 const testGraph = testGraphData as NavGraph
+const multiFloorGraph = multiFloorGraphData as NavGraph
 
 describe('PathfindingEngine', () => {
   const engine = new PathfindingEngine(testGraph)
@@ -119,6 +121,159 @@ describe('PathfindingEngine', () => {
 
       expect(result.found).toBe(true)
       expect(result.segments).toEqual([{ fromId: 'entrance', toId: 'hall-1', distance: 0.2 }])
+    })
+  })
+})
+
+describe('PathfindingEngine — cross-floor routing (MFLR-03)', () => {
+  const multiFloorEngine = new PathfindingEngine(multiFloorGraph)
+
+  describe('Test 1: standard mode finds cross-floor path via stairs', () => {
+    it('routes entrance → room-201 through stairs connector', () => {
+      const result = multiFloorEngine.findRoute('entrance', 'room-201', 'standard')
+
+      expect(result.found).toBe(true)
+      expect(result.nodeIds).toContain('stairs-f1')
+      expect(result.nodeIds).toContain('stairs-f2')
+      // stairs-f1 must appear before stairs-f2 in the path
+      const stairsF1Idx = result.nodeIds.indexOf('stairs-f1')
+      const stairsF2Idx = result.nodeIds.indexOf('stairs-f2')
+      expect(stairsF1Idx).toBeLessThan(stairsF2Idx)
+      expect(result.totalDistance).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Test 2: accessible mode finds cross-floor path via elevator', () => {
+    it('routes entrance → room-201 through elevator connector, avoiding stairs', () => {
+      const result = multiFloorEngine.findRoute('entrance', 'room-201', 'accessible')
+
+      expect(result.found).toBe(true)
+      expect(result.nodeIds).toContain('elevator-f1')
+      expect(result.nodeIds).toContain('elevator-f2')
+      // elevator-f1 must appear before elevator-f2 in the path
+      const elevF1Idx = result.nodeIds.indexOf('elevator-f1')
+      const elevF2Idx = result.nodeIds.indexOf('elevator-f2')
+      expect(elevF1Idx).toBeLessThan(elevF2Idx)
+      expect(result.nodeIds).not.toContain('stairs-f1')
+      expect(result.nodeIds).not.toContain('stairs-f2')
+    })
+  })
+
+  describe('Test 3: accessible mode returns not-found when only stairs exist between floors', () => {
+    it('returns not-found when only stairs connector links the floors', () => {
+      // Single-connector graph: entrance → stairs-only-f1 --(stairs inter-floor)--> stairs-only-f2 → dest
+      const stairsOnlyGraph: NavGraph = {
+        buildings: [
+          {
+            id: 1,
+            name: 'Stairs-Only Building',
+            floors: [
+              {
+                id: 1,
+                floorNumber: 1,
+                imagePath: 'floor-1.png',
+                updatedAt: '2026-01-01T00:00:00Z',
+                nodes: [
+                  {
+                    id: 'start',
+                    x: 0.1,
+                    y: 0.5,
+                    label: 'Start',
+                    type: 'hallway',
+                    searchable: true,
+                    floorId: 1,
+                  },
+                  {
+                    id: 'stairs-only-f1',
+                    x: 0.5,
+                    y: 0.5,
+                    label: 'Stairs F1',
+                    type: 'stairs',
+                    searchable: false,
+                    floorId: 1,
+                    connectsToFloorAboveId: 2,
+                    connectsToNodeAboveId: 'stairs-only-f2',
+                  },
+                ],
+                edges: [
+                  {
+                    id: 'se1',
+                    sourceId: 'start',
+                    targetId: 'stairs-only-f1',
+                    standardWeight: 0.2,
+                    accessibleWeight: 1e10,
+                    accessible: false,
+                    bidirectional: true,
+                  },
+                ],
+              },
+              {
+                id: 2,
+                floorNumber: 2,
+                imagePath: 'floor-2.png',
+                updatedAt: '2026-01-01T00:00:00Z',
+                nodes: [
+                  {
+                    id: 'stairs-only-f2',
+                    x: 0.5,
+                    y: 0.5,
+                    label: 'Stairs F2',
+                    type: 'stairs',
+                    searchable: false,
+                    floorId: 2,
+                    connectsToFloorBelowId: 1,
+                    connectsToNodeBelowId: 'stairs-only-f1',
+                  },
+                  {
+                    id: 'dest',
+                    x: 0.8,
+                    y: 0.5,
+                    label: 'Destination',
+                    type: 'room',
+                    searchable: true,
+                    floorId: 2,
+                  },
+                ],
+                edges: [
+                  {
+                    id: 'se2',
+                    sourceId: 'stairs-only-f2',
+                    targetId: 'dest',
+                    standardWeight: 0.3,
+                    accessibleWeight: 1e10,
+                    accessible: false,
+                    bidirectional: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }
+      const stairsOnlyEngine = new PathfindingEngine(stairsOnlyGraph)
+      const result = stairsOnlyEngine.findRoute('start', 'dest', 'accessible')
+
+      expect(result.found).toBe(false)
+    })
+  })
+
+  describe('Test 4: same-floor routing still works after heuristic change', () => {
+    it('routes within floor 1 correctly', () => {
+      const result = multiFloorEngine.findRoute('entrance', 'corridor-1', 'standard')
+
+      expect(result.found).toBe(true)
+      expect(result.nodeIds).toEqual(['entrance', 'corridor-1'])
+    })
+  })
+
+  describe('Test 5: cross-floor path has correct segment count', () => {
+    it('entrance → corridor-1 → stairs-f1 → stairs-f2 → room-201 = 4 segments', () => {
+      const result = multiFloorEngine.findRoute('entrance', 'room-201', 'standard')
+
+      expect(result.found).toBe(true)
+      // Path must be: entrance → corridor-1 → stairs-f1 → stairs-f2 → room-201
+      expect(result.nodeIds).toEqual(['entrance', 'corridor-1', 'stairs-f1', 'stairs-f2', 'room-201'])
+      expect(result.segments).toHaveLength(4)
     })
   })
 })
