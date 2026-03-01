@@ -3,9 +3,10 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import type { NavGraph } from '@shared/types'
+import type { NavGraph, NavNode } from '@shared/types'
 import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
+import { and, eq } from 'drizzle-orm'
 import postgres from 'postgres'
 import { Hono } from 'hono'
 import { csrf } from 'hono/csrf'
@@ -13,7 +14,7 @@ import { jwt } from 'hono/jwt'
 import { JWT_SECRET } from './auth/credentials'
 import { authRoutes } from './auth/routes'
 import { db } from './db/client'
-import { edges, graphMetadata, nodes } from './db/schema'
+import { buildings, edges, floors, nodes } from './db/schema'
 import { seedIfEmpty } from './db/seed'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -34,6 +35,38 @@ app.use(csrf())
 /** Health check endpoint — verifies the server is running. */
 app.get('/api/health', (c) => {
   return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+/** Serve the floor plan image for a specific building and floor. */
+app.get('/api/floor-plan/:buildingId/:floorNumber', async (c) => {
+  try {
+    const buildingId = Number(c.req.param('buildingId'))
+    const floorNumber = Number(c.req.param('floorNumber'))
+    if (Number.isNaN(buildingId) || Number.isNaN(floorNumber)) {
+      return c.json({ error: 'Invalid building or floor number' }, 400)
+    }
+
+    const [floorRow] = await db
+      .select({ imagePath: floors.imagePath })
+      .from(floors)
+      .where(and(eq(floors.buildingId, buildingId), eq(floors.floorNumber, floorNumber)))
+      .limit(1)
+
+    if (!floorRow) return c.json({ error: 'Floor not found' }, 404)
+
+    const filePath = resolve(__dirname, 'assets', floorRow.imagePath)
+    const buffer = await readFile(filePath)
+    // Detect content type from extension
+    const ext = floorRow.imagePath.split('.').pop()?.toLowerCase()
+    const contentType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
+    c.header('Content-Type', contentType)
+    c.header('Cache-Control', 'public, max-age=3600')
+    return c.body(buffer)
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code
+    if (code === 'ENOENT') return c.json({ error: 'Floor plan image not found' }, 404)
+    return c.json({ error: 'Failed to read floor plan' }, 500)
+  }
 })
 
 /** Serve the full-resolution floor plan PNG. */
@@ -73,42 +106,77 @@ app.get('/api/floor-plan/thumbnail', async (c) => {
 /** Serve the navigation graph as JSON — queries PostgreSQL via Drizzle. No auth required. */
 app.get('/api/map', async (c) => {
   try {
-    const nodeRows = await db.select().from(nodes)
-    const edgeRows = await db.select().from(edges)
-    const metaRows = await db.select().from(graphMetadata).limit(1)
-    const meta = metaRows[0]
+    const [buildingRows, floorRows, nodeRows, edgeRows] = await Promise.all([
+      db.select().from(buildings),
+      db.select().from(floors),
+      db.select().from(nodes),
+      db.select().from(edges),
+    ])
 
-    if (!meta) return c.json({ error: 'Graph data not found' }, 404)
+    if (buildingRows.length === 0) return c.json({ error: 'Graph data not found' }, 404)
+
+    // Group nodes by floorId for efficient assembly
+    const nodesByFloor = new Map<number, typeof nodeRows>()
+    for (const n of nodeRows) {
+      if (!nodesByFloor.has(n.floorId)) nodesByFloor.set(n.floorId, [])
+      nodesByFloor.get(n.floorId)!.push(n)
+    }
+
+    // Assign edges to source node's floor (edges are not directly floor-scoped in DB)
+    const edgesByFloor = new Map<number, typeof edgeRows>()
+    const nodeFloorMap = new Map(nodeRows.map(n => [n.id, n.floorId]))
+    for (const e of edgeRows) {
+      const floorId = nodeFloorMap.get(e.sourceId)
+      if (floorId !== undefined) {
+        if (!edgesByFloor.has(floorId)) edgesByFloor.set(floorId, [])
+        edgesByFloor.get(floorId)!.push(e)
+      }
+    }
+
+    // Group floors by buildingId
+    const floorsByBuilding = new Map<number, typeof floorRows>()
+    for (const f of floorRows) {
+      if (!floorsByBuilding.has(f.buildingId)) floorsByBuilding.set(f.buildingId, [])
+      floorsByBuilding.get(f.buildingId)!.push(f)
+    }
 
     const graph: NavGraph = {
-      nodes: nodeRows.map((n) => ({
-        id: n.id,
-        x: n.x,
-        y: n.y,
-        label: n.label,
-        type: n.type as NavGraph['nodes'][number]['type'],
-        searchable: n.searchable,
-        floor: n.floor,
-        ...(n.roomNumber != null && { roomNumber: n.roomNumber }),
-        ...(n.description != null && { description: n.description }),
-        ...(n.buildingName != null && { buildingName: n.buildingName }),
-        ...(n.accessibilityNotes != null && { accessibilityNotes: n.accessibilityNotes }),
+      buildings: buildingRows.map((b) => ({
+        id: b.id,
+        name: b.name,
+        floors: (floorsByBuilding.get(b.id) ?? []).map((f) => ({
+          id: f.id,
+          floorNumber: f.floorNumber,
+          imagePath: f.imagePath,
+          updatedAt: f.updatedAt,
+          nodes: (nodesByFloor.get(f.id) ?? []).map((n) => ({
+            id: n.id,
+            x: n.x,
+            y: n.y,
+            label: n.label,
+            type: n.type as NavNode['type'],
+            searchable: n.searchable,
+            floorId: n.floorId,
+            ...(n.roomNumber != null && { roomNumber: n.roomNumber }),
+            ...(n.description != null && { description: n.description }),
+            ...(n.accessibilityNotes != null && { accessibilityNotes: n.accessibilityNotes }),
+            ...(n.connectsToFloorAboveId != null && { connectsToFloorAboveId: n.connectsToFloorAboveId }),
+            ...(n.connectsToFloorBelowId != null && { connectsToFloorBelowId: n.connectsToFloorBelowId }),
+            ...(n.connectsToNodeAboveId != null && { connectsToNodeAboveId: n.connectsToNodeAboveId }),
+            ...(n.connectsToNodeBelowId != null && { connectsToNodeBelowId: n.connectsToNodeBelowId }),
+          })),
+          edges: (edgesByFloor.get(f.id) ?? []).map((e) => ({
+            id: e.id,
+            sourceId: e.sourceId,
+            targetId: e.targetId,
+            standardWeight: e.standardWeight,
+            accessibleWeight: e.accessibleWeight,
+            accessible: e.accessible,
+            bidirectional: e.bidirectional,
+            ...(e.accessibilityNotes != null && { accessibilityNotes: e.accessibilityNotes }),
+          })),
+        })),
       })),
-      edges: edgeRows.map((e) => ({
-        id: e.id,
-        sourceId: e.sourceId,
-        targetId: e.targetId,
-        standardWeight: e.standardWeight,
-        accessibleWeight: e.accessibleWeight, // 1e10 is safe in JSON; Infinity is not
-        accessible: e.accessible,
-        bidirectional: e.bidirectional,
-        ...(e.accessibilityNotes != null && { accessibilityNotes: e.accessibilityNotes }),
-      })),
-      metadata: {
-        buildingName: meta.buildingName,
-        floor: meta.floor,
-        lastUpdated: meta.lastUpdated,
-      },
     }
 
     c.header('Cache-Control', 'public, max-age=60')
@@ -129,60 +197,62 @@ app.use('/api/admin/*', jwt({ secret: JWT_SECRET, alg: 'HS256', cookie: 'admin_t
 /**
  * POST /api/admin/graph
  * Replaces the entire navigation graph in PostgreSQL atomically.
- * Receives a full NavGraph JSON body; wraps delete+insert in a PostgreSQL transaction.
+ * Receives a full NavGraph JSON body (buildings → floors → nodes/edges);
+ * wraps delete+insert in a PostgreSQL transaction.
  */
 app.post('/api/admin/graph', async (c) => {
   try {
     const graph = (await c.req.json()) as NavGraph
-    // Basic validation: must have nodes array and edges array
-    if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) {
+    // Basic validation: must have buildings array
+    if (!Array.isArray(graph.buildings)) {
       return c.json({ error: 'Invalid graph data' }, 400)
     }
 
     await db.transaction(async (tx) => {
-      // Delete all existing data
-      await tx.delete(graphMetadata)
+      // Delete in FK-safe order (edges → nodes → floors → buildings)
       await tx.delete(edges)
       await tx.delete(nodes)
+      await tx.delete(floors)
+      await tx.delete(buildings)
 
-      // Insert nodes
-      for (const n of graph.nodes) {
-        await tx.insert(nodes).values({
-          id: n.id,
-          x: n.x,
-          y: n.y,
-          label: n.label,
-          type: n.type,
-          searchable: n.searchable,
-          floor: n.floor,
-          roomNumber: n.roomNumber ?? null,
-          description: n.description ?? null,
-          buildingName: n.buildingName ?? null,
-          accessibilityNotes: n.accessibilityNotes ?? null,
-        })
-      }
+      for (const b of graph.buildings) {
+        const buildingRows = await tx.insert(buildings).values({ name: b.name }).returning({ id: buildings.id })
+        if (buildingRows.length === 0) throw new Error('Failed to insert building')
+        const building = buildingRows[0]!
 
-      // Insert edges
-      for (const e of graph.edges) {
-        await tx.insert(edges).values({
-          id: e.id,
-          sourceId: e.sourceId,
-          targetId: e.targetId,
-          standardWeight: e.standardWeight,
-          accessibleWeight: e.accessibleWeight, // 1e10 for non-accessible (never Infinity)
-          accessible: e.accessible,
-          bidirectional: e.bidirectional,
-          accessibilityNotes: e.accessibilityNotes ?? null,
-        })
-      }
+        for (const f of b.floors) {
+          const floorRows = await tx.insert(floors).values({
+            buildingId: building.id,
+            floorNumber: f.floorNumber,
+            imagePath: f.imagePath,
+            updatedAt: new Date().toISOString(),
+          }).returning({ id: floors.id })
+          if (floorRows.length === 0) throw new Error('Failed to insert floor')
+          const floor = floorRows[0]!
 
-      // Insert metadata
-      if (graph.metadata) {
-        await tx.insert(graphMetadata).values({
-          buildingName: graph.metadata.buildingName,
-          floor: graph.metadata.floor,
-          lastUpdated: graph.metadata.lastUpdated,
-        })
+          for (const n of f.nodes) {
+            await tx.insert(nodes).values({
+              id: n.id, x: n.x, y: n.y, label: n.label, type: n.type,
+              searchable: n.searchable, floorId: floor.id,
+              roomNumber: n.roomNumber ?? null,
+              description: n.description ?? null,
+              accessibilityNotes: n.accessibilityNotes ?? null,
+              connectsToFloorAboveId: n.connectsToFloorAboveId ?? null,
+              connectsToFloorBelowId: n.connectsToFloorBelowId ?? null,
+              connectsToNodeAboveId: n.connectsToNodeAboveId ?? null,
+              connectsToNodeBelowId: n.connectsToNodeBelowId ?? null,
+            })
+          }
+
+          for (const e of f.edges) {
+            await tx.insert(edges).values({
+              id: e.id, sourceId: e.sourceId, targetId: e.targetId,
+              standardWeight: e.standardWeight, accessibleWeight: e.accessibleWeight,
+              accessible: e.accessible, bidirectional: e.bidirectional,
+              accessibilityNotes: e.accessibilityNotes ?? null,
+            })
+          }
+        }
       }
     })
 
