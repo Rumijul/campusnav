@@ -1,5 +1,5 @@
 import type { PathResult } from '@shared/pathfinding/types'
-import type { NavNode } from '@shared/types'
+import type { NavFloor, NavNode } from '@shared/types'
 import { useMemo } from 'react'
 
 // ============================================================
@@ -14,6 +14,10 @@ export type StepIcon =
   | 'sharp-right'
   | 'arrive'
   | 'accessible'
+  | 'stairs-up'
+  | 'stairs-down'
+  | 'elevator'
+  | 'ramp'
 
 export interface DirectionStep {
   /** Human-readable instruction, e.g. "Turn left at the cafeteria" */
@@ -85,7 +89,9 @@ function euclideanDist(ax: number, ay: number, bx: number, by: number): number {
 /**
  * Classify bearing delta into a step icon.
  */
-function classifyTurn(delta: number): Exclude<StepIcon, 'arrive' | 'accessible'> {
+function classifyTurn(
+  delta: number,
+): Exclude<StepIcon, 'arrive' | 'accessible' | 'stairs-up' | 'stairs-down' | 'elevator' | 'ramp'> {
   const abs = Math.abs(delta)
   if (abs < 30) return 'straight'
   if (abs < 120) return delta > 0 ? 'turn-right' : 'turn-left'
@@ -96,8 +102,14 @@ function classifyTurn(delta: number): Exclude<StepIcon, 'arrive' | 'accessible'>
  * Build the instruction text for a direction step at the current (middle) node.
  * Appends " at the {label}" when the node is a searchable landmark-type.
  */
-function buildInstruction(icon: Exclude<StepIcon, 'accessible'>, node: NavNode): string {
-  const base: Record<Exclude<StepIcon, 'accessible'>, string> = {
+function buildInstruction(
+  icon: Exclude<StepIcon, 'accessible' | 'stairs-up' | 'stairs-down' | 'elevator' | 'ramp'>,
+  node: NavNode,
+): string {
+  const base: Record<
+    Exclude<StepIcon, 'accessible' | 'stairs-up' | 'stairs-down' | 'elevator' | 'ramp'>,
+    string
+  > = {
     straight: 'Continue straight',
     'turn-left': 'Turn left',
     'turn-right': 'Turn right',
@@ -133,6 +145,7 @@ export function generateDirections(
   nodeIds: string[],
   nodeMap: Map<string, NavNode>,
   mode: 'standard' | 'accessible',
+  floorMap: Map<number, NavFloor> = new Map(),
 ): DirectionsResult {
   if (nodeIds.length < 2) {
     return { steps: [], totalDistanceNorm: 0, totalDurationSec: 0 }
@@ -155,14 +168,46 @@ export function generateDirections(
     const next = nodeMap.get(nextId)
     if (prev === undefined || curr === undefined || next === undefined) continue
 
+    const distanceM = euclideanDist(prev.x, prev.y, curr.x, curr.y)
+    const durationSec = distanceM / speed
+
+    // Floor-change detection: check if curr→next crosses a floor boundary
+    if (curr.floorId !== next.floorId) {
+      // Determine direction icon based on connector type and vertical direction
+      let icon: StepIcon
+      if (curr.type === 'stairs') {
+        icon = next.floorId > curr.floorId ? 'stairs-up' : 'stairs-down'
+      } else if (curr.type === 'elevator') {
+        icon = 'elevator'
+      } else if (curr.type === 'ramp') {
+        icon = 'ramp'
+      } else {
+        // Fallback: should not occur in a well-formed graph
+        icon = 'stairs-up'
+      }
+
+      // Determine connector type name for instruction text
+      const connectorTypeName =
+        curr.type === 'elevator' ? 'elevator' : curr.type === 'ramp' ? 'ramp' : 'stairs'
+
+      // Look up destination floor number; fall back to next.floorId if not in map
+      const destFloor = floorMap.get(next.floorId)
+      const floorNumber = destFloor?.floorNumber ?? next.floorId
+      const instruction = `Take the ${connectorTypeName} to Floor ${floorNumber}`
+
+      const isAccessibleSegment = curr.type === 'elevator' || curr.type === 'ramp'
+
+      steps.push({ instruction, icon, distanceM, durationSec, isAccessibleSegment })
+      totalDistanceNorm += distanceM
+      continue
+    }
+
     const inBearing = bearing(prev.x, prev.y, curr.x, curr.y)
     const outBearing = bearing(curr.x, curr.y, next.x, next.y)
     const delta = normalizeDelta(outBearing - inBearing)
 
     const icon = classifyTurn(delta)
     const instruction = buildInstruction(icon, curr)
-    const distanceM = euclideanDist(prev.x, prev.y, curr.x, curr.y)
-    const durationSec = distanceM / speed
     const isAccessibleSegment = curr.type === 'ramp' || curr.type === 'elevator'
 
     steps.push({ instruction, icon, distanceM, durationSec, isAccessibleSegment })
