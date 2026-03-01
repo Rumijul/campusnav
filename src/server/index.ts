@@ -103,6 +103,29 @@ app.get('/api/floor-plan/thumbnail', async (c) => {
   }
 })
 
+/** Serve the campus overhead map image. */
+app.get('/api/campus/image', async (c) => {
+  try {
+    const [campusBuilding] = await db.select({ id: buildings.id }).from(buildings)
+      .where(eq(buildings.name, 'Campus')).limit(1)
+    if (!campusBuilding) return c.json({ error: 'Campus map not found' }, 404)
+    const [campusFloor] = await db.select({ imagePath: floors.imagePath }).from(floors)
+      .where(and(eq(floors.buildingId, campusBuilding.id), eq(floors.floorNumber, 0))).limit(1)
+    if (!campusFloor) return c.json({ error: 'Campus map not found' }, 404)
+    const filePath = resolve(__dirname, 'assets', campusFloor.imagePath)
+    const buffer = await readFile(filePath)
+    const ext = campusFloor.imagePath.split('.').pop()?.toLowerCase()
+    const contentType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
+    c.header('Content-Type', contentType)
+    c.header('Cache-Control', 'public, max-age=3600')
+    return c.body(buffer)
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code
+    if (code === 'ENOENT') return c.json({ error: 'Campus map image not found' }, 404)
+    return c.json({ error: 'Failed to read campus map' }, 500)
+  }
+})
+
 /** Serve the navigation graph as JSON — queries PostgreSQL via Drizzle. No auth required. */
 app.get('/api/map', async (c) => {
   try {
@@ -348,6 +371,85 @@ app.delete('/api/admin/floors/:id', async (c) => {
   } catch (err) {
     console.error('Delete floor failed:', err)
     return c.json({ error: 'Failed to delete floor' }, 500)
+  }
+})
+
+/**
+ * POST /api/admin/floor-plan/:buildingId/:floorNumber
+ * Replaces the image for an existing floor. Saves file as
+ * floor-plan-{buildingId}-{floorNumber}.{ext} and updates floors.imagePath.
+ */
+app.post('/api/admin/floor-plan/:buildingId/:floorNumber', async (c) => {
+  try {
+    const buildingId = Number(c.req.param('buildingId'))
+    const floorNumber = Number(c.req.param('floorNumber'))
+    if (Number.isNaN(buildingId) || Number.isNaN(floorNumber)) {
+      return c.json({ error: 'Invalid building or floor number' }, 400)
+    }
+    const body = await c.req.parseBody()
+    const file = body.image
+    if (!file || !(file instanceof File)) return c.json({ error: 'No image file provided' }, 400)
+    if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+    const filename = `floor-plan-${buildingId}-${floorNumber}.${ext}`
+    const dest = resolve(__dirname, 'assets', filename)
+    const buffer = Buffer.from(await file.arrayBuffer())
+    await writeFile(dest, buffer)
+    await db.update(floors)
+      .set({ imagePath: filename, updatedAt: new Date().toISOString() })
+      .where(and(eq(floors.buildingId, buildingId), eq(floors.floorNumber, floorNumber)))
+    return c.json({ ok: true })
+  } catch (err) {
+    console.error('Replace floor image failed:', err)
+    return c.json({ error: 'Failed to replace floor image' }, 500)
+  }
+})
+
+/**
+ * POST /api/admin/campus/image
+ * Upsert pattern — creates Campus building+floor if they don't exist,
+ * then saves the campus-map.{ext} image.
+ */
+app.post('/api/admin/campus/image', async (c) => {
+  try {
+    const body = await c.req.parseBody()
+    const file = body.image
+    if (!file || !(file instanceof File)) return c.json({ error: 'No image file provided' }, 400)
+    if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+    const filename = `campus-map.${ext}`
+    const dest = resolve(__dirname, 'assets', filename)
+    const buffer = Buffer.from(await file.arrayBuffer())
+    await writeFile(dest, buffer)
+    // Upsert Campus building
+    let [campusBuilding] = await db.select({ id: buildings.id }).from(buildings)
+      .where(eq(buildings.name, 'Campus')).limit(1)
+    if (!campusBuilding) {
+      const rows = await db.insert(buildings).values({ name: 'Campus' }).returning({ id: buildings.id })
+      if (rows.length === 0) throw new Error('Failed to create Campus building')
+      campusBuilding = rows[0]!
+    }
+    // Upsert Campus floor (floorNumber = 0 is the sentinel)
+    let [campusFloor] = await db.select({ id: floors.id }).from(floors)
+      .where(and(eq(floors.buildingId, campusBuilding.id), eq(floors.floorNumber, 0))).limit(1)
+    if (!campusFloor) {
+      const rows = await db.insert(floors).values({
+        buildingId: campusBuilding.id,
+        floorNumber: 0,
+        imagePath: filename,
+        updatedAt: new Date().toISOString(),
+      }).returning({ id: floors.id })
+      if (rows.length === 0) throw new Error('Failed to create Campus floor')
+      campusFloor = rows[0]!
+    } else {
+      await db.update(floors)
+        .set({ imagePath: filename, updatedAt: new Date().toISOString() })
+        .where(eq(floors.id, campusFloor.id))
+    }
+    return c.json({ ok: true, buildingId: campusBuilding.id, floorId: campusFloor.id })
+  } catch (err) {
+    console.error('Campus image upload failed:', err)
+    return c.json({ error: 'Failed to upload campus image' }, 500)
   }
 })
 
