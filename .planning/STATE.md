@@ -238,6 +238,7 @@ Last activity: 2026-03-01 — Completed 18-03: Extended useEditorState with mult
 | Phase 17-multi-floor-pathfinding-engine P02 | 5 | 2 tasks | 2 files |
 | Phase 17-multi-floor-pathfinding-engine P04 | 5 | 1 tasks | 2 files |
 | Phase 18-admin-multi-floor-editor P01 | 2 min | 2 tasks | 5 files |
+| Phase 18-admin-multi-floor-editor P02 | 1 min | 2 tasks | 1 files |
 | Phase 18-admin-multi-floor-editor P03 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
@@ -389,6 +390,10 @@ Recent decisions affecting current work:
 - [Phase 18-01]: connectsToBuildingId nullable (no .notNull()) — only entrance nodes on campus map will have this set; all others leave null
 - [Phase 18-01]: Renamed auto-generated migration 0002_melodic_richard_fisk.sql to 0002_campus_entrance_bridge.sql; updated _journal.json tag — Drizzle applies migrations by journal tag, not filename
 - [Phase 18-01]: Conditional spread pattern ...(n.connectsToBuildingId != null && { connectsToBuildingId }) matches existing nullable FK field pattern in GET /api/map
+- [Phase 18-02]: GET /api/campus/image placed with public image routes — path not under /api/admin/* so JWT guard does not apply regardless of position
+- [Phase 18-02]: Campus floor uses floorNumber=0 as sentinel — distinguishes campus overhead map from real building floors (which start at 1)
+- [Phase 18-02]: inArray used twice in DELETE transaction (sourceId, targetId passes) — edges table has two separate FK columns, requiring two passes
+- [Phase 18-02]: Per-floor image naming: floor-plan-{buildingId}-{floorNumber}.{ext} — deterministic, idempotent on re-upload
 - [Phase 18-03]: switchFloor and switchToCampus are helper wrappers (not raw dispatch) because history refs live outside reducer — dispatch alone cannot reset history
 - [Phase 18-03]: floorSnapshots cache keyed by DB floor id (number) — prevents re-fetch when user returns to a previously loaded floor
 
@@ -408,6 +413,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 18-admin-multi-floor-editor 18-01-PLAN.md
+Stopped at: Completed 18-admin-multi-floor-editor 18-02-PLAN.md
 Resume file: None
-Next action: /gsd:execute-phase 18 plan 02
+Next action: /gsd:execute-phase 18 plan 03
