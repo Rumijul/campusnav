@@ -34,7 +34,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 <details open>
 <summary>🔄 v1.5 General Support Update (Phases 15–20) — IN PROGRESS</summary>
 
-- [ ] Phase 15: PostgreSQL Migration (3 plans)
+- [x] Phase 15: PostgreSQL Migration (3 plans) (completed 2026-03-01)
 - [ ] Phase 16: Multi-floor Data Model (— plans)
 - [ ] Phase 17: Multi-floor Pathfinding Engine (— plans)
 - [ ] Phase 18: Admin Multi-floor Editor (— plans)
@@ -63,7 +63,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 13. Restore Location Detail View | v1.0 | 3/3 | Complete | 2026-02-27 |
 | 14. Documentation Cleanup | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 14.1. Node Selection Fixes & Room # Edit (INSERTED) | v1.0 | 3/3 | Complete | 2026-02-28 |
-| 15. PostgreSQL Migration | 2/3 | In Progress|  | — |
+| 15. PostgreSQL Migration | 3/3 | Complete   | 2026-03-01 | — |
 | 16. Multi-floor Data Model | v1.5 | 0/— | Not started | — |
 | 17. Multi-floor Pathfinding Engine | v1.5 | 0/— | Not started | — |
 | 18. Admin Multi-floor Editor | v1.5 | 0/— | Not started | — |

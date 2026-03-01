@@ -88,9 +88,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 15-postgresql-migration
-Plan: 02 complete (3/3 plans done... pending Plan 03 human checkpoint)
-Status: In Progress
-Last activity: 2026-03-01 — Completed 15-02: All server DB calls converted from sync better-sqlite3 to async postgres.js (seed.ts, index.ts startup, GET /api/map, POST /api/admin/graph)
+Plan: 03 complete (3/3 plans done — Phase 15 COMPLETE)
+Status: Complete
+Last activity: 2026-03-01 — Completed 15-03: Human-verified live integration test — Docker PostgreSQL, migrate+seed startup, /api/health, /api/map, idempotent restart all confirmed. INFR-01 satisfied.
 
 ## Performance Metrics
 
@@ -150,6 +150,7 @@ Last activity: 2026-03-01 — Completed 15-02: All server DB calls converted fro
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P03 | 3 | 2 tasks | 2 files |
 | Phase 15-postgresql-migration P01 | 3 | 2 tasks | 10 files |
 | Phase 15-postgresql-migration P02 | 3 | 2 tasks | 2 files |
+| Phase 15-postgresql-migration P03 | 0 | 1 task (human-verify) | 0 files |
 
 ## Accumulated Context
 
@@ -280,6 +281,8 @@ Recent decisions affecting current work:
 - [Phase 15-02]: Top-level await used for migrate/seed startup — valid in ESM (package.json type=module)
 - [Phase 15-02]: Dedicated postgres({ max: 1 }) migration client closed after migration — prevents connection pool overhead during startup
 - [Phase 15-02]: db.transaction(async tx => {...}) replaces db.$client.transaction() — Drizzle ORM API used instead of raw postgres.js client
+- [Phase 15-03]: Human-verified live integration test — all 5 truths confirmed: Docker running, migrate+seed startup, /api/health 200, /api/map seeded data, idempotent restart. INFR-01 satisfied.
+- [Phase 15-postgresql-migration]: Phase 15 complete — SQLite (better-sqlite3) fully replaced with PostgreSQL (postgres-js + drizzle-orm); app ready for Neon cloud deployment
 
 ### Pending Todos
 
@@ -297,6 +300,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 15-postgresql-migration 15-02-PLAN.md
+Stopped at: Completed 15-postgresql-migration 15-03-PLAN.md (Phase 15 complete)
 Resume file: None
-Next action: /gsd:execute-phase 15 plan 03 (human checkpoint — start server against live PostgreSQL)
+Next action: /gsd:execute-phase 16 (Neon deployment — swap DATABASE_URL to Neon managed PostgreSQL)
