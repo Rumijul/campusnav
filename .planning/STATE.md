@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-03-01T06:51:46.367Z"
+progress:
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 7
+  completed_plans: 6
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-03-01T06:44:14.362Z"
 progress:
   total_phases: 3
@@ -114,9 +127,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 16-multi-floor-data-model
-Plan: 02 complete (2/4 plans done — Phase 16 In Progress)
+Plan: 03 complete (3/4 plans done — Phase 16 In Progress)
 Status: In Progress
-Last activity: 2026-03-01 — Completed 16-02: types.ts updated with NavBuilding/NavFloor interfaces and NavGraph.buildings nested shape; campus-graph.json reformatted to nested multi-floor format (48 nodes under buildings[0].floors[0]); seed.ts rewritten to traverse buildings → floors using RETURNING for FK capture. types.ts and seed.ts compile clean.
+Last activity: 2026-03-01 — Completed 16-03: GET /api/map now queries buildings/floors/nodes/edges in parallel and assembles nested NavGraph; POST /api/admin/graph iterates buildings[].floors[] with FK-safe delete/re-insert; new GET /api/floor-plan/:buildingId/:floorNumber endpoint; flattenNavGraph shim in graph-builder.ts; all NavGraph type consumers updated project-wide; tsc --noEmit exits with zero errors.
 
 ## Performance Metrics
 
@@ -179,6 +192,7 @@ Last activity: 2026-03-01 — Completed 16-02: types.ts updated with NavBuilding
 | Phase 15-postgresql-migration P03 | 0 | 1 task (human-verify) | 0 files |
 | Phase 16-multi-floor-data-model P01 | 2.5 min | 2 tasks | 4 files |
 | Phase 16-multi-floor-data-model P02 | 4 min | 2 tasks | 3 files |
+| Phase 16-multi-floor-data-model P03 | 5 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -315,6 +329,8 @@ Recent decisions affecting current work:
 - [Phase 16-02]: SeedGraph local type in seed.ts mirrors JSON shape; NavGraph remains the API type with floorId on NavNodeData
 - [Phase 16-02]: RETURNING guard uses explicit index access with Error throw (not destructuring) to satisfy TypeScript strict null checks on Drizzle returning()
 - [Phase 16-02]: floorId NOT in campus-graph.json nodes; seeder assigns from RETURNING floor.id; onConflictDoNothing not used on buildings/floors inserts
+- [Phase 16-03]: flattenNavGraph documented as Phase 17 replacement target — shim keeps engine compiling without cross-floor routing
+- [Phase 16-03]: Admin editor flattens NavGraph on load, wraps flat state into single-building NavGraph on save
 
 ### Pending Todos
 
