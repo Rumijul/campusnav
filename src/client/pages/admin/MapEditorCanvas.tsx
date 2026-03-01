@@ -70,6 +70,9 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   })
 
   // Load graph from server on mount — initialize multi-floor NavGraph state
+  // Note: uses dispatch directly (not switchFloor) so this callback stays stable.
+  // switchFloor is not useCallback-wrapped, so including it as a dep would cause
+  // loadNavGraph to rebuild every render → infinite useEffect loop.
   const loadNavGraph = useCallback(async () => {
     try {
       const res = await fetch('/api/map', { credentials: 'include' })
@@ -82,14 +85,14 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         const firstFloor = firstRealBuilding.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
         if (firstFloor) {
           dispatch({ type: 'SWITCH_BUILDING', buildingId: firstRealBuilding.id })
-          switchFloor(firstFloor.id, firstFloor.nodes, firstFloor.edges)
+          dispatch({ type: 'SWITCH_FLOOR', floorId: firstFloor.id, nodes: firstFloor.nodes, edges: firstFloor.edges })
           setFloorPlanUrl(`/api/floor-plan/${firstRealBuilding.id}/${firstFloor.floorNumber}?t=${firstFloor.updatedAt}`)
         }
       }
     } catch {
       // Silently fail — editor starts empty if graph cannot be loaded
     }
-  }, [dispatch, switchFloor])
+  }, [dispatch])
 
   useEffect(() => {
     loadNavGraph()

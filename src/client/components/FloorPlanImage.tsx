@@ -72,6 +72,7 @@ export default function FloorPlanImage({
     tweenRef.current = tween
 
     return () => {
+      tweenRef.current = null
       tween.destroy()
     }
   }, [image, isFullLoaded])
