@@ -1,4 +1,4 @@
-import type { NavEdge, NavGraph, NavNode } from '@shared/types'
+import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '@shared/types'
 import type Konva from 'konva'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
@@ -8,6 +8,7 @@ import { EdgeDataTable } from '../../components/admin/EdgeDataTable'
 import EdgeLayer from '../../components/admin/EdgeLayer'
 import EditorSidePanel from '../../components/admin/EditorSidePanel'
 import EditorToolbar from '../../components/admin/EditorToolbar'
+import ManageFloorsModal from '../../components/admin/ManageFloorsModal'
 import { NodeDataTable } from '../../components/admin/NodeDataTable'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
 import FloorPlanImage from '../../components/FloorPlanImage'
@@ -30,7 +31,7 @@ interface MapEditorCanvasProps {
 
 export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const { width, height } = useViewportSize()
-  const { state, dispatch, recordHistory, handleUndo, handleRedo, canUndo, canRedo } =
+  const { state, dispatch, recordHistory, handleUndo, handleRedo, canUndo, canRedo, switchFloor, switchToCampus } =
     useEditorState()
 
   const stageRef = useRef<Konva.Stage>(null)
@@ -50,6 +51,11 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const [floorPlanUrl, setFloorPlanUrl] = useState<string>('/api/floor-plan/image')
   const [cursorCanvasPos, setCursorCanvasPos] = useState<{ x: number; y: number } | null>(null)
 
+  // Multi-floor state
+  const [navGraph, setNavGraph] = useState<NavGraph | null>(null)
+  const [manageFloorsOpen, setManageFloorsOpen] = useState(false)
+  const [isSavingFloor, setIsSavingFloor] = useState(false)
+
   // Compute editor viewport height (full height minus toolbar ~52px)
   const editorHeight = height
 
@@ -63,24 +69,66 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     onScaleChange: setStageScale,
   })
 
-  // Load graph from server on mount — flatten multi-floor NavGraph into editor state
+  // Load graph from server on mount — initialize multi-floor NavGraph state
+  const loadNavGraph = useCallback(async () => {
+    try {
+      const res = await fetch('/api/map', { credentials: 'include' })
+      if (!res.ok) return
+      const graph = (await res.json()) as NavGraph
+      setNavGraph(graph)
+      // Auto-select first real building (non-Campus), first floor
+      const firstRealBuilding = graph.buildings.find((b) => b.name !== 'Campus')
+      if (firstRealBuilding) {
+        const firstFloor = firstRealBuilding.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
+        if (firstFloor) {
+          dispatch({ type: 'SWITCH_BUILDING', buildingId: firstRealBuilding.id })
+          switchFloor(firstFloor.id, firstFloor.nodes, firstFloor.edges)
+          setFloorPlanUrl(`/api/floor-plan/${firstRealBuilding.id}/${firstFloor.floorNumber}?t=${firstFloor.updatedAt}`)
+        }
+      }
+    } catch {
+      // Silently fail — editor starts empty if graph cannot be loaded
+    }
+  }, [dispatch, switchFloor])
+
   useEffect(() => {
-    fetch('/api/map', { credentials: 'include' })
-      .then((res) => {
-        if (!res.ok) return
-        return res.json() as Promise<NavGraph>
-      })
-      .then((graph) => {
-        if (!graph) return
-        // Flatten buildings → floors → nodes/edges for the flat editor state
-        const nodes = graph.buildings.flatMap((b) => b.floors.flatMap((f) => f.nodes))
-        const edges = graph.buildings.flatMap((b) => b.floors.flatMap((f) => f.edges))
-        dispatch({ type: 'LOAD_GRAPH', nodes, edges })
-      })
-      .catch(() => {
-        // Silently fail — editor starts empty if graph cannot be loaded
-      })
-  }, [dispatch])
+    loadNavGraph()
+  }, [loadNavGraph])
+
+  // Derived helpers from navGraph + state
+  const isCampusActive = state.activeBuildingId === 'campus'
+
+  const nonCampusBuildings: NavBuilding[] = (navGraph?.buildings ?? []).filter((b) => b.name !== 'Campus')
+
+  const activeBuilding: NavBuilding | undefined = isCampusActive
+    ? undefined
+    : nonCampusBuildings.find((b) => b.id === state.activeBuildingId)
+
+  const sortedFloors: NavFloor[] = (activeBuilding?.floors ?? [])
+    .slice()
+    .sort((a, b) => a.floorNumber - b.floorNumber)
+
+  // Handle building switch — switches building context, loads first floor
+  const handleBuildingSwitch = useCallback(
+    async (value: string) => {
+      if (value === 'campus') {
+        const campusBuilding = navGraph?.buildings.find((b) => b.name === 'Campus')
+        const campusFloor = campusBuilding?.floors[0]
+        switchToCampus(campusFloor?.nodes ?? [], campusFloor?.edges ?? [])
+        setFloorPlanUrl('/api/campus/image')
+      } else {
+        const buildingId = Number(value)
+        dispatch({ type: 'SWITCH_BUILDING', buildingId })
+        const building = navGraph?.buildings.find((b) => b.id === buildingId)
+        const firstFloor = building?.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
+        if (firstFloor) {
+          switchFloor(firstFloor.id, firstFloor.nodes, firstFloor.edges)
+          setFloorPlanUrl(`/api/floor-plan/${buildingId}/${firstFloor.floorNumber}?t=${firstFloor.updatedAt}`)
+        }
+      }
+    },
+    [navGraph, dispatch, switchFloor, switchToCampus],
+  )
 
   // Keyboard shortcuts for undo/redo, escape, and delete
   useEffect(() => {
@@ -159,7 +207,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           x: normX,
           y: normY,
           searchable: true,
-          floorId: 1,
+          floorId: state.activeFloorId ?? 1,  // use active floor DB id, fallback to 1
         }
 
         dispatch({ type: 'PLACE_NODE', node: newNode })
@@ -179,7 +227,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         }
       }
     },
-    [state.mode, imageRect, dispatch, recordHistory],
+    [state.mode, state.activeFloorId, imageRect, dispatch, recordHistory],
   )
 
   // Handle node click
@@ -243,62 +291,112 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     [dispatch, recordHistory],
   )
 
-  // Handle save — POST graph to server
-  // Wraps the flat editor state into the multi-floor NavGraph shape expected by the API.
-  // The admin editor currently operates on a single building/floor; Phase 17 will add
-  // multi-floor editing support.
+  // Handle save — POST graph to server, context-aware (campus vs floor)
   const handleSave = useCallback(async () => {
-    const graph: NavGraph = {
-      buildings: [
-        {
-          id: 1,
-          name: 'Main Building',
-          floors: [
-            {
-              id: 1,
-              floorNumber: 1,
-              imagePath: 'floor-plan.png',
-              updatedAt: new Date().toISOString(),
-              nodes: state.nodes,
-              edges: state.edges,
-            },
-          ],
-        },
-      ],
+    if (isCampusActive) {
+      // Campus save: find campus building/floor in navGraph
+      const campusBuilding = navGraph?.buildings.find((b) => b.name === 'Campus')
+      if (!campusBuilding) return
+      const campusFloor = campusBuilding.floors[0]
+      if (!campusFloor) return
+      const graph: NavGraph = {
+        buildings: [{
+          ...campusBuilding,
+          floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }],
+        }],
+      }
+      const res = await fetch('/api/admin/graph', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(graph),
+      })
+      if (res.ok) dispatch({ type: 'MARK_SAVED' })
+    } else {
+      // Building/floor save: wrap active floor nodes into the full NavGraph
+      if (!navGraph || !activeBuilding || state.activeFloorId === null) return
+      const updatedBuildings = navGraph.buildings.map((b) => {
+        if (b.id !== activeBuilding.id) return b
+        return {
+          ...b,
+          floors: b.floors.map((f) => {
+            if (f.id !== state.activeFloorId) return f
+            return { ...f, nodes: state.nodes, edges: state.edges }
+          }),
+        }
+      })
+      const graph: NavGraph = { buildings: updatedBuildings }
+      const res = await fetch('/api/admin/graph', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(graph),
+      })
+      if (res.ok) dispatch({ type: 'MARK_SAVED' })
     }
-    const res = await fetch('/api/admin/graph', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(graph),
-    })
-    if (res.ok) dispatch({ type: 'MARK_SAVED' })
-  }, [state.nodes, state.edges, dispatch])
+  }, [isCampusActive, navGraph, activeBuilding, state.activeFloorId, state.nodes, state.edges, dispatch])
+
+  // Handle floor switch — auto-saves current floor, loads new floor
+  const handleFloorSwitch = useCallback(
+    async (floor: NavFloor) => {
+      if (floor.id === state.activeFloorId) return
+      // Auto-save current floor silently (fire-and-forget)
+      if (state.isDirty && !isCampusActive && state.activeFloorId !== null) {
+        setIsSavingFloor(true)
+        try {
+          await handleSave()
+        } catch {
+          /* silent */
+        } finally {
+          setIsSavingFloor(false)
+        }
+      }
+      // Switch floor
+      switchFloor(floor.id, floor.nodes, floor.edges)
+      setFloorPlanUrl(`/api/floor-plan/${state.activeBuildingId}/${floor.floorNumber}?t=${floor.updatedAt}`)
+    },
+    [state.activeFloorId, state.isDirty, state.activeBuildingId, isCampusActive, switchFloor, handleSave],
+  )
 
   // Handle upload button click — open file picker
   const handleUploadClick = useCallback(() => {
     fileInputRef.current?.click()
   }, [])
 
-  // Handle file selection — instant preview + background upload
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  // Handle file selection — instant preview + background upload, routes to correct endpoint
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0]
+      if (!file) return
 
-    // Instant local preview
-    const previewUrl = URL.createObjectURL(file)
-    setFloorPlanUrl(previewUrl)
+      // Instant local preview
+      const previewUrl = URL.createObjectURL(file)
+      setFloorPlanUrl(previewUrl)
 
-    // Background upload to server
-    const formData = new FormData()
-    formData.append('image', file)
-    await fetch('/api/admin/floor-plan', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-      // No Content-Type header — browser sets multipart boundary automatically
-    })
-  }, [])
+      const formData = new FormData()
+      formData.append('image', file)
+
+      if (isCampusActive) {
+        await fetch('/api/admin/campus/image', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        })
+        // Reload navGraph to pick up new campus building/floor ids
+        await loadNavGraph()
+      } else {
+        // Per-floor upload — use active building/floor numbers
+        const floorNumber =
+          activeBuilding?.floors.find((f) => f.id === state.activeFloorId)?.floorNumber ?? 1
+        await fetch(`/api/admin/floor-plan/${state.activeBuildingId}/${floorNumber}`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        })
+      }
+    },
+    [isCampusActive, activeBuilding, state.activeBuildingId, state.activeFloorId, loadNavGraph],
+  )
 
   // Compute selected edge with source/target names for side panel
   const selectedEdgeWithNames = (() => {
@@ -329,6 +427,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           canRedo={canRedo}
           isDirty={state.isDirty}
           onLogout={onLogout}
+          isCampusActive={isCampusActive}
+          onManageFloors={() => setManageFloorsOpen(true)}
         />
       </div>
 
@@ -349,6 +449,40 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           Data
         </button>
       </div>
+
+      {/* Building selector + floor tab row — only shown on Map tab */}
+      {activeTab === 'map' && (
+        <div className="flex items-center gap-2 border-b border-gray-200 bg-white px-4 py-1.5 flex-wrap">
+          {/* Building / Campus selector */}
+          <select
+            value={isCampusActive ? 'campus' : String(state.activeBuildingId)}
+            onChange={(e) => handleBuildingSwitch(e.target.value)}
+            className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="campus">Campus</option>
+            {nonCampusBuildings.map((b) => (
+              <option key={b.id} value={String(b.id)}>{b.name}</option>
+            ))}
+          </select>
+
+          {/* Floor tabs — only when a real building is active */}
+          {!isCampusActive && sortedFloors.map((floor) => (
+            <button
+              key={floor.id}
+              type="button"
+              onClick={() => handleFloorSwitch(floor)}
+              disabled={isSavingFloor}
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                state.activeFloorId === floor.id
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Floor {floor.floorNumber}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Map panel — mounted but hidden when Data tab is active */}
       <div
@@ -408,8 +542,22 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             mode={state.mode}
             onNodeClick={handleNodeClick}
             onNodeDragEnd={handleNodeDragEnd}
+            isCampusActive={isCampusActive}
           />
         </Stage>
+
+        {/* Campus empty state overlay */}
+        {isCampusActive && !image && (
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-auto cursor-pointer"
+            onClick={handleUploadClick}
+          >
+            <div className="text-center text-slate-500 hover:text-slate-700">
+              <p className="text-lg font-medium">Upload campus map to begin</p>
+              <p className="text-sm">Click to upload an overhead image</p>
+            </div>
+          </div>
+        )}
 
         {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
         <div className="pointer-events-none absolute right-0 top-0 h-full">
@@ -441,6 +589,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
                 dispatch({ type: 'SELECT_NODE', id: null })
                 dispatch({ type: 'SELECT_EDGE', id: null })
               }}
+              isCampusActive={isCampusActive}
+              buildings={nonCampusBuildings}
             />
           </div>
         </div>
@@ -499,6 +649,19 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         className="hidden"
         onChange={handleFileChange}
       />
+
+      {/* Manage Floors modal */}
+      {manageFloorsOpen && activeBuilding && (
+        <ManageFloorsModal
+          isOpen={manageFloorsOpen}
+          buildingId={activeBuilding.id}
+          floors={activeBuilding.floors}
+          onClose={() => setManageFloorsOpen(false)}
+          onFloorAdded={() => { setManageFloorsOpen(false); loadNavGraph() }}
+          onFloorDeleted={() => { setManageFloorsOpen(false); loadNavGraph() }}
+          onFloorImageReplaced={() => { loadNavGraph() }}
+        />
+      )}
     </div>
   )
 }
