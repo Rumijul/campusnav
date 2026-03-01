@@ -63,7 +63,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 13. Restore Location Detail View | v1.0 | 3/3 | Complete | 2026-02-27 |
 | 14. Documentation Cleanup | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 14.1. Node Selection Fixes & Room # Edit (INSERTED) | v1.0 | 3/3 | Complete | 2026-02-28 |
-| 15. PostgreSQL Migration | v1.5 | 0/3 | Not started | — |
+| 15. PostgreSQL Migration | 1/3 | In Progress|  | — |
 | 16. Multi-floor Data Model | v1.5 | 0/— | Not started | — |
 | 17. Multi-floor Pathfinding Engine | v1.5 | 0/— | Not started | — |
 | 18. Admin Multi-floor Editor | v1.5 | 0/— | Not started | — |

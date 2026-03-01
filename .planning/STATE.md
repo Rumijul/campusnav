@@ -1,6 +1,19 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-03-01T04:28:11.611Z"
+progress:
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
 milestone_name: MVP
 status: complete
 last_updated: "2026-02-28T00:00:00.000Z"
@@ -74,10 +87,10 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for v1.5
-Last activity: 2026-02-28 — Milestone v1.5 General Support Update started
+Phase: 15-postgresql-migration
+Plan: 01 complete (2/3 plans done)
+Status: In Progress
+Last activity: 2026-03-01 — Completed 15-01: DB layer swapped SQLite→PostgreSQL (schema, client, drizzle config, docker-compose, migrations)
 
 ## Performance Metrics
 
@@ -135,6 +148,7 @@ Last activity: 2026-02-28 — Milestone v1.5 General Support Update started
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P01 | 2 | 2 tasks | 2 files |
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P02 | 2 | 2 tasks | 2 files |
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P03 | 3 | 2 tasks | 2 files |
+| Phase 15-postgresql-migration P01 | 3 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -259,6 +273,9 @@ Recent decisions affecting current work:
 - [Phase 14.1-02]: onClearStart/onClearDestination as optional props — backward compatible; no additional clearing logic needed (existing useEffect handles teardown)
 - [Phase 14.1-03]: exactOptionalPropertyTypes workaround: conditional spread ({} vs { roomNumber: trimmed }) to clear optional fields instead of passing undefined
 - [Phase 14.1-03]: SearchOverlay gap-1 + items-center for tighter Room N · type grouping; conditional dot separator renders only when roomNumber present
+- [Phase 15-postgresql-migration]: postgres-js chosen (not pg/node-postgres) — native ESM, promise-based, matches Neon serverless connection model
+- [Phase 15-postgresql-migration]: db export name unchanged from SQLite version — all downstream imports remain valid without modification
+- [Phase 15-postgresql-migration]: Downstream errors (seed.ts, index.ts) deferred to Plan 02 — SQLite sync APIs (.all, .run, .transaction) replaced with async patterns in next plan
 
 ### Pending Todos
 
@@ -275,7 +292,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-28
-Stopped at: v1.5 scope defined — 6 phases (15–20) written to ROADMAP.md; ready to plan Phase 15
+Last session: 2026-03-01
+Stopped at: Completed 15-postgresql-migration 15-01-PLAN.md
 Resume file: None
-Next action: /gsd:plan-phase 15 (PostgreSQL Migration)
+Next action: /gsd:execute-phase 15 plan 02 (async server startup + route rewrites)

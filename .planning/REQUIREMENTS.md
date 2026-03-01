@@ -9,7 +9,7 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 
 ### Infrastructure
 
-- [ ] **INFR-01**: Application database migrated from SQLite to PostgreSQL for cloud-hosted deployment readiness
+- [x] **INFR-01**: Application database migrated from SQLite to PostgreSQL for cloud-hosted deployment readiness
 
 ### Multi-floor
 
@@ -55,7 +55,7 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFR-01 | Phase 15: PostgreSQL Migration | Pending |
+| INFR-01 | Phase 15: PostgreSQL Migration | Complete |
 | MFLR-01 | Phase 16: Multi-floor Data Model | Pending |
 | MFLR-02 | Phase 16: Multi-floor Data Model | Pending |
 | CAMP-01 | Phase 16: Multi-floor Data Model | Pending |
