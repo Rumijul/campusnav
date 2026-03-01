@@ -75,7 +75,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 14.1. Node Selection Fixes & Room # Edit (INSERTED) | v1.0 | 3/3 | Complete | 2026-02-28 |
 | 15. PostgreSQL Migration | 3/3 | Complete    | 2026-03-01 | — |
 | 16. Multi-floor Data Model | 4/4 | Complete   | 2026-03-01 | 2026-03-01 |
-| 17. Multi-floor Pathfinding Engine | 4/4 | Complete   | 2026-03-01 | — |
+| 17. Multi-floor Pathfinding Engine | 4/4 | Complete    | 2026-03-01 | — |
 | 18. Admin Multi-floor Editor | v1.5 | 0/— | Not started | — |
 | 19. Student Floor Tab UI | v1.5 | 0/— | Not started | — |
 | 20. Deployment | v1.5 | 0/— | Not started | — |
