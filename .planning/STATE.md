@@ -276,6 +276,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: v1.0 milestone archived — MILESTONES.md, PROJECT.md, ROADMAP.md updated; REQUIREMENTS.md deleted; git tagged v1.0; RETROSPECTIVE.md created
+Stopped at: v1.5 scope defined — 6 phases (15–20) written to ROADMAP.md; ready to plan Phase 15
 Resume file: None
-Next action: Run /gsd:new-milestone to start v1.1 planning (questioning → research → requirements → roadmap)
+Next action: /gsd:plan-phase 15 (PostgreSQL Migration)
