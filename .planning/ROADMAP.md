@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–14.1 (shipped 2026-02-28)
+- 🔄 **v1.5 General Support Update** — Phases 15–20 (in progress)
 
 ## Phases
 
@@ -30,6 +31,18 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 
 </details>
 
+<details open>
+<summary>🔄 v1.5 General Support Update (Phases 15–20) — IN PROGRESS</summary>
+
+- [ ] Phase 15: PostgreSQL Migration (3 plans)
+- [ ] Phase 16: Multi-floor Data Model (— plans)
+- [ ] Phase 17: Multi-floor Pathfinding Engine (— plans)
+- [ ] Phase 18: Admin Multi-floor Editor (— plans)
+- [ ] Phase 19: Student Floor Tab UI (— plans)
+- [ ] Phase 20: Deployment (— plans)
+
+</details>
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -50,3 +63,9 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 13. Restore Location Detail View | v1.0 | 3/3 | Complete | 2026-02-27 |
 | 14. Documentation Cleanup | v1.0 | 1/1 | Complete | 2026-02-27 |
 | 14.1. Node Selection Fixes & Room # Edit (INSERTED) | v1.0 | 3/3 | Complete | 2026-02-28 |
+| 15. PostgreSQL Migration | v1.5 | 0/3 | Not started | — |
+| 16. Multi-floor Data Model | v1.5 | 0/— | Not started | — |
+| 17. Multi-floor Pathfinding Engine | v1.5 | 0/— | Not started | — |
+| 18. Admin Multi-floor Editor | v1.5 | 0/— | Not started | — |
+| 19. Student Floor Tab UI | v1.5 | 0/— | Not started | — |
+| 20. Deployment | v1.5 | 0/— | Not started | — |
