@@ -88,9 +88,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 15-postgresql-migration
-Plan: 01 complete (2/3 plans done)
+Plan: 02 complete (3/3 plans done... pending Plan 03 human checkpoint)
 Status: In Progress
-Last activity: 2026-03-01 — Completed 15-01: DB layer swapped SQLite→PostgreSQL (schema, client, drizzle config, docker-compose, migrations)
+Last activity: 2026-03-01 — Completed 15-02: All server DB calls converted from sync better-sqlite3 to async postgres.js (seed.ts, index.ts startup, GET /api/map, POST /api/admin/graph)
 
 ## Performance Metrics
 
@@ -149,6 +149,7 @@ Last activity: 2026-03-01 — Completed 15-01: DB layer swapped SQLite→Postgre
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P02 | 2 | 2 tasks | 2 files |
 | Phase 14.1-node-selection-fixes-and-admin-room-number-edit P03 | 3 | 2 tasks | 2 files |
 | Phase 15-postgresql-migration P01 | 3 | 2 tasks | 10 files |
+| Phase 15-postgresql-migration P02 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -276,6 +277,9 @@ Recent decisions affecting current work:
 - [Phase 15-postgresql-migration]: postgres-js chosen (not pg/node-postgres) — native ESM, promise-based, matches Neon serverless connection model
 - [Phase 15-postgresql-migration]: db export name unchanged from SQLite version — all downstream imports remain valid without modification
 - [Phase 15-postgresql-migration]: Downstream errors (seed.ts, index.ts) deferred to Plan 02 — SQLite sync APIs (.all, .run, .transaction) replaced with async patterns in next plan
+- [Phase 15-02]: Top-level await used for migrate/seed startup — valid in ESM (package.json type=module)
+- [Phase 15-02]: Dedicated postgres({ max: 1 }) migration client closed after migration — prevents connection pool overhead during startup
+- [Phase 15-02]: db.transaction(async tx => {...}) replaces db.$client.transaction() — Drizzle ORM API used instead of raw postgres.js client
 
 ### Pending Todos
 
@@ -293,6 +297,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 15-postgresql-migration 15-01-PLAN.md
+Stopped at: Completed 15-postgresql-migration 15-02-PLAN.md
 Resume file: None
-Next action: /gsd:execute-phase 15 plan 02 (async server startup + route rewrites)
+Next action: /gsd:execute-phase 15 plan 03 (human checkpoint — start server against live PostgreSQL)
