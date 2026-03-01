@@ -3,6 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
+last_updated: "2026-03-01T06:44:14.362Z"
+progress:
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 7
+  completed_plans: 5
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
 last_updated: "2026-03-01T06:37:36.287Z"
 progress:
   total_phases: 3
@@ -101,9 +114,9 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 ## Current Position
 
 Phase: 16-multi-floor-data-model
-Plan: 01 complete (1/4 plans done — Phase 16 In Progress)
+Plan: 02 complete (2/4 plans done — Phase 16 In Progress)
 Status: In Progress
-Last activity: 2026-03-01 — Completed 16-01: schema.ts updated with buildings/floors tables; nodes.floor replaced by floor_id FK; migration SQL written with INSERT seed + UPDATE back-fill for 48 existing nodes; graphMetadata dropped. MFLR-01, MFLR-02, CAMP-01 schema foundation complete.
+Last activity: 2026-03-01 — Completed 16-02: types.ts updated with NavBuilding/NavFloor interfaces and NavGraph.buildings nested shape; campus-graph.json reformatted to nested multi-floor format (48 nodes under buildings[0].floors[0]); seed.ts rewritten to traverse buildings → floors using RETURNING for FK capture. types.ts and seed.ts compile clean.
 
 ## Performance Metrics
 
@@ -165,6 +178,7 @@ Last activity: 2026-03-01 — Completed 16-01: schema.ts updated with buildings/
 | Phase 15-postgresql-migration P02 | 3 | 2 tasks | 2 files |
 | Phase 15-postgresql-migration P03 | 0 | 1 task (human-verify) | 0 files |
 | Phase 16-multi-floor-data-model P01 | 2.5 min | 2 tasks | 4 files |
+| Phase 16-multi-floor-data-model P02 | 4 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -298,6 +312,9 @@ Recent decisions affecting current work:
 - [Phase 15-03]: Human-verified live integration test — all 5 truths confirmed: Docker running, migrate+seed startup, /api/health 200, /api/map seeded data, idempotent restart. INFR-01 satisfied.
 - [Phase 15-postgresql-migration]: Phase 15 complete — SQLite (better-sqlite3) fully replaced with PostgreSQL (postgres-js + drizzle-orm); app ready for Neon cloud deployment
 - [Phase 16-multi-floor-data-model]: text type for connects_to_node_above/below_id to match nodes.id text PK; text for floors.updated_at to match project ISO 8601 convention; graphMetadata dropped atomically in same migration
+- [Phase 16-02]: SeedGraph local type in seed.ts mirrors JSON shape; NavGraph remains the API type with floorId on NavNodeData
+- [Phase 16-02]: RETURNING guard uses explicit index access with Error throw (not destructuring) to satisfy TypeScript strict null checks on Drizzle returning()
+- [Phase 16-02]: floorId NOT in campus-graph.json nodes; seeder assigns from RETURNING floor.id; onConflictDoNothing not used on buildings/floors inserts
 
 ### Pending Todos
 
