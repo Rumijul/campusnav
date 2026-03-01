@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T12:17:44.402Z"
+last_updated: "2026-03-01T12:24:30.264Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 ---
@@ -222,6 +222,7 @@ Last activity: 2026-03-01 — Completed 16-04: Human-verified multi-floor data m
 | Phase 16-multi-floor-data-model P04 | 0 | 1 task (human-verify) | 1 file |
 | Phase 17-multi-floor-pathfinding-engine P01 | 2 | 3 tasks | 3 files |
 | Phase 17-multi-floor-pathfinding-engine P03 | 3 | 1 tasks | 2 files |
+| Phase 17-multi-floor-pathfinding-engine P02 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -366,6 +367,8 @@ Recent decisions affecting current work:
 - [Phase 17-03]: Floor-change detection checks curr.floorId !== next.floorId BEFORE bearing calculation; continue skips normal turn step for connector nodes
 - [Phase 17-03]: classifyTurn and buildInstruction return types narrowed to exclude floor-change icons for TypeScript strict compliance
 - [Phase 17-03]: useRouteDirections hook signature unchanged; Phase 19 will wire real floorMap for per-floor routing
+- [Phase 17-02]: Return 0 for cross-floor A* heuristic pairs: Euclidean x,y across floors is inadmissible; 0 keeps heuristic conservative while inter-floor edge costs provide signal
+- [Phase 17-02]: Both standardFinder and accessibleFinder heuristics updated with same floor-aware check: a.data.floorId !== b.data.floorId ? 0 : calculateWeight(...)
 
 ### Pending Todos
 
