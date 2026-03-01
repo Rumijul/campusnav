@@ -7,9 +7,9 @@ import { edges, graphMetadata, nodes } from './schema'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export function seedIfEmpty(): void {
+export async function seedIfEmpty(): Promise<void> {
   // Cheap count check — no-op if already seeded
-  const existing = db.select().from(nodes).all()
+  const existing = await db.select().from(nodes)
   if (existing.length > 0) {
     console.log(`[seed] Already seeded (${existing.length} nodes) — skipping`)
     return
@@ -21,7 +21,8 @@ export function seedIfEmpty(): void {
   // Map NavNode fields to schema column names
   // NavNode has camelCase fields; schema columns are snake_case but Drizzle
   // accepts the JS camelCase property names defined in schema.ts
-  db.insert(nodes)
+  await db
+    .insert(nodes)
     .values(
       graph.nodes.map((n) => ({
         id: n.id,
@@ -38,9 +39,9 @@ export function seedIfEmpty(): void {
       })),
     )
     .onConflictDoNothing()
-    .run()
 
-  db.insert(edges)
+  await db
+    .insert(edges)
     .values(
       graph.edges.map((e) => ({
         id: e.id,
@@ -54,16 +55,15 @@ export function seedIfEmpty(): void {
       })),
     )
     .onConflictDoNothing()
-    .run()
 
-  db.insert(graphMetadata)
+  await db
+    .insert(graphMetadata)
     .values([{
       buildingName: graph.metadata.buildingName,
       floor: graph.metadata.floor,
       lastUpdated: graph.metadata.lastUpdated,
     }])
     .onConflictDoNothing()
-    .run()
 
   console.log(`[seed] Inserted ${graph.nodes.length} nodes, ${graph.edges.length} edges`)
 }
