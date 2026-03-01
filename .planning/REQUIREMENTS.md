@@ -13,8 +13,8 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 
 ### Multi-floor
 
-- [ ] **MFLR-01**: Each building floor is a first-class data entity with its own floor plan image reference and node graph
-- [ ] **MFLR-02**: Floor connector nodes (staircase/elevator/ramp) carry floor-linkage metadata (which floor above/below they connect to)
+- [x] **MFLR-01**: Each building floor is a first-class data entity with its own floor plan image reference and node graph
+- [x] **MFLR-02**: Floor connector nodes (staircase/elevator/ramp) carry floor-linkage metadata (which floor above/below they connect to)
 - [ ] **MFLR-03**: Pathfinding engine routes across floors via floor connector nodes, preferring accessible connectors for wheelchair routes
 - [ ] **MFLR-04**: Admin can add/remove floors per building and upload a distinct floor plan image for each floor
 - [ ] **MFLR-05**: Student sees per-floor route segments — each segment displayed on that floor's map
@@ -22,7 +22,7 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 
 ### Multi-building / Campus
 
-- [ ] **CAMP-01**: Multi-building data model stores buildings as parent entities, each containing one or more floors
+- [x] **CAMP-01**: Multi-building data model stores buildings as parent entities, each containing one or more floors
 - [ ] **CAMP-02**: Admin uploads a hand-drawn overhead image as the campus-level outdoor map
 - [ ] **CAMP-03**: Admin places outdoor path nodes and building entrance markers on the campus map
 - [ ] **CAMP-04**: Building entrance nodes bridge the outdoor graph to floor 1 of each building, enabling cross-building routes
@@ -56,9 +56,9 @@ Which phases cover which requirements.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFR-01 | Phase 15: PostgreSQL Migration | Complete |
-| MFLR-01 | Phase 16: Multi-floor Data Model | Pending |
-| MFLR-02 | Phase 16: Multi-floor Data Model | Pending |
-| CAMP-01 | Phase 16: Multi-floor Data Model | Pending |
+| MFLR-01 | Phase 16: Multi-floor Data Model | Complete |
+| MFLR-02 | Phase 16: Multi-floor Data Model | Complete |
+| CAMP-01 | Phase 16: Multi-floor Data Model | Complete |
 | MFLR-03 | Phase 17: Multi-floor Pathfinding Engine | Pending |
 | MFLR-04 | Phase 18: Admin Multi-floor Editor | Pending |
 | CAMP-02 | Phase 18: Admin Multi-floor Editor | Pending |

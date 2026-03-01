@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-01T04:52:50.128Z"
+last_updated: "2026-03-01T06:37:36.287Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 7
+  completed_plans: 4
 ---
 
 ---
@@ -100,10 +100,10 @@ See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 15-postgresql-migration
-Plan: 03 complete (3/3 plans done — Phase 15 COMPLETE)
-Status: Complete
-Last activity: 2026-03-01 — Completed 15-03: Human-verified live integration test — Docker PostgreSQL, migrate+seed startup, /api/health, /api/map, idempotent restart all confirmed. INFR-01 satisfied.
+Phase: 16-multi-floor-data-model
+Plan: 01 complete (1/4 plans done — Phase 16 In Progress)
+Status: In Progress
+Last activity: 2026-03-01 — Completed 16-01: schema.ts updated with buildings/floors tables; nodes.floor replaced by floor_id FK; migration SQL written with INSERT seed + UPDATE back-fill for 48 existing nodes; graphMetadata dropped. MFLR-01, MFLR-02, CAMP-01 schema foundation complete.
 
 ## Performance Metrics
 
@@ -164,6 +164,7 @@ Last activity: 2026-03-01 — Completed 15-03: Human-verified live integration t
 | Phase 15-postgresql-migration P01 | 3 | 2 tasks | 10 files |
 | Phase 15-postgresql-migration P02 | 3 | 2 tasks | 2 files |
 | Phase 15-postgresql-migration P03 | 0 | 1 task (human-verify) | 0 files |
+| Phase 16-multi-floor-data-model P01 | 2.5 min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -296,6 +297,7 @@ Recent decisions affecting current work:
 - [Phase 15-02]: db.transaction(async tx => {...}) replaces db.$client.transaction() — Drizzle ORM API used instead of raw postgres.js client
 - [Phase 15-03]: Human-verified live integration test — all 5 truths confirmed: Docker running, migrate+seed startup, /api/health 200, /api/map seeded data, idempotent restart. INFR-01 satisfied.
 - [Phase 15-postgresql-migration]: Phase 15 complete — SQLite (better-sqlite3) fully replaced with PostgreSQL (postgres-js + drizzle-orm); app ready for Neon cloud deployment
+- [Phase 16-multi-floor-data-model]: text type for connects_to_node_above/below_id to match nodes.id text PK; text for floors.updated_at to match project ISO 8601 convention; graphMetadata dropped atomically in same migration
 
 ### Pending Todos
 
@@ -313,6 +315,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 15-postgresql-migration 15-03-PLAN.md (Phase 15 complete)
+Stopped at: Completed 16-multi-floor-data-model 16-01-PLAN.md
 Resume file: None
-Next action: /gsd:execute-phase 16 (Neon deployment — swap DATABASE_URL to Neon managed PostgreSQL)
+Next action: /gsd:execute-phase 16 plan 02 (update types.ts, seed.ts, index.ts, pathfinding for multi-floor NavGraph shape)
