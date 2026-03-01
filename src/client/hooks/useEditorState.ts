@@ -15,6 +15,11 @@ export type EditorState = {
   selectedEdgeId: string | null
   pendingEdgeSourceId: string | null
   isDirty: boolean
+  // Multi-floor context (added Phase 18)
+  activeBuildingId: number | 'campus'
+  activeFloorId: number | null  // null when campus is active
+  floorSnapshots: Record<number, { nodes: NavNode[]; edges: NavEdge[] }>
+  campusSnapshot: { nodes: NavNode[]; edges: NavEdge[] } | null
 }
 
 export type EditorAction =
@@ -32,6 +37,9 @@ export type EditorAction =
   | { type: 'DELETE_EDGE'; id: string }
   | { type: 'MARK_SAVED' }
   | { type: 'RESTORE_SNAPSHOT'; snapshot: EditorState }
+  | { type: 'SWITCH_FLOOR'; floorId: number; nodes: NavNode[]; edges: NavEdge[] }
+  | { type: 'SWITCH_TO_CAMPUS'; nodes: NavNode[]; edges: NavEdge[] }
+  | { type: 'SWITCH_BUILDING'; buildingId: number | 'campus' }
 
 // ============================================================
 // Initial State
@@ -45,6 +53,10 @@ const initialState: EditorState = {
   selectedEdgeId: null,
   pendingEdgeSourceId: null,
   isDirty: false,
+  activeBuildingId: 1,        // Default to building 1 (Main Building)
+  activeFloorId: null,        // null until first floor is loaded
+  floorSnapshots: {},
+  campusSnapshot: null,
 }
 
 // ============================================================
@@ -161,6 +173,54 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         ...action.snapshot,
       }
 
+    case 'SWITCH_FLOOR':
+      return {
+        ...state,
+        nodes: action.nodes,
+        edges: action.edges,
+        activeFloorId: action.floorId,
+        activeBuildingId: state.activeBuildingId,
+        mode: 'select',
+        selectedNodeId: null,
+        selectedEdgeId: null,
+        pendingEdgeSourceId: null,
+        isDirty: false,
+        // Cache the loaded floor data in snapshots
+        floorSnapshots: {
+          ...state.floorSnapshots,
+          [action.floorId]: { nodes: action.nodes, edges: action.edges },
+        },
+      }
+
+    case 'SWITCH_TO_CAMPUS':
+      return {
+        ...state,
+        nodes: action.nodes,
+        edges: action.edges,
+        activeBuildingId: 'campus',
+        activeFloorId: null,
+        mode: 'select',
+        selectedNodeId: null,
+        selectedEdgeId: null,
+        pendingEdgeSourceId: null,
+        isDirty: false,
+        campusSnapshot: { nodes: action.nodes, edges: action.edges },
+      }
+
+    case 'SWITCH_BUILDING':
+      return {
+        ...state,
+        activeBuildingId: action.buildingId,
+        activeFloorId: null,
+        nodes: [],
+        edges: [],
+        mode: 'select',
+        selectedNodeId: null,
+        selectedEdgeId: null,
+        pendingEdgeSourceId: null,
+        isDirty: false,
+      }
+
     default:
       return state
   }
@@ -245,6 +305,39 @@ export function useEditorState() {
   const canUndo = historyInfo.step > 0
   const canRedo = historyInfo.step < historyInfo.length - 1
 
+  const switchFloor = (floorId: number, nodes: NavNode[], edges: NavEdge[]) => {
+    dispatch({ type: 'SWITCH_FLOOR', floorId, nodes, edges })
+    // Reset undo history to the new floor's initial state
+    const newState: EditorState = {
+      ...initialState,
+      activeBuildingId: state.activeBuildingId,
+      activeFloorId: floorId,
+      nodes,
+      edges,
+      floorSnapshots: { ...state.floorSnapshots, [floorId]: { nodes, edges } },
+      campusSnapshot: state.campusSnapshot,
+    }
+    history.current = [newState]
+    historyStep.current = 0
+    setHistoryInfo({ step: 0, length: 1 })
+  }
+
+  const switchToCampus = (nodes: NavNode[], edges: NavEdge[]) => {
+    dispatch({ type: 'SWITCH_TO_CAMPUS', nodes, edges })
+    const newState: EditorState = {
+      ...initialState,
+      activeBuildingId: 'campus',
+      activeFloorId: null,
+      nodes,
+      edges,
+      campusSnapshot: { nodes, edges },
+      floorSnapshots: state.floorSnapshots,
+    }
+    history.current = [newState]
+    historyStep.current = 0
+    setHistoryInfo({ step: 0, length: 1 })
+  }
+
   return {
     state,
     dispatch,
@@ -253,5 +346,7 @@ export function useEditorState() {
     handleRedo,
     canUndo,
     canRedo,
+    switchFloor,
+    switchToCampus,
   }
 }
