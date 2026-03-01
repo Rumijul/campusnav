@@ -6,7 +6,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import type { NavGraph, NavNode } from '@shared/types'
 import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import postgres from 'postgres'
 import { Hono } from 'hono'
 import { csrf } from 'hono/csrf'
@@ -287,6 +287,67 @@ app.post('/api/admin/floor-plan', async (c) => {
   } catch (err) {
     console.error('Floor plan upload failed:', err)
     return c.json({ error: 'Failed to upload floor plan' }, 500)
+  }
+})
+
+/**
+ * POST /api/admin/floors
+ * Accepts multipart form with buildingId, floorNumber, image.
+ * Creates the floor record and saves the image atomically.
+ */
+app.post('/api/admin/floors', async (c) => {
+  try {
+    const body = await c.req.parseBody()
+    const buildingId = Number(body.buildingId)
+    const floorNumber = Number(body.floorNumber)
+    const file = body.image
+    if (Number.isNaN(buildingId) || Number.isNaN(floorNumber)) {
+      return c.json({ error: 'Invalid buildingId or floorNumber' }, 400)
+    }
+    if (!file || !(file instanceof File)) return c.json({ error: 'No image file provided' }, 400)
+    if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
+    const filename = `floor-plan-${buildingId}-${floorNumber}.${ext}`
+    const dest = resolve(__dirname, 'assets', filename)
+    const buffer = Buffer.from(await file.arrayBuffer())
+    await writeFile(dest, buffer)
+    const floorRows = await db.insert(floors).values({
+      buildingId,
+      floorNumber,
+      imagePath: filename,
+      updatedAt: new Date().toISOString(),
+    }).returning({ id: floors.id })
+    if (floorRows.length === 0) throw new Error('Failed to insert floor')
+    return c.json({ ok: true, floorId: floorRows[0]!.id })
+  } catch (err) {
+    console.error('Add floor failed:', err)
+    return c.json({ error: 'Failed to add floor' }, 500)
+  }
+})
+
+/**
+ * DELETE /api/admin/floors/:id
+ * Deletes the floor and all its nodes + edges in FK-safe order
+ * (edges first, then nodes, then floor).
+ */
+app.delete('/api/admin/floors/:id', async (c) => {
+  try {
+    const floorId = Number(c.req.param('id'))
+    if (Number.isNaN(floorId)) return c.json({ error: 'Invalid floor id' }, 400)
+    await db.transaction(async (tx) => {
+      const floorNodeIds = await tx.select({ id: nodes.id }).from(nodes).where(eq(nodes.floorId, floorId))
+      const ids = floorNodeIds.map(n => n.id)
+      if (ids.length > 0) {
+        await tx.delete(edges).where(inArray(edges.sourceId, ids))
+        await tx.delete(edges).where(inArray(edges.targetId, ids))
+        await tx.delete(nodes).where(eq(nodes.floorId, floorId))
+      }
+      await tx.delete(floors).where(eq(floors.id, floorId))
+    })
+    return c.json({ ok: true })
+  } catch (err) {
+    console.error('Delete floor failed:', err)
+    return c.json({ error: 'Failed to delete floor' }, 500)
   }
 })
 
