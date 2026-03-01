@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import type { NavGraph } from '@shared/types'
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
+import postgres from 'postgres'
 import { Hono } from 'hono'
 import { csrf } from 'hono/csrf'
 import { jwt } from 'hono/jwt'
@@ -17,9 +19,11 @@ import { seedIfEmpty } from './db/seed'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // ── Startup: migrate then seed ──────────────────────────────────────────────
-// migrate() is synchronous with better-sqlite3; applies only pending migrations
-migrate(db, { migrationsFolder: resolve(__dirname, '../../drizzle') })
-seedIfEmpty()
+// postgres-js migrator is async — use a dedicated short-lived connection (max: 1)
+const migrationClient = postgres(process.env.DATABASE_URL!, { max: 1 })
+await migrate(drizzlePg(migrationClient), { migrationsFolder: resolve(__dirname, '../../drizzle') })
+await migrationClient.end()
+await seedIfEmpty()
 // ────────────────────────────────────────────────────────────────────────────
 
 const app = new Hono()
@@ -66,13 +70,12 @@ app.get('/api/floor-plan/thumbnail', async (c) => {
   }
 })
 
-/** Serve the navigation graph as JSON — queries SQLite via Drizzle. No auth required. */
-app.get('/api/map', (c) => {
+/** Serve the navigation graph as JSON — queries PostgreSQL via Drizzle. No auth required. */
+app.get('/api/map', async (c) => {
   try {
-    // better-sqlite3 is synchronous — no await needed
-    const nodeRows = db.select().from(nodes).all()
-    const edgeRows = db.select().from(edges).all()
-    const metaRows = db.select().from(graphMetadata).limit(1).all()
+    const nodeRows = await db.select().from(nodes)
+    const edgeRows = await db.select().from(edges)
+    const metaRows = await db.select().from(graphMetadata).limit(1)
     const meta = metaRows[0]
 
     if (!meta) return c.json({ error: 'Graph data not found' }, 404)
@@ -125,8 +128,8 @@ app.use('/api/admin/*', jwt({ secret: JWT_SECRET, alg: 'HS256', cookie: 'admin_t
 
 /**
  * POST /api/admin/graph
- * Replaces the entire navigation graph in SQLite atomically.
- * Receives a full NavGraph JSON body; wraps delete+insert in a SQLite transaction.
+ * Replaces the entire navigation graph in PostgreSQL atomically.
+ * Receives a full NavGraph JSON body; wraps delete+insert in a PostgreSQL transaction.
  */
 app.post('/api/admin/graph', async (c) => {
   try {
@@ -136,61 +139,52 @@ app.post('/api/admin/graph', async (c) => {
       return c.json({ error: 'Invalid graph data' }, 400)
     }
 
-    // Use the raw better-sqlite3 connection for synchronous transaction
-    const sqlite = db.$client
-    const txn = sqlite.transaction(() => {
+    await db.transaction(async (tx) => {
       // Delete all existing data
-      db.delete(graphMetadata).run()
-      db.delete(edges).run()
-      db.delete(nodes).run()
+      await tx.delete(graphMetadata)
+      await tx.delete(edges)
+      await tx.delete(nodes)
 
       // Insert nodes
       for (const n of graph.nodes) {
-        db.insert(nodes)
-          .values({
-            id: n.id,
-            x: n.x,
-            y: n.y,
-            label: n.label,
-            type: n.type,
-            searchable: n.searchable,
-            floor: n.floor,
-            roomNumber: n.roomNumber ?? null,
-            description: n.description ?? null,
-            buildingName: n.buildingName ?? null,
-            accessibilityNotes: n.accessibilityNotes ?? null,
-          })
-          .run()
+        await tx.insert(nodes).values({
+          id: n.id,
+          x: n.x,
+          y: n.y,
+          label: n.label,
+          type: n.type,
+          searchable: n.searchable,
+          floor: n.floor,
+          roomNumber: n.roomNumber ?? null,
+          description: n.description ?? null,
+          buildingName: n.buildingName ?? null,
+          accessibilityNotes: n.accessibilityNotes ?? null,
+        })
       }
 
       // Insert edges
       for (const e of graph.edges) {
-        db.insert(edges)
-          .values({
-            id: e.id,
-            sourceId: e.sourceId,
-            targetId: e.targetId,
-            standardWeight: e.standardWeight,
-            accessibleWeight: e.accessibleWeight, // 1e10 for non-accessible (never Infinity)
-            accessible: e.accessible,
-            bidirectional: e.bidirectional,
-            accessibilityNotes: e.accessibilityNotes ?? null,
-          })
-          .run()
+        await tx.insert(edges).values({
+          id: e.id,
+          sourceId: e.sourceId,
+          targetId: e.targetId,
+          standardWeight: e.standardWeight,
+          accessibleWeight: e.accessibleWeight, // 1e10 for non-accessible (never Infinity)
+          accessible: e.accessible,
+          bidirectional: e.bidirectional,
+          accessibilityNotes: e.accessibilityNotes ?? null,
+        })
       }
 
       // Insert metadata
       if (graph.metadata) {
-        db.insert(graphMetadata)
-          .values({
-            buildingName: graph.metadata.buildingName,
-            floor: graph.metadata.floor,
-            lastUpdated: graph.metadata.lastUpdated,
-          })
-          .run()
+        await tx.insert(graphMetadata).values({
+          buildingName: graph.metadata.buildingName,
+          floor: graph.metadata.floor,
+          lastUpdated: graph.metadata.lastUpdated,
+        })
       }
     })
-    txn() // execute the transaction
 
     return c.json({ ok: true })
   } catch (err) {
