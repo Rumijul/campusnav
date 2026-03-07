@@ -64,7 +64,11 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
   - [x] 19-02-PLAN.md — Components: LandmarkMarker dimmed support + FloorTabStrip HTML overlay
   - [x] 19-03-PLAN.md — Wire: FloorPlanCanvas full multi-floor state, filtering, auto-switch
   - [x] 19-04-PLAN.md — Human verification checkpoint (7 browser scenarios — APPROVED)
-- [ ] Phase 20: Deployment (— plans)
+- [ ] Phase 20: Deployment (3 plans)
+  Plans:
+  - [ ] 20-01-PLAN.md — R2 module + port fix + 7 image I/O swaps in src/server/index.ts
+  - [ ] 20-02-PLAN.md — render.yaml complete env vars + .env.example R2 section
+  - [ ] 20-03-PLAN.md — Human checkpoint: Render deploy + 7-step smoke test
 
 </details>
 
@@ -93,4 +97,4 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 17. Multi-floor Pathfinding Engine                  | 4/4       | Complete       | 2026-03-01  | —          |
 | 18. Admin Multi-floor Editor                        | 5/6 | Complete    | 2026-03-07 | —          |
 | 19. Student Floor Tab UI                            | 5/5 | Complete    | 2026-03-07 | 2026-03-07 |
-| 20. Deployment                                      | v1.5      | 0/—            | Not started | —          |
+| 20. Deployment                                      | v1.5      | 0/3            | Not started | —          |
