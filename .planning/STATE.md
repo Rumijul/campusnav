@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: "Completed 20-02: render.yaml and .env.example updated with DATABASE_URL and R2 env vars"
-last_updated: "2026-03-07T16:29:46.817Z"
+stopped_at: "Completed 20-01: R2 image storage wired, port fixed for Render deployment"
+last_updated: "2026-03-07T16:33:23.623Z"
 last_activity: "2026-03-07 — Completed 19-04: Human verified all 7 browser scenarios for the student floor tab UI — default floor on load, manual switching, building selector, route auto-switch, cross-floor browsing, dimmed elevator connector tap, and single-floor campus zero-chrome."
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 25
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 ---
@@ -304,6 +304,7 @@ Last activity: 2026-03-07 — Completed 19-04: Human verified all 7 browser scen
 | Phase 19-student-floor-tab-ui P03 | 3 | 2 tasks | 1 files |
 | Phase 19-student-floor-tab-ui P04 | 0 | 1 task (human-verify) | 0 files |
 | Phase 20-deployment P02 | 41s | 2 tasks | 2 files |
+| Phase 20-deployment P01 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -477,6 +478,8 @@ Recent decisions affecting current work:
 - [Phase 19-03]: showTabStrip guard: graphState.status === loaded AND floorCount > 1 AND !sheetOpen — three conditions enforce all visibility rules
 - [Phase 20-deployment]: DATABASE_URL and 4 R2 env vars added to render.yaml with sync: false — Render Blueprint now prompts for all 8 secrets on import
 - [Phase 20-deployment]: PORT NOT declared in render.yaml — Render injects it automatically; declaring it causes conflicts
+- [Phase 20-deployment]: r2GetBuffer returns Uint8Array<ArrayBuffer> via bytes.slice() — Hono Data type requires concrete ArrayBuffer; transformToByteArray returns ArrayBufferLike
+- [Phase 20-deployment]: requestChecksumCalculation/responseChecksumValidation set to WHEN_REQUIRED — AWS SDK v3.729+ checksum headers rejected by Cloudflare R2
 
 ### Pending Todos
 
@@ -493,7 +496,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T16:29:46.814Z
-Stopped at: Completed 20-02: render.yaml and .env.example updated with DATABASE_URL and R2 env vars
+Last session: 2026-03-07T16:33:23.620Z
+Stopped at: Completed 20-01: R2 image storage wired, port fixed for Render deployment
 Resume file: None
 Next action: /gsd:new-milestone or plan next phase
