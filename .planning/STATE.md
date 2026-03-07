@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: "Completed 19-02: FloorTabStrip component + LandmarkMarker/LandmarkLayer dimming props"
-last_updated: "2026-03-07T11:17:59.866Z"
+stopped_at: "Completed 19-03: FloorPlanCanvas rewired with full multi-floor state management"
+last_updated: "2026-03-07T11:30:50.643Z"
 last_activity: "2026-03-01 — Completed 18-05: Wired full multi-floor editing into MapEditorCanvas — building selector dropdown, sorted floor tabs, auto-save on floor switch, campus mode with empty-state prompt, ManageFloorsModal integration, context-aware handleSave/handleFileChange, and fixed node floorId assignment."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 22
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 ---
@@ -286,6 +286,7 @@ Last activity: 2026-03-01 — Completed 18-05: Wired full multi-floor editing in
 | Phase 19-student-floor-tab-ui P00 | 1 | 1 tasks | 1 files |
 | Phase 19-student-floor-tab-ui P01 | 2 | 2 tasks | 2 files |
 | Phase 19-student-floor-tab-ui P02 | 2min | 2 tasks | 3 files |
+| Phase 19-student-floor-tab-ui P03 | 3 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -454,6 +455,9 @@ Recent decisions affecting current work:
 - [Phase 19-02]: isDimmed opacity applied to Konva Group so circle and label dim together
 - [Phase 19-02]: FloorTabStrip visibility controlled by caller via conditional render — no internal state
 - [Phase 19-02]: z-30 for FloorTabStrip renders below LocationDetailSheet (z-40) and DirectionsSheet (z-50)
+- [Phase 19-03]: floorImageTarget useMemo must precede useFloorPlanImage hook call — React hooks rules; target derived from activeBuilding + activeFloor state
+- [Phase 19-03]: handleLandmarkTap returns early (no detail sheet) when auto-switching floor — avoids opening detail for adjacent-floor elevator taps
+- [Phase 19-03]: showTabStrip guard: graphState.status === loaded AND floorCount > 1 AND !sheetOpen — three conditions enforce all visibility rules
 
 ### Pending Todos
 
@@ -470,7 +474,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T11:17:59.863Z
-Stopped at: Completed 19-02: FloorTabStrip component + LandmarkMarker/LandmarkLayer dimming props
+Last session: 2026-03-07T11:30:50.638Z
+Stopped at: Completed 19-03: FloorPlanCanvas rewired with full multi-floor state management
 Resume file: None
 Next action: /gsd:execute-phase 18 plan 06 (or check if phase is complete)
