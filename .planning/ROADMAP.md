@@ -57,7 +57,13 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
   - [ ] 18-04-PLAN.md — ManageFloorsModal + EditorToolbar + EditorSidePanel + NodeMarkerLayer
   - [ ] 18-05-PLAN.md — MapEditorCanvas full rewire (building selector, floor tabs, auto-save, campus mode)
   - [ ] 18-06-PLAN.md — Human verification checkpoint
-- [ ] Phase 19: Student Floor Tab UI (— plans)
+- [ ] Phase 19: Student Floor Tab UI (5 plans)
+  Plans:
+  - [ ] 19-00-PLAN.md — Wave 0: useFloorFiltering.test.ts stub (TDD RED state)
+  - [ ] 19-01-PLAN.md — TDD: useFloorFiltering pure functions + useFloorPlanImage parameterization
+  - [ ] 19-02-PLAN.md — Components: LandmarkMarker dimmed support + FloorTabStrip HTML overlay
+  - [ ] 19-03-PLAN.md — Wire: FloorPlanCanvas full multi-floor state, filtering, auto-switch
+  - [ ] 19-04-PLAN.md — Human verification checkpoint (7 browser scenarios)
 - [ ] Phase 20: Deployment (— plans)
 
 </details>
@@ -86,5 +92,5 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 16. Multi-floor Data Model                          | 4/4       | Complete       | 2026-03-01  | 2026-03-01 |
 | 17. Multi-floor Pathfinding Engine                  | 4/4       | Complete       | 2026-03-01  | —          |
 | 18. Admin Multi-floor Editor                        | 5/6 | Complete    | 2026-03-07 | —          |
-| 19. Student Floor Tab UI                            | v1.5      | 0/—            | Not started | —          |
+| 19. Student Floor Tab UI                            | v1.5      | 0/5            | Not started | —          |
 | 20. Deployment                                      | v1.5      | 0/—            | Not started | —          |
