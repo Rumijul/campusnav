@@ -16,6 +16,8 @@ interface LandmarkLayerProps {
   onSelectNode: (node: NavNode) => void
   /** Node IDs to exclude from rendering (e.g. start/dest nodes replaced by A/B pins) */
   hiddenNodeIds?: string[]
+  /** Node IDs to render at reduced opacity (e.g. elevator nodes on adjacent floors) */
+  dimmedNodeIds?: Set<string>
 }
 
 /* ──────────────── Component ──────────────── */
@@ -27,6 +29,7 @@ export function LandmarkLayer({
   selectedNodeId,
   onSelectNode,
   hiddenNodeIds,
+  dimmedNodeIds,
 }: LandmarkLayerProps) {
   // Image not yet loaded — no markers
   if (imageRect === null) return null
@@ -46,6 +49,7 @@ export function LandmarkLayer({
           isSelected={node.id === selectedNodeId}
           isLabelVisible={node.id === selectedNodeId || stageScale >= 2.0}
           onClick={() => onSelectNode(node)}
+          isDimmed={dimmedNodeIds?.has(node.id) ?? false}
         />
       ))}
     </Layer>

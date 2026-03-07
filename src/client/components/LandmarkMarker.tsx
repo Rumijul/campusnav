@@ -22,6 +22,7 @@ interface LandmarkMarkerProps {
   isSelected: boolean
   isLabelVisible: boolean // true when selected OR stageScale >= 2.0
   onClick: () => void
+  isDimmed?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -33,6 +34,7 @@ export function LandmarkMarker({
   isSelected,
   isLabelVisible,
   onClick,
+  isDimmed,
 }: LandmarkMarkerProps) {
   // Convert normalized coordinates to pixel position
   const pixelX = imageRect.x + node.x * imageRect.width
@@ -42,7 +44,7 @@ export function LandmarkMarker({
   const radius = isSelected ? SCREEN_RADIUS * 1.4 : SCREEN_RADIUS
 
   return (
-    <Group x={pixelX} y={pixelY} scaleX={scale} scaleY={scale} onClick={onClick} onTap={onClick}>
+    <Group x={pixelX} y={pixelY} scaleX={scale} scaleY={scale} onClick={onClick} onTap={onClick} opacity={isDimmed ? 0.35 : 1}>
       <Circle
         radius={radius}
         fill={fill}
