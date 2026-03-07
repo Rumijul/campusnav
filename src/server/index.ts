@@ -1,6 +1,7 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { r2GetBuffer, r2PutBuffer } from './r2'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import type { NavGraph, NavNode } from '@shared/types'
@@ -54,52 +55,39 @@ app.get('/api/floor-plan/:buildingId/:floorNumber', async (c) => {
 
     if (!floorRow) return c.json({ error: 'Floor not found' }, 404)
 
-    const filePath = resolve(__dirname, 'assets', floorRow.imagePath)
-    const buffer = await readFile(filePath)
+    const buffer = await r2GetBuffer(floorRow.imagePath)
     // Detect content type from extension
     const ext = floorRow.imagePath.split('.').pop()?.toLowerCase()
     const contentType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
     c.header('Content-Type', contentType)
     c.header('Cache-Control', 'public, max-age=3600')
     return c.body(buffer)
-  } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code
-    if (code === 'ENOENT') return c.json({ error: 'Floor plan image not found' }, 404)
-    return c.json({ error: 'Failed to read floor plan' }, 500)
+  } catch (_err) {
+    return c.json({ error: 'Floor plan image not found' }, 404)
   }
 })
 
 /** Serve the full-resolution floor plan PNG. */
 app.get('/api/floor-plan/image', async (c) => {
   try {
-    const filePath = resolve(__dirname, 'assets/floor-plan.png')
-    const buffer = await readFile(filePath)
+    const buffer = await r2GetBuffer('floor-plan.png')
     c.header('Content-Type', 'image/png')
     c.header('Cache-Control', 'public, max-age=3600')
     return c.body(buffer)
-  } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code
-    if (code === 'ENOENT') {
-      return c.json({ error: 'Floor plan not found' }, 404)
-    }
-    return c.json({ error: 'Failed to read floor plan' }, 500)
+  } catch (_err) {
+    return c.json({ error: 'Floor plan not found' }, 404)
   }
 })
 
 /** Serve the low-resolution floor plan thumbnail JPEG. */
 app.get('/api/floor-plan/thumbnail', async (c) => {
   try {
-    const filePath = resolve(__dirname, 'assets/floor-plan-thumb.jpg')
-    const buffer = await readFile(filePath)
+    const buffer = await r2GetBuffer('floor-plan-thumb.jpg')
     c.header('Content-Type', 'image/jpeg')
     c.header('Cache-Control', 'public, max-age=3600')
     return c.body(buffer)
-  } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code
-    if (code === 'ENOENT') {
-      return c.json({ error: 'Floor plan thumbnail not found' }, 404)
-    }
-    return c.json({ error: 'Failed to read floor plan thumbnail' }, 500)
+  } catch (_err) {
+    return c.json({ error: 'Floor plan thumbnail not found' }, 404)
   }
 })
 
@@ -112,17 +100,14 @@ app.get('/api/campus/image', async (c) => {
     const [campusFloor] = await db.select({ imagePath: floors.imagePath }).from(floors)
       .where(and(eq(floors.buildingId, campusBuilding.id), eq(floors.floorNumber, 0))).limit(1)
     if (!campusFloor) return c.json({ error: 'Campus map not found' }, 404)
-    const filePath = resolve(__dirname, 'assets', campusFloor.imagePath)
-    const buffer = await readFile(filePath)
+    const buffer = await r2GetBuffer(campusFloor.imagePath)
     const ext = campusFloor.imagePath.split('.').pop()?.toLowerCase()
     const contentType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
     c.header('Content-Type', contentType)
     c.header('Cache-Control', 'public, max-age=3600')
     return c.body(buffer)
-  } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code
-    if (code === 'ENOENT') return c.json({ error: 'Campus map image not found' }, 404)
-    return c.json({ error: 'Failed to read campus map' }, 500)
+  } catch (_err) {
+    return c.json({ error: 'Campus map image not found' }, 404)
   }
 })
 
@@ -304,8 +289,7 @@ app.post('/api/admin/floor-plan', async (c) => {
       return c.json({ error: 'File must be an image' }, 400)
     }
     const buffer = Buffer.from(await file.arrayBuffer())
-    const dest = resolve(__dirname, 'assets/floor-plan.png')
-    await writeFile(dest, buffer)
+    await r2PutBuffer('floor-plan.png', buffer, file.type)
     return c.json({ ok: true })
   } catch (err) {
     console.error('Floor plan upload failed:', err)
@@ -331,9 +315,8 @@ app.post('/api/admin/floors', async (c) => {
     if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
     const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
     const filename = `floor-plan-${buildingId}-${floorNumber}.${ext}`
-    const dest = resolve(__dirname, 'assets', filename)
     const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(dest, buffer)
+    await r2PutBuffer(filename, buffer, file.type)
     const floorRows = await db.insert(floors).values({
       buildingId,
       floorNumber,
@@ -392,9 +375,8 @@ app.post('/api/admin/floor-plan/:buildingId/:floorNumber', async (c) => {
     if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
     const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
     const filename = `floor-plan-${buildingId}-${floorNumber}.${ext}`
-    const dest = resolve(__dirname, 'assets', filename)
     const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(dest, buffer)
+    await r2PutBuffer(filename, buffer, file.type)
     await db.update(floors)
       .set({ imagePath: filename, updatedAt: new Date().toISOString() })
       .where(and(eq(floors.buildingId, buildingId), eq(floors.floorNumber, floorNumber)))
@@ -418,9 +400,8 @@ app.post('/api/admin/campus/image', async (c) => {
     if (!file.type.startsWith('image/')) return c.json({ error: 'File must be an image' }, 400)
     const ext = file.name.split('.').pop()?.toLowerCase() ?? 'png'
     const filename = `campus-map.${ext}`
-    const dest = resolve(__dirname, 'assets', filename)
     const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(dest, buffer)
+    await r2PutBuffer(filename, buffer, file.type)
     // Upsert Campus building
     let [campusBuilding] = await db.select({ id: buildings.id }).from(buildings)
       .where(eq(buildings.name, 'Campus')).limit(1)
@@ -460,6 +441,6 @@ app.get('/*', async (c) => {
   return c.html(html)
 })
 
-const port = 3001
+const port = Number(process.env.PORT) || 3001
 console.log(`Server running on http://localhost:${port}`)
 serve({ fetch: app.fetch, port })

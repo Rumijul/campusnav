@@ -25,11 +25,13 @@ export const BUCKET = process.env.R2_BUCKET_NAME!
  * Download an R2 object as a Node.js Buffer.
  * In AWS SDK v3, Body is a ReadableStream — use transformToByteArray().
  */
-export async function r2GetBuffer(key: string): Promise<Buffer> {
+export async function r2GetBuffer(key: string): Promise<Uint8Array<ArrayBuffer>> {
   const result = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
   if (!result.Body) throw new Error(`R2 object not found: ${key}`)
+  // transformToByteArray returns Uint8Array<ArrayBufferLike>; .slice() gives Uint8Array<ArrayBuffer>
+  // which satisfies Hono's Data type constraint for c.body().
   const bytes = await result.Body.transformToByteArray()
-  return Buffer.from(bytes)
+  return bytes.slice()
 }
 
 /** Upload a Buffer to R2 with the given content type. */
