@@ -1,10 +1,11 @@
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
-import type { NavFloor, NavNode } from '@shared/types'
+import type { NavBuilding, NavFloor, NavNode } from '@shared/types'
 import type Konva from 'konva'
 import KonvaModule from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
+import { filterNodesByActiveFloor, filterRouteSegmentByFloor, totalFloorCount } from '../hooks/useFloorFiltering'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
 import { useGraphData } from '../hooks/useGraphData'
 import { useMapViewport } from '../hooks/useMapViewport'
@@ -13,6 +14,7 @@ import { useRouteSelection } from '../hooks/useRouteSelection'
 import { useViewportSize } from '../hooks/useViewportSize'
 import { DirectionsSheet } from './DirectionsSheet'
 import FloorPlanImage from './FloorPlanImage'
+import { FloorTabStrip } from './FloorTabStrip'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
 import { LocationDetailSheet } from './LocationDetailSheet'
@@ -39,7 +41,11 @@ interface RouteResult {
  */
 export default function FloorPlanCanvas() {
   const { width, height } = useViewportSize()
-  const { image, isLoading, isFailed, isFullLoaded } = useFloorPlanImage()
+
+  // ── Active floor/building state ──
+  const [activeBuildingId, setActiveBuildingId] = useState<number | 'campus' | null>(null)
+  const [activeFloorId, setActiveFloorId] = useState<number | null>(null)
+
   const stageRef = useRef<Konva.Stage>(null)
   const [imageRect, setImageRect] = useState<{
     x: number
@@ -66,6 +72,55 @@ export default function FloorPlanCanvas() {
   const [toast, setToast] = useState<{ message: string; isError: boolean } | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // ── All buildings from the graph ──
+  const allBuildings = useMemo<NavBuilding[]>(() => {
+    if (graphState.status !== 'loaded') return []
+    return graphState.data.buildings
+  }, [graphState])
+
+  // Non-campus buildings for the building selector
+  const nonCampusBuildings = useMemo(
+    () => allBuildings.filter(b => b.name !== 'Campus'),
+    [allBuildings],
+  )
+
+  // Campus building (may be undefined — only present if admin uploaded campus map)
+  const campusBuilding = useMemo(
+    () => allBuildings.find(b => b.name === 'Campus'),
+    [allBuildings],
+  )
+
+  // The active NavBuilding object
+  const activeBuilding = useMemo(() => {
+    if (activeBuildingId === 'campus') return campusBuilding
+    if (activeBuildingId === null) return undefined
+    return allBuildings.find(b => b.id === activeBuildingId)
+  }, [activeBuildingId, allBuildings, campusBuilding])
+
+  // Sorted floors for the active building (for floor tab buttons)
+  const sortedActiveFloors = useMemo(
+    () => (activeBuilding?.floors ?? []).slice().sort((a, b) => a.floorNumber - b.floorNumber),
+    [activeBuilding],
+  )
+
+  // The currently active NavFloor object
+  const activeFloor = useMemo(
+    () => sortedActiveFloors.find(f => f.id === activeFloorId) ?? null,
+    [sortedActiveFloors, activeFloorId],
+  )
+
+  // Floor count across all buildings — used to show/hide the tab strip
+  const floorCount = useMemo(() => totalFloorCount(allBuildings), [allBuildings])
+
+  // Compute target for useFloorPlanImage — must be stable (not constructed inline) to avoid hook dependency issues
+  const floorImageTarget = useMemo<{ buildingId: number; floorNumber: number } | 'campus' | undefined>(() => {
+    if (activeBuildingId === 'campus') return 'campus'
+    if (!activeBuilding || !activeFloor) return undefined
+    return { buildingId: activeBuilding.id, floorNumber: activeFloor.floorNumber }
+  }, [activeBuildingId, activeBuilding, activeFloor])
+
+  const { image, isLoading, isFailed, isFullLoaded } = useFloorPlanImage(floorImageTarget)
+
   // Get nodes array when graph is loaded — flatten from buildings → floors → nodes
   const nodes = useMemo(() => {
     if (graphState.status !== 'loaded') return []
@@ -84,6 +139,15 @@ export default function FloorPlanCanvas() {
       graphState.data.buildings.flatMap((b) => b.floors).map((f) => [f.id, f]),
     )
   }, [graphState])
+
+  // Show tab strip: only when > 1 total floor AND DirectionsSheet is closed
+  const showTabStrip = graphState.status === 'loaded' && floorCount > 1 && !sheetOpen
+
+  // Filtered nodes for LandmarkLayer — active floor + dimmed adjacent elevator connectors
+  const { nodes: filteredNodes, dimmedNodeIds } = useMemo(() => {
+    if (!activeFloor) return { nodes: [] as NavNode[], dimmedNodeIds: new Set<string>() }
+    return filterNodesByActiveFloor(nodes, activeFloor.id)
+  }, [nodes, activeFloor])
 
   // Compute turn-by-turn directions for each mode
   const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard', floorMap)
@@ -121,6 +185,22 @@ export default function FloorPlanCanvas() {
       fitToScreen(width, height, true)
     }
   }, [width, height])
+
+  // Default initialization — on first graph load, set active floor to Floor 1 of first non-campus building
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initialize once on first load
+  useEffect(() => {
+    if (graphState.status !== 'loaded') return
+    if (activeFloorId !== null) return // already initialized
+    const firstBuilding = graphState.data.buildings.find(b => b.name !== 'Campus')
+    if (!firstBuilding) return
+    const floor1 = firstBuilding.floors
+      .slice()
+      .sort((a, b) => a.floorNumber - b.floorNumber)[0]
+    if (floor1) {
+      setActiveBuildingId(firstBuilding.id)
+      setActiveFloorId(floor1.id)
+    }
+  }, [graphState.status])
 
   /** Show a toast notification that auto-dismisses after 3 seconds */
   const showToast = useCallback((message: string, isError = false) => {
@@ -186,6 +266,37 @@ export default function FloorPlanCanvas() {
     [imageRect, width, height],
   )
 
+  /** Switch to a new floor — updates state and re-fits the canvas */
+  const handleFloorSwitch = useCallback(
+    (floor: NavFloor) => {
+      const building = allBuildings.find(b => b.floors.some(f => f.id === floor.id))
+      if (building) setActiveBuildingId(building.id)
+      setActiveFloorId(floor.id)
+      fitToScreen(width, height, true)
+    },
+    [allBuildings, width, height, fitToScreen],
+  )
+
+  /** Switch to a different building — defaults to Floor 1 (or campus floor) */
+  const handleBuildingSwitch = useCallback(
+    (id: number | 'campus') => {
+      setActiveBuildingId(id)
+      if (id === 'campus') {
+        // Campus has exactly one map — no floor tabs. Set activeFloorId to campus floor id.
+        const campusBld = allBuildings.find(b => b.name === 'Campus')
+        const campusFloor = campusBld?.floors[0]
+        if (campusFloor) setActiveFloorId(campusFloor.id)
+      } else {
+        // Switch to floor 1 (lowest floorNumber) of the newly selected building
+        const bld = allBuildings.find(b => b.id === id)
+        const firstFloor = bld?.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
+        if (firstFloor) setActiveFloorId(firstFloor.id)
+        fitToScreen(width, height, true)
+      }
+    },
+    [allBuildings, width, height, fitToScreen],
+  )
+
   /** Compute route and trigger auto-pan when both start and destination are set */
   const handleRouteTrigger = useCallback(() => {
     if (!routeSelection.start || !routeSelection.destination || !engine) return
@@ -211,10 +322,16 @@ export default function FloorPlanCanvas() {
       setRouteVisible(true)
       setActiveMode('standard')
       showToast('Route calculated')
+
+      // Auto-switch to start node's floor so student sees where journey begins
+      if (routeSelection.start) {
+        const startFloor = floorMap.get(routeSelection.start.floorId)
+        if (startFloor) handleFloorSwitch(startFloor)
+      }
     } else {
       showToast('No route found', true)
     }
-  }, [routeSelection.start, routeSelection.destination, engine, fitToBounds, showToast])
+  }, [routeSelection.start, routeSelection.destination, engine, fitToBounds, showToast, floorMap, handleFloorSwitch])
 
   // Clear route result and close sheet when selections change (start or dest cleared)
   useEffect(() => {
@@ -237,13 +354,22 @@ export default function FloorPlanCanvas() {
     setSheetOpen(false)
   }, [])
 
-  /** Combined landmark tap handler: show detail sheet AND feed route selection */
+  /** Combined landmark tap handler: show detail sheet AND feed route selection.
+   *  Also auto-switches floor when tapping a dimmed elevator connector. */
   const handleLandmarkTap = useCallback(
     (node: NavNode) => {
+      // Auto-switch floor when tapping a node on a different floor (e.g. dimmed elevator connector)
+      if (activeFloor && node.floorId !== activeFloor.id) {
+        const targetFloor = floorMap.get(node.floorId)
+        if (targetFloor) {
+          handleFloorSwitch(targetFloor)
+          return // Don't open detail sheet on auto-switch tap
+        }
+      }
       setDetailNode(node)
       routeSelection.setFromTap(node)
     },
-    [routeSelection],
+    [routeSelection, activeFloor, floorMap, handleFloorSwitch],
   )
 
   /** Convert node IDs to flat pixel coordinate array for RouteLayer */
@@ -261,12 +387,14 @@ export default function FloorPlanCanvas() {
     [imageRect, nodeMap],
   )
 
+  // Active route points — filtered to the currently active floor only
   const activeRoutePoints = useMemo(() => {
-    if (!routeResult) return []
+    if (!routeResult || !activeFloor) return []
     const result = activeMode === 'standard' ? routeResult.standard : routeResult.accessible
     if (!result.found) return []
-    return buildRoutePoints(result.nodeIds)
-  }, [routeResult, activeMode, buildRoutePoints])
+    const floorNodeIds = filterRouteSegmentByFloor(result.nodeIds, nodeMap, activeFloor.id)
+    return buildRoutePoints(floorNodeIds)
+  }, [routeResult, activeMode, activeFloor, nodeMap, buildRoutePoints])
 
   const activeRouteColor = activeMode === 'standard' ? '#3b82f6' : '#22c55e'
 
@@ -339,14 +467,15 @@ export default function FloorPlanCanvas() {
           visible={routeVisible && activeRoutePoints.length >= 4}
         />
 
-        {/* Landmarks — markers above floor plan image */}
+        {/* Landmarks — markers above floor plan image, filtered to active floor */}
         <LandmarkLayer
-          nodes={nodes}
+          nodes={filteredNodes}
           imageRect={imageRect}
           stageScale={stageScale}
           selectedNodeId={null}
           onSelectNode={handleLandmarkTap}
           hiddenNodeIds={hiddenNodeIds}
+          dimmedNodeIds={dimmedNodeIds}
         />
 
         {/* Selection pins — A/B labeled markers above landmarks */}
@@ -414,7 +543,15 @@ export default function FloorPlanCanvas() {
         (routeResult.standard.found || routeResult.accessible.found) && (
           <div
             className="absolute left-3 z-20 bg-white/90 backdrop-blur-sm rounded-lg shadow px-3 py-2 flex flex-col gap-1.5 text-xs"
-            style={{ bottom: sheetOpen ? '276px' : detailNode !== null ? '196px' : '16px' }}
+            style={{
+              bottom: sheetOpen
+                ? '276px'
+                : detailNode !== null
+                  ? '196px'
+                  : showTabStrip
+                    ? '64px'   // 48px strip height + 16px gap
+                    : '16px'
+            }}
           >
             {routeResult.standard.found && (
               <div className="flex items-center gap-2">
@@ -446,6 +583,19 @@ export default function FloorPlanCanvas() {
         >
           {toast.message}
         </div>
+      )}
+
+      {/* Floor tab strip — hidden when DirectionsSheet is open or only 1 floor total */}
+      {showTabStrip && (
+        <FloorTabStrip
+          buildings={nonCampusBuildings}
+          campusBuilding={campusBuilding}
+          activeBuildingId={activeBuildingId}
+          activeFloorId={activeFloorId}
+          sortedFloors={sortedActiveFloors}
+          onBuildingSwitch={handleBuildingSwitch}
+          onFloorSwitch={handleFloorSwitch}
+        />
       )}
     </div>
   )
