@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: "Completed 19-00: useFloorFiltering test stubs (RED state)"
-last_updated: "2026-03-07T11:14:21.914Z"
+stopped_at: "Completed 19-02: FloorTabStrip component + LandmarkMarker/LandmarkLayer dimming props"
+last_updated: "2026-03-07T11:17:59.866Z"
 last_activity: "2026-03-01 — Completed 18-05: Wired full multi-floor editing into MapEditorCanvas — building selector dropdown, sorted floor tabs, auto-save on floor switch, campus mode with empty-state prompt, ManageFloorsModal integration, context-aware handleSave/handleFileChange, and fixed node floorId assignment."
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 22
-  completed_plans: 18
+  completed_plans: 20
 ---
 
 ---
@@ -284,6 +284,8 @@ Last activity: 2026-03-01 — Completed 18-05: Wired full multi-floor editing in
 | Phase 18-admin-multi-floor-editor P04 | 5 | 2 tasks | 4 files |
 | Phase 18-admin-multi-floor-editor P05 | 3 | 2 tasks | 1 files |
 | Phase 19-student-floor-tab-ui P00 | 1 | 1 tasks | 1 files |
+| Phase 19-student-floor-tab-ui P01 | 2 | 2 tasks | 2 files |
+| Phase 19-student-floor-tab-ui P02 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -446,6 +448,12 @@ Recent decisions affecting current work:
 - [Phase 18-05]: loadNavGraph wrapped in useCallback for re-call from ManageFloorsModal operations; handleSave context-aware for campus vs floor; handleFileChange routes to /api/admin/campus/image when campus active
 - [Phase 19-student-floor-tab-ui]: Elevator nodes from adjacent floors appear dimmed on active floor; stairs/ramps do NOT appear (filterNodesByActiveFloor returns {nodes, dimmedNodeIds: Set<string>})
 - [Phase 19-student-floor-tab-ui]: totalFloorCount sums all floors across all buildings — single-floor campuses return 1 and hide tab UI
+- [Phase 19-student-floor-tab-ui]: filterNodesByActiveFloor includes only elevator type from adjacent floors (not stairs/ramp) — student-visible connector rule enforced in pure function
+- [Phase 19-student-floor-tab-ui]: useFloorPlanImage uses unconditional useImage calls with sentinel '' URL for unused slots — React hooks rules compliance with optional target param
+- [Phase 19-student-floor-tab-ui]: useFloorPlanImage target=undefined (legacy) path preserved exactly — backward-compatible so FloorPlanCanvas needs no change until Plan 03 wires it
+- [Phase 19-02]: isDimmed opacity applied to Konva Group so circle and label dim together
+- [Phase 19-02]: FloorTabStrip visibility controlled by caller via conditional render — no internal state
+- [Phase 19-02]: z-30 for FloorTabStrip renders below LocationDetailSheet (z-40) and DirectionsSheet (z-50)
 
 ### Pending Todos
 
@@ -462,7 +470,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T11:14:21.911Z
-Stopped at: Completed 19-00: useFloorFiltering test stubs (RED state)
+Last session: 2026-03-07T11:17:59.863Z
+Stopped at: Completed 19-02: FloorTabStrip component + LandmarkMarker/LandmarkLayer dimming props
 Resume file: None
 Next action: /gsd:execute-phase 18 plan 06 (or check if phase is complete)
