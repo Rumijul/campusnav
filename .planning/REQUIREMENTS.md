@@ -30,9 +30,9 @@ Requirements for the General Support Update milestone. Each maps to roadmap phas
 
 ### Deployment
 
-- [ ] **DEPL-01**: Frontend deployed to a free always-on CDN (e.g., Netlify or Vercel)
-- [ ] **DEPL-02**: Backend API deployed to a free always-on hosting service (e.g., Railway or Render)
-- [ ] **DEPL-03**: Database running on a free cloud PostgreSQL service (e.g., Neon)
+- [x] **DEPL-01**: Frontend deployed to a free always-on CDN (e.g., Netlify or Vercel)
+- [x] **DEPL-02**: Backend API deployed to a free always-on hosting service (e.g., Railway or Render)
+- [x] **DEPL-03**: Database running on a free cloud PostgreSQL service (e.g., Neon)
 
 ## Future Requirements
 
@@ -67,9 +67,9 @@ Which phases cover which requirements.
 | MFLR-05 | Phase 19: Student Floor Tab UI | Complete |
 | MFLR-06 | Phase 19: Student Floor Tab UI | Complete |
 | CAMP-05 | Phase 19: Student Floor Tab UI | Complete |
-| DEPL-01 | Phase 20: Deployment | Pending |
-| DEPL-02 | Phase 20: Deployment | Pending |
-| DEPL-03 | Phase 20: Deployment | Pending |
+| DEPL-01 | Phase 20: Deployment | Complete |
+| DEPL-02 | Phase 20: Deployment | Complete |
+| DEPL-03 | Phase 20: Deployment | Complete |
 
 **Coverage:**
 - v1.5 requirements: 15 total
