@@ -19,7 +19,6 @@ import {
   useEditorState,
 } from '../../hooks/useEditorState'
 import { useMapViewport } from '../../hooks/useMapViewport'
-import { useViewportSize } from '../../hooks/useViewportSize'
 
 /* ──────────────── Props ──────────────── */
 
@@ -30,13 +29,27 @@ interface MapEditorCanvasProps {
 /* ──────────────── Component ──────────────── */
 
 export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
-  const { width, height } = useViewportSize()
   const { state, dispatch, recordHistory, handleUndo, handleRedo, canUndo, canRedo, switchFloor, switchToCampus } =
     useEditorState()
 
   const stageRef = useRef<Konva.Stage>(null)
   const floorPlanLayerRef = useRef<Konva.Layer>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    const el = canvasContainerRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (!entry) return
+      const { width, height } = entry.contentRect
+      setCanvasSize({ width, height })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const [activeTab, setActiveTab] = useState<'map' | 'data'>('map')
   const [activeSubTab, setActiveSubTab] = useState<'nodes' | 'edges'>('nodes')
@@ -56,8 +69,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const [manageFloorsOpen, setManageFloorsOpen] = useState(false)
   const [isSavingFloor, setIsSavingFloor] = useState(false)
 
-  // Compute editor viewport height (full height minus toolbar ~52px)
-  const editorHeight = height
+  const canvasWidth = canvasSize.width
+  const canvasHeight = canvasSize.height
 
   // Load floor plan image via use-image
   const [image, imageStatus] = useImage(floorPlanUrl)
@@ -489,13 +502,13 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
 
       {/* Map panel — mounted but hidden when Data tab is active */}
       <div
-        className={activeTab !== 'map' ? 'hidden' : 'relative flex-1'}
-        style={{ width, height: editorHeight - 52 }}
+        ref={canvasContainerRef}
+        className={activeTab !== 'map' ? 'hidden' : 'relative flex-1 overflow-hidden'}
       >
         <Stage
           ref={stageRef}
-          width={width}
-          height={editorHeight - 52}
+          width={canvasWidth}
+          height={canvasHeight}
           draggable={state.mode === 'select'}
           onClick={handleStageClick}
           onMouseMove={handleMouseMove}
@@ -511,8 +524,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
               <FloorPlanImage
                 image={image}
                 isFullLoaded={isFullLoaded}
-                viewportWidth={width}
-                viewportHeight={editorHeight - 52}
+                viewportWidth={canvasWidth}
+                viewportHeight={canvasHeight}
                 onImageRectChange={setImageRect}
                 onClick={() => {
                   if (state.mode === 'select') {
@@ -660,8 +673,30 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           buildingId={activeBuilding.id}
           floors={activeBuilding.floors}
           onClose={() => setManageFloorsOpen(false)}
-          onFloorAdded={() => { setManageFloorsOpen(false); loadNavGraph() }}
-          onFloorDeleted={() => { setManageFloorsOpen(false); loadNavGraph() }}
+          onFloorAdded={(newFloor) => {
+            setManageFloorsOpen(false)
+            setNavGraph((prev) => {
+              if (!prev || !activeBuilding) return prev
+              return {
+                buildings: prev.buildings.map((b) =>
+                  b.id === activeBuilding.id ? { ...b, floors: [...b.floors, newFloor] } : b,
+                ),
+              }
+            })
+          }}
+          onFloorDeleted={(floorId) => {
+            setManageFloorsOpen(false)
+            setNavGraph((prev) => {
+              if (!prev || !activeBuilding) return prev
+              return {
+                buildings: prev.buildings.map((b) =>
+                  b.id === activeBuilding.id
+                    ? { ...b, floors: b.floors.filter((f) => f.id !== floorId) }
+                    : b,
+                ),
+              }
+            })
+          }}
           onFloorImageReplaced={() => { loadNavGraph() }}
         />
       )}

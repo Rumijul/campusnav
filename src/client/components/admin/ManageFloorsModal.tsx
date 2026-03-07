@@ -8,8 +8,8 @@ interface ManageFloorsModalProps {
   buildingId: number
   floors: NavFloor[]
   onClose: () => void
-  onFloorAdded: () => void
-  onFloorDeleted: () => void
+  onFloorAdded: (floor: NavFloor) => void
+  onFloorDeleted: (floorId: number) => void
   onFloorImageReplaced: () => void
 }
 
@@ -65,7 +65,7 @@ export default function ManageFloorsModal({
         method: 'DELETE',
         credentials: 'include',
       })
-      onFloorDeleted()
+      onFloorDeleted(floor.id)
     } finally {
       setIsSaving(false)
     }
@@ -80,17 +80,27 @@ export default function ManageFloorsModal({
       formData.append('buildingId', String(buildingId))
       formData.append('floorNumber', newFloorNumber)
       formData.append('image', newFloorFile)
-      await fetch('/api/admin/floors', {
+      const res = await fetch('/api/admin/floors', {
         method: 'POST',
         credentials: 'include',
         body: formData,
       })
+      const { floorId } = await res.json() as { ok: boolean; floorId: number }
+      const ext = newFloorFile.name.split('.').pop()?.toLowerCase() ?? 'png'
+      const newFloor: NavFloor = {
+        id: floorId,
+        floorNumber: Number(newFloorNumber),
+        imagePath: `floor-plan-${buildingId}-${newFloorNumber}.${ext}`,
+        updatedAt: new Date().toISOString(),
+        nodes: [],
+        edges: [],
+      }
       setNewFloorNumber('')
       setNewFloorFile(null)
       if (newFloorFileInputRef.current) {
         newFloorFileInputRef.current.value = ''
       }
-      onFloorAdded()
+      onFloorAdded(newFloor)
     } finally {
       setIsSaving(false)
     }
