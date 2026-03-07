@@ -327,7 +327,10 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(graph),
       })
-      if (res.ok) dispatch({ type: 'MARK_SAVED' })
+      if (res.ok) {
+        dispatch({ type: 'MARK_SAVED' })
+        setNavGraph({ buildings: navGraph!.buildings.map((b) => b.name === 'Campus' ? { ...b, floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }] } : b) })
+      }
     } else {
       // Building/floor save: wrap active floor nodes into the full NavGraph
       if (!navGraph || !activeBuilding || state.activeFloorId === null) return
@@ -348,7 +351,10 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(graph),
       })
-      if (res.ok) dispatch({ type: 'MARK_SAVED' })
+      if (res.ok) {
+        dispatch({ type: 'MARK_SAVED' })
+        setNavGraph({ buildings: updatedBuildings })
+      }
     }
   }, [isCampusActive, navGraph, activeBuilding, state.activeFloorId, state.nodes, state.edges, dispatch])
 
