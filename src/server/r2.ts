@@ -1,0 +1,45 @@
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+
+/**
+ * Cloudflare R2 S3-compatible client.
+ *
+ * IMPORTANT: requestChecksumCalculation and responseChecksumValidation must be
+ * set to 'WHEN_REQUIRED' for compatibility with R2 on AWS SDK v3.729+.
+ * Without this, SDK adds x-amz-checksum-crc32 headers that R2 rejects with 400/501.
+ * Source: https://community.cloudflare.com/t/aws-sdk-client-s3-v3-729-0-breaks-uploadpart-and-putobject-r2-s3-api-compatibility/758637
+ */
+export const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
+})
+
+export const BUCKET = process.env.R2_BUCKET_NAME!
+
+/**
+ * Download an R2 object as a Node.js Buffer.
+ * In AWS SDK v3, Body is a ReadableStream — use transformToByteArray().
+ */
+export async function r2GetBuffer(key: string): Promise<Buffer> {
+  const result = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
+  if (!result.Body) throw new Error(`R2 object not found: ${key}`)
+  const bytes = await result.Body.transformToByteArray()
+  return Buffer.from(bytes)
+}
+
+/** Upload a Buffer to R2 with the given content type. */
+export async function r2PutBuffer(key: string, buffer: Buffer, contentType: string): Promise<void> {
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  )
+}
