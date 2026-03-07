@@ -49,7 +49,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
   - [ ] 17-02-PLAN.md — TDD: Cross-floor A* heuristic + pathfinding tests
   - [ ] 17-03-PLAN.md — TDD: Floor-change direction steps in generateDirections
   - [ ] 17-04-PLAN.md — Wire: FloorPlanCanvas floorMap + useRouteDirections call sites
-- [ ] Phase 18: Admin Multi-floor Editor (6 plans)
+- [x] Phase 18: Admin Multi-floor Editor (6 plans) (completed 2026-03-07)
   Plans:
   - [ ] 18-01-PLAN.md — DB schema migration + types extension (connectsToBuildingId)
   - [ ] 18-02-PLAN.md — Server routes (floors CRUD, campus image upload/serve)
@@ -85,6 +85,6 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 15. PostgreSQL Migration                            | 3/3       | Complete       | 2026-03-01  | —          |
 | 16. Multi-floor Data Model                          | 4/4       | Complete       | 2026-03-01  | 2026-03-01 |
 | 17. Multi-floor Pathfinding Engine                  | 4/4       | Complete       | 2026-03-01  | —          |
-| 18. Admin Multi-floor Editor                        | 1/6 | In Progress|  | —          |
+| 18. Admin Multi-floor Editor                        | 5/6 | Complete    | 2026-03-07 | —          |
 | 19. Student Floor Tab UI                            | v1.5      | 0/—            | Not started | —          |
 | 20. Deployment                                      | v1.5      | 0/—            | Not started | —          |
