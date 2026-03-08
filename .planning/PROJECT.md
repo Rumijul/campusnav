@@ -25,22 +25,21 @@ Show any student the quickest route from where they are to where they need to be
 - ✓ Admin can define connections (edges) with distance/accessibility metadata — v1.0
 - ✓ No login required for students; admin-only JWT authentication for map editing — v1.0
 - ✓ Single floor support — v1.0
+- ✓ Each building floor has its own uploaded floor plan image and node graph — v1.5
+- ✓ Staircase/elevator/ramp nodes are marked as floor connectors (link floor N to floor N+1) — v1.5
+- ✓ Routes auto-path across floors using accessible floor connectors where required — v1.5
+- ✓ Per-floor route visualization — student sees each floor's map segment of the route — v1.5
+- ✓ Student can manually switch floors to browse the map — v1.5
+- ✓ Admin supports multiple buildings — each building has multiple floors — v1.5
+- ✓ Campus outdoor map — admin uploads a hand-drawn overhead campus image — v1.5
+- ✓ Admin places outdoor path nodes and building entrance nodes on campus map — v1.5
+- ✓ Building entrances connect outdoor graph to each building's floor 1 graph — v1.5
+- ✓ Routes spanning buildings show campus outdoor map segment + building floor segments — v1.5
+- ✓ Full deployment to free always-on hosting (Render + Neon PostgreSQL + Backblaze B2) — v1.5
 
 ### Active
 
-<!-- v1.5 scope — multi-floor, multi-building, hosted deployment -->
-
-- [ ] Each building floor has its own uploaded floor plan image and node graph
-- [ ] Staircase/elevator/ramp nodes are marked as floor connectors (link floor N to floor N+1)
-- [ ] Routes auto-path across floors using accessible floor connectors where required
-- [ ] Per-floor route visualization — student sees each floor's map segment of the route
-- [ ] Student can manually switch floors to browse the map
-- [ ] Admin supports multiple buildings — each building has multiple floors
-- [ ] Campus outdoor map — admin uploads a hand-drawn overhead campus image
-- [ ] Admin places outdoor path nodes and building entrance nodes on campus map
-- [ ] Building entrances connect outdoor graph to each building's floor 1 graph
-- [ ] Routes spanning buildings show campus outdoor map segment + building floor segments
-- [ ] Full deployment to free always-on hosting (frontend CDN + API + cloud DB)
+<!-- Next milestone scope — TBD -->
 
 ### Out of Scope
 
@@ -57,9 +56,9 @@ Show any student the quickest route from where they are to where they need to be
 
 ## Context
 
-Shipped v1.0 with ~6,865 LOC TypeScript (React 19 + Hono + Konva.js + Drizzle/SQLite).
+Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender.com.
 
-**Tech stack:** React 19 SPA, Vite, Hono (Node), Konva.js, Drizzle ORM, SQLite (better-sqlite3), ngraph.path (A*), Biome, Tailwind CSS, React Router v6, JWT (httpOnly cookie), CSRF.
+**Tech stack:** React 19 SPA, Vite, Hono (Node), Konva.js, Drizzle ORM, PostgreSQL (postgres-js + Neon), ngraph.path (A*), Biome, Tailwind CSS, React Router v6, JWT (httpOnly cookie), CSRF, @aws-sdk/client-s3 (Backblaze B2 image storage).
 
 **Architecture patterns established:**
 - Normalized 0-1 coordinates for floor plan positioning (prevents pixel-drift on different image sizes)
@@ -67,21 +66,26 @@ Shipped v1.0 with ~6,865 LOC TypeScript (React 19 + Hono + Konva.js + Drizzle/SQ
 - Client-side pathfinding; server is thin CRUD layer only
 - Counter-scaled marker Groups for constant screen-pixel landmark sizes during zoom
 - Custom CSS bottom sheets (not Vaul) — Vaul's modal=false+snapPoints was fundamentally broken with Konva event propagation
+- Two-pass buildGraph: pass 1 intra-floor edges, pass 2 synthesizes inter-floor links from connectsToNodeAboveId
+- floorSnapshots cache keyed by DB floor ID — prevents re-fetch when admin returns to previously loaded floor
+- ResizeObserver on canvas container div for dynamic Stage dimensions (not hardcoded windowHeight − 52)
 
-**Known tech debt from v1.0:**
-- Phase 13 has no VERIFICATION.md (ROUT-07 partially documented — integration-confirmed wired)
+**Known tech debt from v1.0 (still outstanding):**
 - NodeDataTable roomNumber "clear to undefined" path dispatches `{}` instead of `{ roomNumber: undefined }` — admin cannot clear a previously-set room number via data table
 - LandmarkSheet.tsx is dead code (never imported — superseded by Phase 5 route pins + Phase 13 LocationDetailSheet)
-- REQUIREMENTS.md stats footer was cosmetically stale (corrected in archive)
+
+**Known tech debt from v1.5:**
+- Phase 18 ROADMAP listed 5/6 plans; 18-06 was a human-verify checkpoint (all 6 complete, minor display inconsistency in progress table)
 
 ## Constraints
 
 - **Platform**: Web application — must work in modern browsers on both desktop and mobile
 - **No GPS**: Users manually select their location; no device location services used
-- **Single floor**: v1 covers one floor only; architecture does not prevent multi-floor later
-- **Tech stack**: React + Hono + Konva.js + SQLite (established in v1.0)
+- **Multi-floor**: v1.5 ships multi-floor; architecture uses buildings/floors entity model
+- **Tech stack**: React + Hono + Konva.js + PostgreSQL (established in v1.0, DB upgraded v1.5)
 - **Authentication**: Only needed for admin panel, not for student wayfinding
 - **Coordinate system**: Normalized 0-1 — do not switch to pixel coordinates
+- **Image storage**: Backblaze B2 (S3-compatible) for floor plan and campus images in production
 
 ## Key Decisions
 
@@ -99,15 +103,18 @@ Shipped v1.0 with ~6,865 LOC TypeScript (React 19 + Hono + Konva.js + Drizzle/SQ
 | httpOnly cookie for JWT (not Authorization header) | XSS-safe; browser handles automatically | ✓ Good — admin auth secure and transparent to students |
 | Decimal phase numbering for insertions (5.1, 14.1) | Clear insertion semantics without renumbering subsequent phases | ✓ Good — two insertions executed cleanly (5.1: UAT fixes, 14.1: UX improvements) |
 | Client-side pathfinding only | Server remains thin CRUD; pathfinding is fast enough in-browser | ✓ Good — no latency on route computation |
+| postgres-js over pg/node-postgres | Native ESM, promise-based, matches Neon serverless connection model | ✓ Good — clean async/await, no callback API |
+| Two-pass buildGraph for cross-floor edges | Pass 1 intra-floor, Pass 2 synthesizes inter-floor from node metadata — no JSON-stored inter-floor edges | ✓ Good — inter-floor links derived, not duplicated in DB |
+| Zero A* heuristic for cross-floor node pairs | Euclidean x,y across floors is inadmissible; 0 is conservative, inter-floor edge costs provide signal | ✓ Good — correct admissible heuristic, paths route correctly |
+| floorNumber=0 sentinel for campus overhead map | Distinguishes campus from building floors (which start at 1); avoids nullable floor number column | ✓ Good — clean separation, no special-case joins needed |
+| Backblaze B2 over Cloudflare R2 | No credit card required; S3-compatible drop-in — same @aws-sdk/client-s3 client | ✓ Good — zero code change, all 7 smoke tests passed |
+| ResizeObserver for canvas dimensions | Replaces hardcoded windowHeight−52 — fixes canvas stretch when multiple toolbar rows present | ✓ Good — confirmed in Phase 18 human verification |
+| Optimistic floor list updates in admin editor | Replace full refetch with local state patch after floor add/delete — eliminates update lag | ✓ Good — instant UI response, confirmed in human verification |
 
-## Current Milestone: v1.5 General Support Update
+## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
 
-**Goal:** Extend CampusNav from single-floor/single-building to a full multi-floor, multi-building campus navigation system, and deploy on free always-on hosting.
-
-**Target features:**
-- Multi-floor navigation with per-floor images and auto-routed staircase/elevator transitions
-- Multi-building support with hand-drawn campus overhead map and outdoor path routing
-- Free always-on deployment (frontend + API + database)
+Multi-floor, multi-building campus navigation system deployed on Render + Neon + Backblaze B2.
+Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-02-28 after v1.5 milestone start*
+*Last updated: 2026-03-08 after v1.5 milestone*
