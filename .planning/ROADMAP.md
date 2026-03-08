@@ -97,4 +97,4 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 17. Multi-floor Pathfinding Engine                  | 4/4       | Complete       | 2026-03-01  | —          |
 | 18. Admin Multi-floor Editor                        | 5/6 | Complete    | 2026-03-07 | —          |
 | 19. Student Floor Tab UI                            | 5/5 | Complete    | 2026-03-07 | 2026-03-07 |
-| 20. Deployment                                      | 3/3 | Complete   | 2026-03-08 | —          |
+| 20. Deployment                                      | 3/3 | Complete    | 2026-03-08 | —          |
