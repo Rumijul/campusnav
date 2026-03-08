@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: "Completed 20-01: R2 image storage wired, port fixed for Render deployment"
-last_updated: "2026-03-07T16:33:23.623Z"
+stopped_at: "Completed 20-03: Live deployment verified — all 7 smoke tests passed on https://campusnav-hbm3.onrender.com, Phase 20 and v1.5 milestone complete"
+last_updated: "2026-03-08T05:02:59.518Z"
 last_activity: "2026-03-07 — Completed 19-04: Human verified all 7 browser scenarios for the student floor tab UI — default floor on load, manual switching, building selector, route auto-switch, cross-floor browsing, dimmed elevator connector tap, and single-floor campus zero-chrome."
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 25
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 ---
@@ -217,14 +217,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28 after v1.0 milestone)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** v1.0 milestone complete — all 25 requirements shipped, archived to .planning/milestones/. Planning next milestone with /gsd:new-milestone.
+**Current focus:** v1.5 milestone complete — all phases shipped. CampusNav live at https://campusnav-hbm3.onrender.com. Planning next milestone with /gsd:new-milestone.
 
 ## Current Position
 
-Phase: 19-student-floor-tab-ui
-Plan: 04 complete (4/4 plans done — Phase 19 COMPLETE)
-Status: Phase Complete — all requirements verified by human browser testing
-Last activity: 2026-03-07 — Completed 19-04: Human verified all 7 browser scenarios for the student floor tab UI — default floor on load, manual switching, building selector, route auto-switch, cross-floor browsing, dimmed elevator connector tap, and single-floor campus zero-chrome.
+Phase: 20-deployment
+Plan: 03 complete (3/3 plans done — Phase 20 COMPLETE — v1.5 milestone SHIPPED)
+Status: Milestone Complete — all requirements verified, live deployment smoke-tested
+Last activity: 2026-03-08 — Completed 20-03: Human verified all 7 smoke test scenarios on live Render URL — health check, student map, same-floor route, multi-floor route, admin login, B2 image upload persists, Neon graph save survives restart.
 
 ## Performance Metrics
 
@@ -305,6 +305,7 @@ Last activity: 2026-03-07 — Completed 19-04: Human verified all 7 browser scen
 | Phase 19-student-floor-tab-ui P04 | 0 | 1 task (human-verify) | 0 files |
 | Phase 20-deployment P02 | 41s | 2 tasks | 2 files |
 | Phase 20-deployment P01 | 4 | 2 tasks | 4 files |
+| Phase 20-deployment P03 | 0 | 2 tasks | 0 files |
 
 ## Accumulated Context
 
@@ -480,6 +481,8 @@ Recent decisions affecting current work:
 - [Phase 20-deployment]: PORT NOT declared in render.yaml — Render injects it automatically; declaring it causes conflicts
 - [Phase 20-deployment]: r2GetBuffer returns Uint8Array<ArrayBuffer> via bytes.slice() — Hono Data type requires concrete ArrayBuffer; transformToByteArray returns ArrayBufferLike
 - [Phase 20-deployment]: requestChecksumCalculation/responseChecksumValidation set to WHEN_REQUIRED — AWS SDK v3.729+ checksum headers rejected by Cloudflare R2
+- [Phase 20-deployment]: Switched from Cloudflare R2 to Backblaze B2 — no credit card required, S3-compatible drop-in, zero code change beyond env var rename
+- [Phase 20-deployment]: All 7 smoke tests passed on live Render URL (https://campusnav-hbm3.onrender.com) — DEPL-01, DEPL-02, DEPL-03 satisfied
 
 ### Pending Todos
 
@@ -496,7 +499,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T16:33:23.620Z
-Stopped at: Completed 20-01: R2 image storage wired, port fixed for Render deployment
+Last session: 2026-03-08T05:02:59.515Z
+Stopped at: Completed 20-03: Live deployment verified — all 7 smoke tests passed on https://campusnav-hbm3.onrender.com, Phase 20 and v1.5 milestone complete
 Resume file: None
 Next action: /gsd:new-milestone or plan next phase

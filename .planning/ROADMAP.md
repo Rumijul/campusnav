@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–14.1 (shipped 2026-02-28)
-- 🔄 **v1.5 General Support Update** — Phases 15–20 (in progress)
+- ✅ **v1.5 General Support Update** — Phases 15–20 (shipped 2026-03-08)
 
 ## Phases
 
@@ -32,7 +32,7 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 </details>
 
 <details open>
-<summary>🔄 v1.5 General Support Update (Phases 15–20) — IN PROGRESS</summary>
+<summary>✅ v1.5 General Support Update (Phases 15–20) — SHIPPED 2026-03-08</summary>
 
 - [x] Phase 15: PostgreSQL Migration (3 plans)
  (completed 2026-03-01)
@@ -64,11 +64,11 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
   - [x] 19-02-PLAN.md — Components: LandmarkMarker dimmed support + FloorTabStrip HTML overlay
   - [x] 19-03-PLAN.md — Wire: FloorPlanCanvas full multi-floor state, filtering, auto-switch
   - [x] 19-04-PLAN.md — Human verification checkpoint (7 browser scenarios — APPROVED)
-- [ ] Phase 20: Deployment (3 plans)
+- [x] Phase 20: Deployment (3 plans) (completed 2026-03-08)
   Plans:
-  - [ ] 20-01-PLAN.md — R2 module + port fix + 7 image I/O swaps in src/server/index.ts
-  - [ ] 20-02-PLAN.md — render.yaml complete env vars + .env.example R2 section
-  - [ ] 20-03-PLAN.md — Human checkpoint: Render deploy + 7-step smoke test
+  - [x] 20-01-PLAN.md — B2 image storage module (switched from R2) + port fix + 7 image I/O swaps
+  - [x] 20-02-PLAN.md — render.yaml complete env vars + .env.example B2 section
+  - [x] 20-03-PLAN.md — Human checkpoint: Render deploy + 7-step smoke test (APPROVED 2026-03-08)
 
 </details>
 
@@ -97,4 +97,4 @@ Full phase details: [.planning/milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADM
 | 17. Multi-floor Pathfinding Engine                  | 4/4       | Complete       | 2026-03-01  | —          |
 | 18. Admin Multi-floor Editor                        | 5/6 | Complete    | 2026-03-07 | —          |
 | 19. Student Floor Tab UI                            | 5/5 | Complete    | 2026-03-07 | 2026-03-07 |
-| 20. Deployment                                      | 2/3 | In Progress|  | —          |
+| 20. Deployment                                      | 3/3 | Complete   | 2026-03-08 | —          |
