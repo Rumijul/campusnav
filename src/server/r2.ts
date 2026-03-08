@@ -1,16 +1,15 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 /**
- * Cloudflare R2 S3-compatible client.
+ * Backblaze B2 S3-compatible client.
  *
  * IMPORTANT: requestChecksumCalculation and responseChecksumValidation must be
- * set to 'WHEN_REQUIRED' for compatibility with R2 on AWS SDK v3.729+.
- * Without this, SDK adds x-amz-checksum-crc32 headers that R2 rejects with 400/501.
- * Source: https://community.cloudflare.com/t/aws-sdk-client-s3-v3-729-0-breaks-uploadpart-and-putobject-r2-s3-api-compatibility/758637
+ * set to 'WHEN_REQUIRED' for compatibility with B2 on AWS SDK v3.729+.
+ * Without this, SDK adds x-amz-checksum-crc32 headers that B2 rejects.
  */
 export const r2 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  region: process.env.R2_REGION ?? 'auto',
+  endpoint: process.env.R2_ENDPOINT,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID!,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
