@@ -39,7 +39,13 @@ Show any student the quickest route from where they are to where they need to be
 
 ### Active
 
-<!-- Next milestone scope — TBD -->
+<!-- v1.6 GPS Integration & UX Refinements -->
+
+- [ ] Multi-floor directions show a floor-transition step (connector name + floor number) and section divider between floor segments
+- [ ] Admin can visually link floor-connector nodes across floors without manually entering node IDs
+- [ ] Admin can configure real-world GPS bounds (lat/lng) for each floor plan and the campus map
+- [ ] App uses browser Geolocation to show a GPS "you are here" dot and snap to nearest node as start point
+- [ ] Pinch-to-zoom uses the touch midpoint as the zoom focal point; two-finger rotation pivots around the touch midpoint
 
 ### Out of Scope
 
@@ -111,10 +117,21 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 | ResizeObserver for canvas dimensions | Replaces hardcoded windowHeight−52 — fixes canvas stretch when multiple toolbar rows present | ✓ Good — confirmed in Phase 18 human verification |
 | Optimistic floor list updates in admin editor | Replace full refetch with local state patch after floor add/delete — eliminates update lag | ✓ Good — instant UI response, confirmed in human verification |
 
+## Current Milestone: v1.6 GPS Integration & UX Refinements
+
+**Goal:** Add GPS-based "you are here" positioning and fix mobile gesture focal points, plus improve multi-floor directions clarity and admin floor-connector workflow.
+
+**Target features:**
+- Multi-floor directions with floor-change dividers and connector naming
+- Admin visual floor-connector linking (no manual node ID entry)
+- GPS bounds configuration per floor + campus map (admin)
+- GPS "you are here" dot + nearest-node snap for students
+- Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
+
 ## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
 
 Multi-floor, multi-building campus navigation system deployed on Render + Neon + Backblaze B2.
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-08 after v1.5 milestone*
+*Last updated: 2026-03-09 after v1.6 milestone started*

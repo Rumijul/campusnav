@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: General Support Update
-status: complete
-stopped_at: "v1.5 milestone archived — all 25 plans complete, 15/15 requirements satisfied, deployed live"
-last_updated: "2026-03-08"
-last_activity: "2026-03-08 — v1.5 milestone complete: archived to .planning/milestones/, PROJECT.md evolved, ROADMAP.md collapsed, RETROSPECTIVE.md updated, git tag v1.5 created"
+milestone: v1.6
+milestone_name: GPS Integration & UX Refinements
+status: in_progress
+stopped_at: ""
+last_updated: "2026-03-09"
+last_activity: "2026-03-09 — Milestone v1.6 started"
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 25
-  completed_plans: 25
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-08 after v1.5 milestone)
+See: .planning/PROJECT.md (updated 2026-03-09 after v1.6 milestone started)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** v1.5 archived. Start next milestone with /gsd:new-milestone.
+**Current focus:** v1.6 — GPS Integration & UX Refinements (defining requirements)
 
 ## Current Position
 
-Phase: —
-Plan: — (milestone complete — no active phase)
-Status: Milestone Complete — all requirements verified, live deployment smoke-tested, milestone archived
-Last activity: 2026-03-08 — v1.5 milestone complete and archived. CampusNav live at https://campusnav-hbm3.onrender.com.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-09 — Milestone v1.6 started
 
 ## Accumulated Context
 
@@ -35,7 +35,7 @@ Last activity: 2026-03-08 — v1.5 milestone complete and archived. CampusNav li
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-Key v1.5 decisions:
+Key v1.5 decisions carried forward:
 - postgres-js over pg/node-postgres — native ESM, Neon serverless compatible
 - Two-pass buildGraph — intra-floor pass 1, inter-floor synthesis pass 2 from node metadata
 - Zero A* heuristic for cross-floor pairs — admissible; inter-floor edge costs provide signal
@@ -53,6 +53,7 @@ None.
 - Phase 5.1 inserted after Phase 5: Issues needed to be fixed (v1.0)
 - Phase 14.1 inserted after Phase 14: node selection fixes and admin room number edit (v1.0)
 - Phases 15–20: v1.5 General Support Update (complete)
+- Phases 21+: v1.6 GPS Integration & UX Refinements (pending)
 
 ### Blockers/Concerns
 
@@ -60,7 +61,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: v1.5 milestone archived
+Last session: 2026-03-09
+Stopped at: Milestone v1.6 started — defining requirements
 Resume file: None
-Next action: /gsd:new-milestone (clear context first with /clear)
+Next action: Define requirements, then /gsd:plan-phase 21
