@@ -64,27 +64,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOUCH-01 | — | Pending |
-| TOUCH-02 | — | Pending |
-| TOUCH-03 | — | Pending |
-| DIR-01 | — | Pending |
-| DIR-02 | — | Pending |
-| CONN-01 | — | Pending |
-| CONN-02 | — | Pending |
-| CONN-03 | — | Pending |
-| GPS-01 | — | Pending |
-| GPS-02 | — | Pending |
-| GPS-03 | — | Pending |
-| GPS-04 | — | Pending |
-| GPS-05 | — | Pending |
-| GPS-06 | — | Pending |
-| GPS-07 | — | Pending |
+| TOUCH-01 | Phase 21 | Pending |
+| TOUCH-02 | Phase 21 | Pending |
+| TOUCH-03 | Phase 21 | Pending |
+| DIR-01 | Phase 22 | Pending |
+| DIR-02 | Phase 22 | Pending |
+| CONN-01 | Phase 23 | Pending |
+| CONN-02 | Phase 23 | Pending |
+| CONN-03 | Phase 23 | Pending |
+| GPS-01 | Phase 24 | Pending |
+| GPS-02 | Phase 24 | Pending |
+| GPS-03 | Phase 25 | Pending |
+| GPS-04 | Phase 25 | Pending |
+| GPS-05 | Phase 25 | Pending |
+| GPS-06 | Phase 25 | Pending |
+| GPS-07 | Phase 25 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 15 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 15 ⚠️
+- Mapped to phases: 15 (Phases 21–25)
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-09*
-*Last updated: 2026-03-09 after initial definition*
+*Last updated: 2026-03-09 — traceability filled after roadmap creation*

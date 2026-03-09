@@ -5,9 +5,9 @@ milestone_name: GPS Integration & UX Refinements
 status: in_progress
 stopped_at: ""
 last_updated: "2026-03-09"
-last_activity: "2026-03-09 — Milestone v1.6 started"
+last_activity: "2026-03-09 — v1.6 roadmap created (Phases 21–25)"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,14 +20,31 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-09 after v1.6 milestone started)
 
 **Core value:** Show any student the quickest route from where they are to where they need to be, with wheelchair-accessible alternatives always visible.
-**Current focus:** v1.6 — GPS Integration & UX Refinements (defining requirements)
+**Current focus:** v1.6 — GPS Integration & UX Refinements (Phase 21 ready to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-09 — Milestone v1.6 started
+Phase: 21 of 25 (Touch Gesture Fixes)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-09 — v1.6 roadmap created, Phases 21–25 defined
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0 (v1.6)
+- Average duration: — (no plans yet)
+- Total execution time: —
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| — | — | — | — |
+
+*Updated after each plan completion*
 
 ## Accumulated Context
 
@@ -35,14 +52,11 @@ Last activity: 2026-03-09 — Milestone v1.6 started
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-Key v1.5 decisions carried forward:
-- postgres-js over pg/node-postgres — native ESM, Neon serverless compatible
-- Two-pass buildGraph — intra-floor pass 1, inter-floor synthesis pass 2 from node metadata
-- Zero A* heuristic for cross-floor pairs — admissible; inter-floor edge costs provide signal
-- floorNumber=0 sentinel for campus overhead map
-- Backblaze B2 over Cloudflare R2 — no credit card, S3-compatible drop-in
-- ResizeObserver for canvas dimensions — replaces hardcoded windowHeight−52
-- Optimistic state updates for admin floor mutations — no refetch lag
+Key decisions carried forward into v1.6:
+- Direct Konva stage mutations for viewport (60fps) — gesture fix must preserve this
+- Two-pass buildGraph for cross-floor edges — connector linking UI writes node metadata only; graph synthesis is unchanged
+- floorNumber=0 sentinel for campus overhead map — GPS bounds apply to campus map too (same floors table)
+- Backblaze B2 / Neon PostgreSQL — no infrastructure changes for v1.6
 
 ### Pending Todos
 
@@ -53,15 +67,16 @@ None.
 - Phase 5.1 inserted after Phase 5: Issues needed to be fixed (v1.0)
 - Phase 14.1 inserted after Phase 14: node selection fixes and admin room number edit (v1.0)
 - Phases 15–20: v1.5 General Support Update (complete)
-- Phases 21+: v1.6 GPS Integration & UX Refinements (pending)
+- Phases 21–25: v1.6 GPS Integration & UX Refinements (roadmapped 2026-03-09)
 
 ### Blockers/Concerns
 
-None.
+- Phase 25 (GPS Dot): iOS Safari geolocation diverges from spec — requires real-device test before phase is done. Cannot be verified in browser DevTools.
+- Phase 23 (Connector Linking): pending-link-across-floor-switch state machine has no precedent in v1.5 codebase — plan should sketch state transitions before coding.
 
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: Milestone v1.6 started — defining requirements
+Stopped at: Roadmap created — v1.6 Phases 21–25 written
 Resume file: None
-Next action: Define requirements, then /gsd:plan-phase 21
+Next action: /gsd:plan-phase 21
