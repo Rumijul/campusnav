@@ -1,267 +1,433 @@
-# Pitfalls Research
+# Domain Pitfalls
 
-**Domain:** Campus wayfinding / indoor navigation web app
-**Researched:** 2026-02-18
-**Confidence:** HIGH (domain-specific analysis based on graph theory, wayfinding UX research, accessibility standards, and floor plan rendering patterns)
+**Domain:** Campus wayfinding / indoor navigation — v1.6 feature additions
+**Researched:** 2026-03-09
+**Confidence:** HIGH (code-level analysis of existing v1.5 codebase + targeted web research)
+**Scope:** Pitfalls specific to ADDING GPS positioning, Konva.js touch gesture focal-point fixes, multi-floor direction step generation, and admin floor-connector linking UI to an existing v1.5 system.
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Graph Doesn't Match Physical Reality (Pixel-Coordinate Drift)
-
-**What goes wrong:**
-The navigation graph nodes are placed on the floor plan image using pixel coordinates, but the floor plan image gets resized, cropped, or replaced over time. When the floor plan image changes dimensions or resolution, every node coordinate becomes wrong — paths float in walls, destinations point to empty space, and the entire graph is silently broken.
-
-**Why it happens:**
-Developers anchor nodes to pixel positions (e.g., x:450, y:320) tied to a specific image file. When someone uploads a higher-resolution floor plan, or the image is rendered at a different viewport size, pixel coordinates no longer correspond to physical locations. There's no abstraction layer between "position on image" and "position in building."
-
-**How to avoid:**
-Use a **normalized coordinate system** (0.0 to 1.0 for both axes, representing percentage of image width/height) instead of raw pixel coordinates. Store node positions as `{ x: 0.45, y: 0.32 }` meaning "45% from left, 32% from top." Convert to pixels only at render time based on the current image dimensions. This makes the graph resilient to image swaps, resolution changes, and responsive layouts.
-
-**Warning signs:**
-- Admin places nodes correctly but they render offset on student-facing view
-- Nodes drift when window is resized or on mobile
-- After uploading a new floor plan, all paths look wrong
-- Hard-coded width/height values in coordinate calculations
-
-**Phase to address:**
-Phase 1 (Data model / graph foundation). This is a foundational data representation decision — getting it wrong means rewriting the entire node database and admin editor later.
+Mistakes that cause rewrites, silent data corruption, or broken routing.
 
 ---
 
-### Pitfall 2: Single Graph Can't Serve Both Standard and Accessible Routes
+### Pitfall C-1: GPS Coordinate Transform Inverts or Offsets the "You Are Here" Dot
 
 **What goes wrong:**
-The navigation graph is built as one flat graph with uniform edge weights. When it's time to add wheelchair-accessible routing, developers realize that some edges need to be excluded (stairs) and some need different weights (longer ramp paths), but the graph has no mechanism to differentiate. They end up either duplicating the entire graph (maintenance nightmare) or adding complex runtime filtering that introduces subtle bugs (e.g., accessible route still goes through a non-accessible doorway).
+The admin defines GPS bounds as `{ northLat, southLat, westLng, eastLng }` for a floor plan. The client receives a GPS fix and maps it to a normalized 0–1 coordinate. The dot appears in the wrong location — mirrored, offset by a constant, or off by a factor. The bug only appears on device (not in unit tests), and varies by floor orientation.
 
 **Why it happens:**
-Developers think of accessibility as a filter on the same graph, but accessible routing requires fundamentally different edge properties: which edges are traversable, which have different costs, and which intermediate nodes (ramps, elevators) become mandatory waypoints. A naive "just remove stairs" approach misses narrow doorways, heavy doors, steep inclines, and other accessibility barriers that aren't modeled.
+Three distinct errors are easy to conflate:
 
-**How to avoid:**
-Design the graph data model from day one with **edge-level accessibility metadata**:
-- Each edge gets an `accessible: boolean` flag (is this edge wheelchair-traversable?)
-- Each edge gets separate weight properties: `standardWeight` and `accessibleWeight` (a ramp might be `standardWeight: 30, accessibleWeight: 45` because it's a longer path)
-- Each node gets a `type` field that includes accessibility-relevant categories: `"stairs"`, `"ramp"`, `"elevator"`, `"narrow_passage"`
-- Run Dijkstra twice with different edge filter + weight selector, not two different graphs
+1. **Latitude axis inversion.** Latitude increases northward (up on a map), but canvas Y increases downward. The naive mapping `normY = (lat - southLat) / (northLat - southLat)` gives `normY = 1.0` at the north edge and `normY = 0.0` at the south edge — which is inverted relative to the 0-1 coordinate system where `y=0` is the top of the image. The correct mapping is `normY = 1.0 - (lat - southLat) / (northLat - southLat)` (or equivalently `(northLat - lat) / (northLat - southLat)`).
 
-**Warning signs:**
-- Edge data only has a single `weight` field
-- No way to mark an edge or node as "not wheelchair accessible"
-- Accessible route testing is deferred to "later"
-- The phrase "we'll add accessibility after the main routing works"
+2. **Bounds entered in wrong order.** Admin UI labelled `"North lat" / "South lat"` is easy to fill in backwards (south value in north field), silently swapping the Y axis.
 
-**Phase to address:**
-Phase 1 (Data model). The accessibility metadata schema must be in v1 of the edge/node data model. Adding it retroactively means migrating every edge in the graph and re-testing all routes.
+3. **Longitude/Latitude swapped in the bounds struct.** If the DB column order or the admin form submission puts `lat` where `lng` is expected, the dot will appear at a wildly wrong position and the error is invisible until tested on an actual device outdoors.
+
+**Consequences:**
+- GPS dot renders in a wall, outside the building, or on the wrong floor entirely.
+- Nearest-node snap snaps to the wrong node, placing the student at the wrong start point.
+- Bug is device-only (requires real GPS fix); CI never catches it.
+
+**Prevention:**
+- Name the transform function explicitly and unit-test it: `gpsToNormalized(lat, lng, bounds)` should return `{ x: 0.5, y: 0.5 }` for the geographic center of the bounds.
+- Include a visible sanity-check in the admin GPS-bounds configuration UI: after entering bounds, show a test dot at the building's own approximate center lat/lng and verify it renders in the center of the floor plan.
+- Validate that `northLat > southLat` and `eastLng > westLng` on input; return a form error immediately if not.
+- Document axis convention in code: `// normY = 0 is TOP of image = NORTH of building`.
+
+**Detection:**
+- GPS dot appears at edge of floor plan (likely axis swap or wrong bound order).
+- GPS dot is in correct X but wrong Y or vice versa (latitude/longitude swapped).
+- Dot position looks correct on desktop (where you entered a test coordinate) but wrong on-device outdoors.
+
+**Phase to address:** GPS bounds configuration (admin) phase. Write `gpsToNormalized` with unit tests before integrating Geolocation API.
 
 ---
 
-### Pitfall 3: Admin Graph Editor Produces Disconnected or Unreachable Subgraphs
+### Pitfall C-2: Pinch-Zoom Position Calculation Breaks When Stage Has Rotation
 
 **What goes wrong:**
-The admin builds the navigation graph by placing nodes and connecting edges, but accidentally leaves some nodes unconnected, creates one-way paths, or splits the graph into disconnected islands. Students select a destination that technically exists but is unreachable from their start point. The app either crashes, shows an infinite-distance error, or silently returns no route with no explanation.
+The existing `handleTouchMove` in `useMapViewport.ts` computes the pinch focal point using raw `clientX/clientY` from touch events. When the stage has been rotated by the user (the two-finger rotation gesture is already implemented), the `pointTo` calculation — which converts the touch midpoint from screen space to stage-local space — ignores stage rotation. The formula `(center.x - stage.x()) / stage.scaleX()` only accounts for translation and scale, not rotation. The result: after any rotation, pinch-zoom jumps the stage to a wrong position.
 
 **Why it happens:**
-Graph editing is inherently error-prone. The admin visually places nodes on a floor plan and draws edges, but there's no validation that:
-1. Every destination node is reachable from every other node
-2. The graph is fully connected (no orphan islands)
-3. Removing a single edge doesn't partition the graph
+The current code:
+```ts
+const pointTo = {
+  x: (center.x - stage.x()) / stage.scaleX(),
+  y: (center.y - stage.y()) / stage.scaleY(),
+}
+```
+This is the correct formula only when `stage.rotation() === 0`. With rotation applied, the stage transform is a combination of translate → scale → rotate, and inverting it requires using the full inverse transform matrix, not just dividing by scale.
 
-Dijkstra's algorithm handles unreachable nodes gracefully (returns infinity), but the UI layer often doesn't expect this case.
+**Consequences:**
+- After rotating the floor plan, every subsequent pinch-zoom causes the floor plan to jump unpredictably.
+- The bug is invisible during desktop testing (mouse wheel zoom ignores rotation because `handleWheel` has the same issue but rotation is rarely applied via mouse).
+- On mobile, rotation + zoom is the natural gesture sequence and the bug is immediately visible.
 
-**How to avoid:**
-- **Validate graph connectivity on save**: Run a BFS/DFS from any node and verify all nodes are visited. If not, highlight the disconnected nodes in red in the admin editor.
-- **Highlight orphan nodes**: Nodes with zero edges should be visually flagged.
-- **Validate accessible subgraph separately**: The subset of edges where `accessible: true` must also form a connected graph for all accessible destinations. An accessible destination reachable only via stairs is a data error, not a pathfinding problem.
-- **Handle "no route found" gracefully in UI**: Show "No route available between these points" rather than blank screen or error.
+**Prevention:**
+Use Konva's built-in transform inversion for all pointer-to-stage conversions:
+```ts
+const transform = stage.getAbsoluteTransform().copy().invert()
+const pointTo = transform.point(center) // correct regardless of rotation/scale/translate
+```
+This works for `handleWheel` (pointer-centric zoom) and `handleTouchMove` (pinch focal point) equally.
 
-**Warning signs:**
-- Admin editor has no "validate graph" button
-- No visual distinction between connected and orphan nodes
-- No separate validation for the accessible routing subgraph
-- Pathfinding returns empty path array with no error handling
+**Detection:**
+- Zoom works correctly at `rotation=0`, breaks after any two-finger rotate.
+- After rotating 90 degrees, pinch-zoom moves the stage horizontally instead of vertically.
 
-**Phase to address:**
-Phase 2 (Admin editor) for the validation tools. Phase 3 (Pathfinding) for graceful "no route" handling in the student UI.
+**Phase to address:** Konva gesture focal-point fix phase. Fix `handleWheel` and `handleTouchMove` simultaneously — they share the same math error.
 
 ---
 
-### Pitfall 4: Floor Plan Image Renders Poorly Across Devices
+### Pitfall C-3: Konva Draggable Stage Fights Two-Finger Gestures, Causing Stage Jump
 
 **What goes wrong:**
-The floor plan image looks fine on the developer's desktop monitor but is unusable on mobile phones. Text labels on the floor plan become unreadable. Pan/zoom behavior is janky or non-existent. On low-bandwidth connections the large image takes seconds to load, and on high-DPI screens the image is blurry. The path overlay (SVG/Canvas) doesn't align with the underlying image after zoom/pan transforms.
+When the Stage is `draggable`, Konva handles `touchstart` of the first finger and begins a drag. When the second finger lands, `handleTouchMove` calls `stage.stopDrag()`. But if `Konva.hitOnDragEnabled` is not set, the second touch event is swallowed during drag and `stopDrag` is called too late — after Konva has already translated the stage by the delta of the first finger alone. The result: the stage visibly jumps on every two-finger gesture start.
 
 **Why it happens:**
-Floor plan images are typically large (2000-5000px), detailed architectural drawings. Developers test on desktop and assume the floor plan will "just work" at smaller sizes. They underestimate that:
-- Mobile users need pinch-to-zoom and pan, which requires a proper pan/zoom library
-- Route overlay (drawn on canvas/SVG) must transform in perfect sync with the base image
-- A 5MB PNG floor plan image is unacceptable on mobile data
+The existing code already sets `Konva.hitOnDragEnabled = true` at the top of `useMapViewport.ts` for exactly this reason. The pitfall is forgetting to set it when the file is refactored or when a new Stage component is introduced (e.g., an admin canvas that duplicates some of this logic). The `hitOnDragEnabled` flag is a module-level side effect — it must be set once before any Stage is used.
 
-**How to avoid:**
-- **Use an established pan-zoom library** (like panzoom, react-zoom-pan-pinch, or Leaflet with a custom image layer) rather than hand-rolling zoom math. These handle touch events, momentum scrolling, zoom limits, and coordinate transforms.
-- **Keep the route overlay in the same coordinate space** as the image. If using SVG overlay on top of the image, both must share the same transform. If using Canvas, redraw on every transform. The simplest approach: both image and path are children of the same transformed container element.
-- **Optimize the floor plan image**: Serve WebP format, provide multiple resolutions, lazy-load. Consider tiling for very large floor plans (like Leaflet does for maps).
-- **Test on mobile from day one**: Use Chrome DevTools device emulation during development, not just before launch.
+**Consequences:**
+- Without the flag, second-touch events are swallowed, so `stage.isDragging()` check in `handleTouchMove` never fires on the first frame of a two-finger gesture.
+- Stage jumps by `(firstTouchDelta)` whenever a pinch starts.
 
-**Warning signs:**
-- Floor plan image file is >1MB
-- No pinch-to-zoom or it's custom-built
-- Route SVG overlay drifts from the floor plan after zooming
-- Floor plan text is unreadable without zooming on mobile
-- Developer only tests on desktop
+**Prevention:**
+- Keep `Konva.hitOnDragEnabled = true` at module scope in `useMapViewport.ts`. Do not move it inside the hook body (would re-set on every render but that's not the problem; the problem is forgetting it).
+- Add a comment documenting why it exists: `// REQUIRED: Without this, 2nd touch is swallowed during drag; pinch-zoom fails.`
+- When creating any new Konva Stage (e.g., for the GPS-bounds admin configuration map), ensure this flag is set.
 
-**Phase to address:**
-Phase 1 (Floor plan rendering + pan/zoom). This is a presentation foundation — every subsequent feature (node placement, path drawing, interaction) depends on rock-solid image rendering with proper coordinate transforms.
+**Detection:**
+- Pinch-zoom starts with a visible jump before settling.
+- `stage.isDragging()` is never `true` at the start of `touches.length >= 2` branch.
+
+**Phase to address:** Konva gesture focal-point fix phase — verify this flag is present wherever `useMapViewport` is used.
 
 ---
 
-### Pitfall 5: Human-Readable Directions Are Nonsensical
+### Pitfall C-4: GPS Nearest-Node Snap Uses Wrong Distance Metric (Mixed Coordinate Spaces)
 
 **What goes wrong:**
-The app shows a correct visual path on the map but generates text directions like "Go to Node 47, then Node 48, then Node 52." Or worse: "Turn left. Go 3.2 units. Turn right." — units that mean nothing to a human. The directions reference internal graph structure rather than landmarks, room numbers, or recognizable features.
+The GPS dot is at normalized coordinates `(gpsNormX, gpsNormY)`. The "snap to nearest node" logic computes Euclidean distance between the GPS position and each node in the graph. If the floor plan image is not square (e.g., 1000px wide, 600px tall), a normalized distance of `0.1` represents `100px` horizontally but only `60px` vertically. The nearest-node snap therefore favors nodes that are laterally closer even when a node directly above/below is physically much closer.
 
 **Why it happens:**
-Developers focus on the pathfinding algorithm (Dijkstra produces correct shortest paths) and the visual overlay (path renders correctly on the map), but treat text directions as an afterthought. Generating human-readable turn-by-turn directions from a graph path requires:
-1. Knowing which direction "left" and "right" are (requires angle calculations between consecutive edges)
-2. Knowing landmark names ("pass the cafeteria on your right")
-3. Collapsing sequences of straight-line nodes into a single "continue straight for X meters" instruction
-4. Converting graph distances to human-understandable units
+The existing `calculateWeight` function computes Euclidean distance in normalized 0–1 space and is used consistently throughout pathfinding. That's correct for edge weights because all edges were also measured in the same space. But GPS snapping is different: the "nearest" node should be the one physically closest to the user's location, which requires accounting for the actual pixel aspect ratio of the floor plan image.
 
-**How to avoid:**
-- **Store human-readable names on key nodes**: Not every node needs a name, but junction nodes, doors, landmarks, and destination nodes must have display-friendly labels. Add a `label` field to nodes (e.g., "Main entrance", "Stairwell B", "Room 204").
-- **Categorize nodes by type**: `"hallway"`, `"junction"`, `"door"`, `"room"`, `"landmark"`, `"stairwell"`, `"elevator"`. Direction generation logic uses node types to produce natural language ("Enter through the main doors", "Take the hallway past Room 204").
-- **Calculate turn directions**: Use atan2 on consecutive edge vectors to determine if the next segment is a left turn, right turn, or straight continuation. Define thresholds (e.g., <30 degrees = straight, 30-150 = turn, >150 = U-turn).
-- **Collapse straight segments**: If three consecutive edges have nearly the same angle, combine them into one "Continue straight" instruction rather than three separate steps.
-- **Use real distance estimates**: Map pixel distances to real-world meters using a known scale factor (e.g., admin sets "this hallway is 50 meters" to calibrate).
+**Consequences:**
+- In a building with long hallways (wide floor plan, narrow normalized x-range), the nearest-node snap consistently picks a node in the wrong corridor.
+- The error is small enough to be non-obvious in testing but large enough to route the user to the wrong wing.
 
-**Warning signs:**
-- Node data has `id` but no `label` or `name` field
-- No node `type` classification
-- Text directions reference node IDs or internal coordinates
-- No distance calibration between pixel units and real-world units
-- All nodes generate direction steps (including mid-hallway nodes that should be collapsed)
+**Prevention:**
+When snapping GPS to nearest node, weight the distance by the image aspect ratio:
+```ts
+const aspectRatio = imageWidth / imageHeight  // pixels
+const dx = (nodeX - gpsNormX) * aspectRatio
+const dy = nodeY - gpsNormY
+const dist = Math.sqrt(dx * dx + dy * dy)
+```
+Use this weighted distance only for snapping — not for pathfinding edge weights (which are already consistent in normalized space).
 
-**Phase to address:**
-Phase 1 (Data model) for node labels/types. Phase 3 (Directions generation) for the turn-by-turn algorithm. The data model must support it from the start; the rendering algorithm can come later.
+**Detection:**
+- In a building that is much wider than tall, the GPS dot appears to snap to a node on the wrong side of a hallway.
+- Snapping is correct on square floor plans but wrong on rectangular ones.
+
+**Phase to address:** GPS "you are here" implementation phase. Note in code why aspect-ratio correction is applied only for snapping.
 
 ---
 
-## Technical Debt Patterns
+### Pitfall C-5: GPS Signal Lost Mid-Session Leaves a Stale "You Are Here" Dot
 
-Shortcuts that seem reasonable but create long-term problems.
+**What goes wrong:**
+`navigator.geolocation.watchPosition` calls the success callback only when a new position is available. If the user walks indoors and GPS signal is lost, no error callback fires immediately — the signal just stops updating. The "you are here" dot freezes at the last known position, which may be 50 meters from the user's actual location, but it continues to appear as authoritative.
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Pixel coordinates instead of normalized | Simpler math, direct image-to-click mapping | Every floor plan change breaks all node positions; responsive layout impossible | Never — normalized coords are equally simple to implement |
-| Single weight per edge (no accessible weight) | Simpler data model, fewer fields | Adding accessibility later requires migrating every edge; dual routing is a rewrite | Never — accessibility is a core requirement, not an add-on |
-| Storing graph in frontend only (localStorage/JSON file) | No backend needed, fast prototyping | No admin collaboration, no version history, data loss risk, no server-side validation | MVP only, with explicit plan to migrate to backend storage within weeks |
-| Hand-rolling pan/zoom | No library dependency | Months of mobile touch event bugs, coordinate drift, edge cases with momentum scrolling | Never — battle-tested libraries exist for this exact problem |
-| Hard-coded room/building names | Works for single floor plan | Any campus change (room renumbering, renovation) requires code changes instead of data changes | Never — names must be data, not code |
-| Skipping graph validation | Faster admin workflow, no blocking saves | Silent broken routes for students, impossible to debug which edit broke connectivity | Acceptable during initial development only, must add before any real data entry |
+**Why it happens:**
+Indoor GPS accuracy is 10–50m or worse (often unusable inside buildings). The browser does not call the error callback on signal loss — only on explicit denial or timeout. If `timeout` is not set in the options, `watchPosition` can silently freeze for minutes.
 
-## Integration Gotchas
+**Consequences:**
+- Student believes their dot shows current position and navigates by it — ends up in the wrong place.
+- If nearest-node snap runs on stale position, the set start point is wrong for the entire navigation session.
 
-Common mistakes when connecting components in this type of system.
+**Prevention:**
+- Set a `timeout` on `watchPosition` options (e.g., 10 seconds). When timeout fires, hide the dot rather than leaving it stale.
+- Track `lastPositionTimestamp` from `GeolocationPosition.timestamp`. If the last position is older than 15 seconds, dim or remove the dot.
+- Show an accuracy radius circle around the dot using `GeolocationCoordinates.accuracy`. When accuracy is > 30m (a typical indoor reading), show a warning: "GPS accuracy is low — position may be approximate."
+- Use `getCurrentPosition` first (single fix), then optionally start `watchPosition` — this avoids the common mistake of starting `watchPosition` before the user has granted permission.
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Floor plan image + path overlay | Overlay drawn in screen coordinates, drifts when image pans/zooms | Both must share the same CSS transform parent or canvas context; overlay coordinates are always relative to the image, not the viewport |
-| Search/autocomplete + graph nodes | Search returns a room name but has no link to the graph node ID, requiring a fragile name-matching step | Search index should reference graph node IDs directly; each searchable location is a node or has a `nearestNodeId` foreign key |
-| Admin editor + student view | Admin saves graph in a different format/coordinate system than student view consumes | Single source of truth: one graph data format, one coordinate system, consumed identically by both editor and viewer |
-| Dijkstra output + direction generator | Path is an array of node IDs; direction generator needs geometry (angles, distances) that must be recomputed from the graph | Pathfinding should return enriched path objects: `[{ nodeId, x, y, label, type }]` with precomputed segment angles/distances, not just IDs |
+**Detection:**
+- Dot freezes in one position even as user walks around.
+- No visual change when user walks 10 meters.
+- Accuracy value from the API exceeds half the building width.
 
-## Performance Traps
+**Phase to address:** GPS "you are here" implementation phase. Implement accuracy display and stale-position hiding before any user testing.
 
-Patterns that work at small scale but fail as usage grows.
+---
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Running Dijkstra on every route request server-side | Slow response times, server CPU spikes | For a single-floor graph (<500 nodes), run Dijkstra client-side in the browser. A campus floor has far too few nodes to need server computation. Ship the graph JSON to the client. | Not a real concern for single-floor (~100-300 nodes), but becomes one at multi-building scale (1000+ nodes) |
-| Loading full-resolution floor plan on mobile | 3-5 second load time, high data usage, blank screen while loading | Serve optimized WebP/AVIF, provide srcset for multiple resolutions, show loading skeleton | >500KB image on 3G connection |
-| Re-rendering entire path overlay on every frame during pan/zoom | Janky scrolling, dropped frames on mobile | Use CSS transforms for pan/zoom (GPU-accelerated), don't redraw SVG/Canvas on every frame; only redraw on zoom-end for high-quality render | Any mobile device during active pinch-zoom |
-| Searching room list with linear scan | Noticeable delay on keypress in search box | Pre-index searchable names with a trie or use a lightweight fuzzy search library (e.g., Fuse.js). For <500 rooms this is premature but still good practice | >200 searchable items with complex fuzzy matching |
+### Pitfall C-6: Geolocation Permission Handling Differs Between iOS Safari and Android Chrome
 
-## Security Mistakes
+**What goes wrong:**
+The app calls `navigator.geolocation.getCurrentPosition` when the student clicks "Use my location." On Android Chrome, permission is requested via a prompt and denied/granted state is persisted per site. On iOS Safari:
+- `navigator.permissions.query({ name: 'geolocation' })` returns `"prompt"` even when the user has previously denied (the permission state is inconsistent with the actual system setting).
+- If permission was previously denied in iOS Settings, calling `getCurrentPosition` triggers the error callback with code 1 (PERMISSION_DENIED), but `navigator.permissions.query` still reports `"prompt"`.
+- There is no way to programmatically re-open the iOS permission dialog once denied at the system level. The user must navigate to Settings manually.
 
-Domain-specific security issues beyond general web security.
+**Why it happens:**
+iOS Safari's implementation of the Permissions API does not accurately reflect system-level permission states. This is a known, long-standing divergence from the spec (confirmed by Apple Developer Forum threads as of 2024).
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Admin editor accessible without authentication | Anyone can modify the navigation graph, redirect routes through dangerous areas, or delete all nodes | Implement admin authentication before the editor is deployed to any accessible URL; even on localhost during dev, add a simple auth gate |
-| Floor plan image URL exposes building layout to unauthenticated users | Architectural floor plans may contain security-sensitive information (security office locations, server room locations, emergency exits layout) | Evaluate whether floor plan needs access control; for most campuses this is public info, but check with facilities management. At minimum, don't expose raw architectural drawings — use simplified wayfinding maps instead |
-| Graph data API has no rate limiting | Denial of service by repeatedly requesting pathfinding computations | If pathfinding is server-side, add rate limiting. If client-side (recommended for single-floor), this is not an issue since computation happens in user's browser |
-| Admin API has no input validation on node coordinates | Malicious admin could inject coordinates that break rendering (NaN, extremely large numbers, negative values) | Validate all node coordinates are within 0.0-1.0 range (normalized), all weights are positive numbers, all node IDs are valid references |
+**Consequences:**
+- App attempts to query permission state to show "Allow location" vs "Update in Settings" UI — but on iOS, the query result is wrong, so the wrong message is always shown.
+- Calling `watchPosition` after a system-level deny on iOS fails silently on some iOS versions (no error callback fires at all on certain iOS 16.x builds).
 
-## UX Pitfalls
+**Prevention:**
+- Do not rely on `navigator.permissions.query` for geolocation on iOS. Instead, always call `getCurrentPosition`/`watchPosition` and handle the error callback (code 1 = denied) to show the correct UI.
+- Show a fallback message on PERMISSION_DENIED: "Location access was denied. To enable, go to Settings > Safari > Location and allow this site."
+- The GPS feature must be entirely optional and gracefully absent when denied. The student should still be able to set their start point manually by tapping the map.
 
-Common user experience mistakes in campus wayfinding apps.
+**Detection:**
+- On iOS, "Use my location" shows "Allow location" prompt even after the user has already denied.
+- `watchPosition` error callback never fires on iOS after system-level deny.
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| "You are here" requires GPS or manual selection from a list of 200 rooms | Users can't set their starting point quickly; they abandon the app | Provide prominent room search with autocomplete AND allow tap-on-map to set start point. Group rooms by area/wing. Show recently selected locations. |
-| Accessible route shown separately, requiring extra clicks | Wheelchair users feel like second-class citizens; able-bodied users never see accessible alternatives | Show both routes simultaneously — standard and accessible side by side (as specified in project requirements). This normalizes accessibility. |
-| Path shown on map but no text directions | Users must constantly look at phone while walking, can't glance at step-by-step instructions | Always provide both: visual path on map AND numbered text directions. Text directions should be the primary interface while walking. |
-| Room search requires exact match ("Room 204" but not "204" or "room204") | Users can't find rooms they know exist | Implement fuzzy search: strip prefixes, normalize case, match partial strings. "204", "Room 204", "room 204", "R204" should all find the same room. |
-| No visual confirmation of selected start/end points | User taps on map, path appears, but they're not sure which rooms they selected | Show labeled markers at start (green) and end (red) with room name/number clearly visible. Provide a header like "Room 102 → Library" confirming the route. |
-| Floor plan has no "You are zoomed in" context | User zooms into a hallway, loses orientation — which part of the building are they looking at? | Show a mini-map overview in the corner when zoomed in, or highlight the visible area on a small full-building thumbnail. At minimum, show labeled landmarks that anchor orientation. |
+**Phase to address:** GPS implementation phase. Test on a real iOS device, not just Chrome DevTools emulation, before shipping.
 
-## "Looks Done But Isn't" Checklist
+---
 
-Things that appear complete but are missing critical pieces.
+## Moderate Pitfalls
 
-- [ ] **Pathfinding works:** But does it handle the case where start == destination? (Should show "You're already here" not an error)
-- [ ] **Pathfinding works:** But does it handle when no path exists? (Disconnected graph segments → friendly error, not crash)
-- [ ] **Route displays on map:** But does the path avoid going through walls? (Graph edges must follow walkable corridors, not cut diagonally through rooms)
-- [ ] **Admin can place nodes:** But can admin delete a node without orphaning edges? (Cascade-delete connected edges, or prevent deletion of connected nodes)
-- [ ] **Admin can place nodes:** But is there undo? (Accidental deletion of a node that had 8 edges connected is catastrophic without undo)
-- [ ] **Search finds rooms:** But does it find rooms that aren't navigation destinations? (Every searchable room must map to a graph node or nearest-node reference)
-- [ ] **Accessible route exists:** But has someone in a wheelchair actually traced the route? (Graph says "accessible" but the physical path may have a 2-inch lip or heavy fire door)
-- [ ] **Text directions generated:** But do they make sense when read aloud? (Screen reader users need directions that work as pure text, with no reliance on "see the map")
-- [ ] **Works on desktop:** But has it been tested with actual touch events on a real phone? (Chrome DevTools emulation misses many touch interaction bugs)
-- [ ] **Graph data can be saved:** But is there a backup/export? (Admin accidentally deletes half the graph — can they restore it?)
-- [ ] **Pan/zoom works:** But does tap-to-select-room still work after zooming? (Click/tap coordinates must be transformed through the inverse zoom/pan matrix to find the correct node)
+Mistakes that degrade correctness or UX but do not cause data loss.
 
-## Recovery Strategies
+---
 
-When pitfalls occur despite prevention, how to recover.
+### Pitfall M-1: Floor-Change Direction Steps Generated for Every Node, Not Just at the Connector
 
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| Pixel coordinates used (no normalization) | MEDIUM | Write a migration script that converts all (x,y) coordinates to (x/imageWidth, y/imageHeight) using the current image dimensions. Update all rendering code to multiply by current dimensions at render time. Must be done before any floor plan image change. |
-| Single-weight edges (no accessibility data) | MEDIUM | Add `accessible` boolean and `accessibleWeight` fields to all edges. Default `accessible: true` for hallway edges, `accessible: false` for stairs. Admin must manually review and correct every edge. Time: proportional to number of edges. |
-| Disconnected graph in production | LOW | Run BFS connectivity check, identify orphaned node clusters, add missing edges in admin editor. Impact: some routes were silently failing, which users may have noticed and lost trust. |
-| Floor plan image swap breaks everything | HIGH if pixel coords / LOW if normalized | If pixel coords: manually reposition every node on the new image. If normalized coords: just swap the image file, all positions auto-adjust. This is why normalized coords are critical. |
-| Text directions reference node IDs | MEDIUM | Add `label` and `type` fields to node schema, backfill labels for all named/important nodes. Rewrite direction generator to use labels. Most effort is in the data entry (labeling nodes), not the code. |
-| Hand-rolled pan/zoom is buggy on mobile | HIGH | Replace custom implementation with an established library. This means rewriting how the floor plan container works, how overlays attach, and how tap coordinates are resolved. Often a near-complete rewrite of the map view component. |
+**What goes wrong:**
+The current `generateDirections` in `useRouteDirections.ts` detects a floor change at every step where `curr.floorId !== next.floorId`. On a route that crosses three floors (e.g., Floor 1 → Floor 2 → Floor 3), the route visits: `...floor1node → stairs-floor1 → stairs-floor2 → floor2node... → stairs-floor2b → stairs-floor3 → floor3node...`. A correct implementation should generate exactly two floor-change steps. The pitfall: if there are multiple nodes between the two floors' connector pair (which can happen if the graph has an intermediate campus-outdoor segment or a building-entrance segment), the condition `curr.floorId !== next.floorId` may fire twice in a row or not at all depending on the node layout.
 
-## Pitfall-to-Phase Mapping
+**Why it happens:**
+The floor-change detection looks only one step ahead (`curr.floorId !== next.floorId`). On a route that passes through the campus outdoor segment between two buildings, `floorId` changes multiple times rapidly. Each change generates a floor-change step. If `curr` is the outdoor junction node and `next` is floor 1 of Building B, that generates a spurious "Take the stairs to Floor 1" step for a junction that is not a staircase.
 
-How roadmap phases should address these pitfalls.
+**Consequences:**
+- Direction steps like "Take the stairs to Floor 0" (the campus map sentinel floor).
+- Duplicate "Take the elevator to Floor 2" steps when the route visits multiple consecutive cross-floor nodes.
+- A step with `icon: 'stairs-up'` for an `entrance`-type node.
 
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Pixel-coordinate drift | Phase 1: Data model & floor plan rendering | Verify: resize browser window — do nodes stay in correct positions? Upload a differently-sized image — do coordinates still align? |
-| No accessibility metadata on edges | Phase 1: Data model | Verify: edge schema has `accessible`, `standardWeight`, `accessibleWeight` fields. Query: can you filter edges to accessible-only subset? |
-| Disconnected graph (no validation) | Phase 2: Admin editor | Verify: create an orphan node, click "validate" — does editor flag it? Delete a bridge edge — does editor warn about graph partition? |
-| Floor plan renders poorly on mobile | Phase 1: Floor plan rendering | Verify: open on a real phone — can you pinch-zoom smoothly? Does path overlay stay aligned? Is load time <2 seconds on 4G? |
-| Nonsensical text directions | Phase 1: Data model (node labels/types); Phase 3: Direction generation | Verify: read text directions aloud without looking at the map — can you follow them? Do they reference landmarks, not node IDs? |
-| Admin produces broken graph | Phase 2: Admin editor validation | Verify: connectivity check runs on save. Orphan nodes highlighted. Accessible subgraph validated separately. |
-| No graceful "no route" handling | Phase 3: Pathfinding + student UI | Verify: select two points in disconnected graph regions — does UI show friendly "no route available" message? |
-| Search doesn't find rooms | Phase 3: Student-facing search | Verify: search "204" — does it find "Room 204"? Search "libary" (typo) — does fuzzy match suggest "Library"? |
-| Tap coordinates wrong after zoom | Phase 1: Floor plan pan/zoom | Verify: zoom in 3x, pan to a room, tap it — does the correct node get selected (not one that's 3x offset)? |
-| No admin undo/backup | Phase 2: Admin editor | Verify: delete a node, press undo — does it restore? Export graph, delete everything, import — does it restore? |
+**Prevention:**
+- Only generate a floor-change step when `curr.type` is a recognized connector type (`'stairs'`, `'elevator'`, `'ramp'`) AND `curr.floorId !== next.floorId`. This guards against entrance nodes and junction nodes triggering the condition.
+- Filter out steps that navigate to the campus overhead floor (`floorNumber === 0`) from the direction text — students do not need "Go to Floor 0." Instead, synthesize an "Exit the building" step.
+- Write unit tests covering: same-floor route, one floor-change route, two floor-change route, campus-to-building route.
+
+**Detection:**
+- Direction steps mention "Floor 0" or "Campus floor."
+- Step list has two consecutive elevator/stairs steps with no walking step between them.
+- Route through two buildings shows floor-change steps in unexpected order.
+
+**Phase to address:** Multi-floor directions phase. Add the node-type guard to the floor-change condition before adding floor-change dividers.
+
+---
+
+### Pitfall M-2: Admin Floor-Connector UI Creates One-Sided Links (Orphaned Pairs)
+
+**What goes wrong:**
+The floor-connector data model requires a symmetric pair: the stairs node on Floor 1 has `connectsToNodeAboveId` pointing to the stairs node on Floor 2, and that Floor 2 node has `connectsToNodeBelowId` pointing back to the Floor 1 node. The admin linking UI must write both sides atomically. If the admin switches away from Floor 2 before saving, or the save succeeds for Floor 1 but fails for Floor 2 (e.g., validation error on an unrelated field), the pair is broken: the Floor 1 node points to Floor 2, but the Floor 2 node has no back-pointer.
+
+**Why it happens:**
+The current save model saves one floor at a time (the admin switches floors and triggers an auto-save of the current floor). If the linking UI spans two floors (linking a node on Floor 1 to a node on Floor 2), both floors must be saved in a single operation. The current `handleSave` in `MapEditorCanvas.tsx` only saves the currently active floor's nodes/edges — it does not save cross-floor connector metadata on nodes from other floors.
+
+**Consequences:**
+- `buildGraph`'s Pass 2 only looks at `connectsToNodeAboveId` to synthesize inter-floor edges. A one-sided link (Floor 1 has `connectsToNodeAboveId` but Floor 2 node has no `connectsToNodeBelowId`) means the route can traverse Floor 1 → Floor 2 but the pass-2 deduplication relies on the canonical pair key. If the Floor 2 node also has `connectsToNodeAboveId` pointing somewhere else but not the Floor 1 node, a route can become asymmetric: works up, fails down.
+- Admin cannot detect the broken state without reading raw node data.
+
+**Prevention:**
+- Implement floor-connector linking as a dedicated API endpoint (`POST /api/admin/link-connector`) that atomically updates both nodes (the Floor 1 node's `connectsToNodeAboveId` and the Floor 2 node's `connectsToNodeBelowId`) in a single DB transaction.
+- Do NOT implement cross-floor linking by updating local `state.nodes` on a single floor and relying on per-floor save — the other floor is not in the current editor state.
+- After linking, validate the pair in the UI: show a visual indicator on both nodes confirming the round-trip link is intact.
+
+**Detection:**
+- Route from Floor 1 to Floor 3 works but route from Floor 3 to Floor 1 fails.
+- `connectsToNodeAboveId` is set on the Floor 1 stairs node but `connectsToNodeBelowId` is null on the Floor 2 stairs node.
+
+**Phase to address:** Admin floor-connector linking UI phase. Design the API endpoint before building the UI.
+
+---
+
+### Pitfall M-3: Admin Floor-Connector UI Allows Circular or Cross-Building Links
+
+**What goes wrong:**
+The admin selects a Floor 1 stairs node and links it to another Floor 1 node (same floor — not a vertical connector at all). Or: links a Floor 2 node in Building A to a Floor 2 node in Building B (different buildings — only valid for `entrance`-type nodes connecting to the campus graph, not for same-floor-number nodes in different buildings). The UI does not distinguish between these cases.
+
+**Why it happens:**
+A "pick a node on another floor" selector that lists all nodes in the building (or all nodes in the system) allows selecting targets that are semantically invalid. Without validation, `buildGraph` will synthesize an inter-floor edge between two Floor 1 nodes (same `floorId`), which the pathfinding engine treats as a free teleport edge — zero discriminating cost, traversed on every route.
+
+**Consequences:**
+- A circular link (Floor 1 node A → Floor 1 node B, where A and B are on the same floor) creates an inter-floor edge inside `buildGraph` Pass 2 that incorrectly bypasses real-world pathing.
+- A link between same-floor-number nodes in different buildings creates a building-crossing shortcut that doesn't exist physically.
+
+**Prevention:**
+- In the floor-connector linking UI, restrict the target node selector to: only nodes on a different floor within the same building, and only nodes of a compatible connector type (`stairs`, `elevator`, `ramp`).
+- Validate in the API endpoint: reject a link where `sourceNode.floorId === targetNode.floorId` (same floor), or where `sourceNode.buildingId !== targetNode.buildingId` (unless one is a campus entrance, which is handled separately by `connectsToBuildingId`).
+- Show the floor number clearly in the node selector so the admin can see "Floor 2 — Stairwell B" vs "Floor 1 — Stairwell B."
+
+**Detection:**
+- Route length is near-zero between two distant nodes (teleport shortcut created by invalid inter-floor edge).
+- Admin accidentally created a link between nodes on the same floor.
+
+**Phase to address:** Admin floor-connector linking UI phase. Implement server-side validation before UI validation.
+
+---
+
+### Pitfall M-4: Floor-Connector Linking UI State Is Stale After Floor Switch
+
+**What goes wrong:**
+The admin is in the middle of linking a Floor 1 connector node to a Floor 2 node. The UI enters a "pending link" state (source node selected, waiting for user to switch to Floor 2 and click the target). The admin switches to Floor 2. The editor calls `switchFloor` (via `handleFloorSwitch`), which auto-saves Floor 1 and replaces `state.nodes` with Floor 2's nodes. The "pending link" source node ID is still in UI state — but the current floor's nodes no longer include it. If the admin clicks "cancel," the pending state is not cleared, leaving a lingering ghost selection.
+
+**Why it happens:**
+The existing editor state machine (`useEditorState`) has `pendingEdgeSourceId` for the in-floor edge drawing mode. A floor-connector linking flow requires an analogous "pending link source" state that persists across floor switches — but floor switching currently clears node selection and resets other transient state. The interaction model of "select source on one floor, switch floor, select target" spans two state snapshots.
+
+**Consequences:**
+- User interface shows "linking mode active" with no visible source node highlighted (it's on a different floor).
+- Admin confusion about what they were linking.
+- If the save triggers during the floor switch, the source node may be saved without the connector fields fully set.
+
+**Prevention:**
+- Track the "pending connector link" state at a level above `useEditorState` — in `MapEditorCanvas.tsx` or a dedicated hook — so it persists across floor switches. Store: `{ sourceNodeId, sourceFloorId, sourceBuildingId }`.
+- Show a persistent banner: "Linking Stairwell A (Floor 1) → Select the matching node on another floor. Press Escape to cancel."
+- Clear the pending link state on Escape, on building switch, and on completed link.
+- Disable floor deletion while a pending link is active (prevents the source floor from disappearing during the link flow).
+
+**Detection:**
+- "Linking mode" indicator persists after switching floors twice.
+- Escape key does not clear the linking mode on Floor 2 because the clear handler only runs on Floor 1's node events.
+
+**Phase to address:** Admin floor-connector linking UI phase. Design the state machine before implementing UI.
+
+---
+
+### Pitfall M-5: Multi-Floor Direction Steps Include the Connector Node as a Turn Step AND as a Floor-Change Step
+
+**What goes wrong:**
+Consider the path `...hallway-node → stairs-floor1 → stairs-floor2 → hallway-node...`. The loop in `generateDirections` processes triples `(prev, curr, next)`. When `i` is at `stairs-floor1`: `prev` = hallway, `curr` = stairs-floor1, `next` = stairs-floor2. Since `curr.floorId !== next.floorId`, a floor-change step is generated — correct. But on the previous iteration where `i` is at `hallway-node` before the stairs: `prev` = previous-node, `curr` = hallway-node-before-stairs, `next` = stairs-floor1. Since both are on floor 1, this generates a normal turn step pointing toward the stairs. That is also correct. The bug appears when the node immediately before the stairs IS a connector type itself (e.g., a building entrance that opens into a stairwell): two consecutive floor-change steps are generated with no walking distance between them.
+
+**Why it happens:**
+The floor-change detection runs independently for every triple. It does not look back to check whether the previous step was also a floor-change step. On campus-outdoor-to-building routes where the entrance node is at floor 0 (campus) and the first indoor node is at floor 1, the sequence `outdoor-node(floor0) → entrance-node(floor0) → floor1-node` produces a valid transition. But if the admin placed the entrance node at `floor1` instead of `floor0`, it produces two consecutive floor-change-like conditions.
+
+**Prevention:**
+- After generating all steps, post-process to merge or drop consecutive floor-change steps with zero walking distance between them.
+- Document the expected node sequence for campus-to-building routes in a comment: `campus(floor0) → entrance(floor0) → floor1-node` is the canonical layout.
+- Add a test case: route from campus outdoor node through an entrance to Floor 1 of a building — the step list should have exactly one "Enter building" or equivalent transition step, not two.
+
+**Detection:**
+- Directions list shows two consecutive non-walking steps: "Enter building" followed immediately by "Take stairs to Floor 1."
+- `distanceM` of 0 on a floor-change step.
+
+**Phase to address:** Multi-floor directions phase. Include campus-outdoor-to-building routes in direction step tests.
+
+---
+
+## Minor Pitfalls
+
+Mistakes that cause confusion or polish issues but are straightforward to fix.
+
+---
+
+### Pitfall m-1: GPS Dot Uses watchPosition on Page Load Without User Intent, Triggering Immediate Permission Prompt
+
+**What goes wrong:**
+The app starts `watchPosition` on mount (or when the student map loads), triggering the browser's permission prompt before the user has interacted with any GPS feature. On iOS Safari, an unprompted location request on page load is silently blocked in some configurations. On Android Chrome, the popup appears immediately, interrupting the user's initial map orientation.
+
+**Prevention:**
+Only call `getCurrentPosition` or `watchPosition` when the user explicitly clicks a "Show my location" button. Never start geolocation on mount. Store the `watchId` returned by `watchPosition` and call `clearWatch(watchId)` when the component unmounts or when the user dismisses the GPS feature.
+
+**Phase to address:** GPS implementation phase.
+
+---
+
+### Pitfall m-2: "You Are Here" Accuracy Circle Is Drawn in Stage Coordinates, Not Screen Coordinates, and Scales with Zoom
+
+**What goes wrong:**
+The accuracy radius circle (representing GPS accuracy in meters) is drawn as a Konva shape inside the Stage. Its radius is computed from GPS accuracy in meters, converted to normalized coordinates, then to pixels based on `imageRect`. When the user zooms in, the circle scales up with the stage, making it appear as if accuracy has improved at high zoom.
+
+**Prevention:**
+The accuracy circle should be drawn as an HTML overlay element (CSS circle) positioned over the GPS dot using the same coordinate conversion used for the GPS dot's screen position, but at fixed screen-space size (accounting for zoom by dividing the accuracy-in-pixels by the current stage scale). Alternatively, accept the scaling behavior but cap the radius in screen pixels to prevent it from filling the entire viewport.
+
+**Phase to address:** GPS "you are here" implementation phase.
+
+---
+
+### Pitfall m-3: Admin Floor-Connector Visual Linking Is Not Visible When Linked Node Is on a Hidden Floor
+
+**What goes wrong:**
+The admin is on Floor 2. A connector node shows a link indicator ("linked to Floor 3, node X"). The admin wants to verify the link — but Floor 3 does not exist yet (it was added to the DB but the admin has not uploaded a floor plan). The node selector for Floor 3 is empty. The admin assumes the link is broken and re-links it, creating a second `connectsToNodeAboveId` write that overwrites the first.
+
+**Prevention:**
+When displaying the linked node's identity in the floor-connector UI, always show the linked node ID and floor number even if the target floor is not currently loaded. Indicate if the target node cannot be found in the current `navGraph` (it may be on a floor that hasn't been saved yet). Do not make the link indicator interactive when the target floor is unavailable — show it as read-only until the floor is loaded.
+
+**Phase to address:** Admin floor-connector linking UI phase.
+
+---
+
+### Pitfall m-4: Two-Finger Rotation Is Applied Every Frame in handleTouchMove Without a Threshold, Causing Jitter
+
+**What goes wrong:**
+The existing `handleTouchMove` applies rotation on every `touchmove` event based on `angleDiff = angle - lastAngle`. For very small finger movements, `angleDiff` can be sub-1-degree noise (device jitter). Applying this every frame produces a slowly drifting rotation that the user did not intend — the map subtly rotates during a pure pinch-zoom.
+
+**Prevention:**
+Apply a rotation threshold: only update `stage.rotation()` when `Math.abs(angleDiff * 180 / Math.PI) > ROTATION_THRESHOLD_DEG` (e.g., 2 degrees per frame). This prevents jitter while preserving responsive intentional rotation.
+
+**Phase to address:** Konva gesture focal-point fix phase.
+
+---
+
+## Phase-Specific Warnings
+
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|----------------|------------|
+| GPS bounds admin config | Axis inversion (C-1) | Unit-test `gpsToNormalized` before any UI work |
+| GPS "you are here" | Stale dot / accuracy misleading (C-5, m-2) | Implement accuracy radius + stale timeout before user testing |
+| GPS permission | iOS Safari denial inconsistency (C-6) | Test on real iOS device; never rely on permissions.query |
+| GPS nearest-node snap | Aspect-ratio distance error (C-4) | Add aspect correction in snap function, not in pathfinding |
+| Konva pinch-zoom fix | Rotation-aware focal point (C-2) | Use `getAbsoluteTransform().invert()` for all pointer-to-stage math |
+| Konva pinch-zoom fix | Stage jump on gesture start (C-3) | Verify `Konva.hitOnDragEnabled = true` in all canvases |
+| Konva rotation fix | Sub-threshold rotation jitter (m-4) | Add `> 2 deg` threshold before applying angle delta |
+| Multi-floor directions | Duplicate floor-change steps (M-5, M-1) | Add node-type guard + post-processing; test campus-to-building route |
+| Admin floor-connector UI | Orphaned one-sided links (M-2) | Atomic server-side link API before building UI |
+| Admin floor-connector UI | Invalid same-floor or cross-building links (M-3) | Server-side validation on link API |
+| Admin floor-connector UI | UI state stale after floor switch (M-4) | Pending-link state lives above useEditorState; persists across floor switch |
+
+---
+
+## Integration Pitfalls
+
+Mistakes specific to integrating new v1.6 features with the existing v1.5 architecture.
+
+| Integration Point | Mistake | Correct Approach |
+|-------------------|---------|-----------------|
+| GPS → normalized coordinates | Using `calculateWeight` (normalized Euclidean) for nearest-node snap | Use aspect-ratio-corrected distance for snap only; keep `calculateWeight` for pathfinding |
+| GPS dot → Konva Stage | Drawing dot as a Konva shape inside Stage | Dot is easier as an HTML absolute-positioned element; avoids coordinate transform complexity for the accuracy circle |
+| GPS permission → app state | Starting `watchPosition` on mount or in `useEffect` with empty deps | Only start after user explicit action; store `watchId` ref; `clearWatch` on unmount |
+| Floor-connector link → save flow | Saving connector fields in per-floor save (only saves active floor) | Dedicated `/api/admin/link-connector` that writes both nodes atomically |
+| Multi-floor directions → `floorMap` | Passing `floorMap` to `generateDirections` but it's empty because `graphState` is not yet `loaded` | Gate the directions call on `graphState.status === 'loaded'`; `floorMap` should never be empty when routes exist |
+| Rotation pivot fix → `handleWheel` | Fixing pinch only, not wheel zoom | Both `handleWheel` and `handleTouchMove` use the same focal-point formula; fix both at the same time |
+
+---
 
 ## Sources
 
-- Dijkstra's algorithm: Wikipedia, well-established computer science (HIGH confidence)
-- Wayfinding UX principles: Wikipedia "Wayfinding" article, referencing Lynch (1960), Passini (1984), Arthur & Passini (1992) — foundational wayfinding research (HIGH confidence)
-- WCAG 2.1 accessibility standards: W3C official documentation, updated Feb 2026 (HIGH confidence)
-- Indoor positioning challenges: Wikipedia "Indoor positioning system" article (MEDIUM confidence — background context, not directly applied since CampusNav uses no GPS)
-- Pan/zoom coordinate transform issues: Based on established web development patterns with CSS transforms and SVG coordinate systems (HIGH confidence — well-known browser behavior)
-- Normalized coordinate systems for floor plans: Standard practice in CAD/GIS applications (HIGH confidence)
-- Graph connectivity validation: Standard graph theory (BFS/DFS reachability) (HIGH confidence)
-- Mobile touch event handling: Established web platform behavior (HIGH confidence)
-- Accessible routing as separate edge weights: Standard approach in multi-criteria shortest path problems (HIGH confidence)
-- Fuzzy search for room names: Established UX pattern, libraries like Fuse.js (MEDIUM confidence — specific library recommendation from training data)
+- `src/client/hooks/useMapViewport.ts` — existing pinch-zoom and rotation implementation (code analysis, HIGH confidence)
+- `src/client/hooks/useRouteDirections.ts` — existing floor-change step generation (code analysis, HIGH confidence)
+- `src/shared/pathfinding/graph-builder.ts` — Pass 2 inter-floor edge synthesis logic (code analysis, HIGH confidence)
+- `src/server/db/schema.ts` — connector fields schema: `connectsToNodeAboveId`, `connectsToNodeBelowId` (code analysis, HIGH confidence)
+- `src/client/pages/admin/MapEditorCanvas.tsx` — per-floor save flow; floor switch auto-save (code analysis, HIGH confidence)
+- MDN Geolocation API: [GeolocationCoordinates.accuracy](https://developer.mozilla.org/en-US/docs/Web/API/GeolocationCoordinates/accuracy) (HIGH confidence)
+- MDN Geolocation: [watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition) — `timeout` option and behavior (HIGH confidence)
+- Pointr: [Indoor location in browsers — explained](https://www.pointr.tech/blog/dispelling-web-based-bluedot-myth) — indoor GPS accuracy ceiling ~10m (MEDIUM confidence)
+- Konva GitHub Issues: [Pinch Zoom jumps randomly #1096](https://github.com/konvajs/konva/issues/1096) — focal point calculation with draggable stage (MEDIUM confidence)
+- Konva GitHub Issues: [Zooming stage relative to pointer position does not work in Safari #1044](https://github.com/konvajs/konva/issues/1044) — Safari-specific pointer position issue (MEDIUM confidence)
+- Konva Docs: [Multi-touch Scale Stage](https://konvajs.org/docs/sandbox/Multi-touch_Scale_Stage.html) — `hitOnDragEnabled` requirement (HIGH confidence)
+- Konva GitHub Issues: [Konva 4.0.0 breaks touch stage.getPointerPosition() #733](https://github.com/konvajs/konva/issues/733) — `setPointersPositions` workaround (MEDIUM confidence)
+- Apple Developer Forums: [HTML Geolocation API does not work](https://developer.apple.com/forums/thread/751189) — iOS Safari permissions.query inconsistency (HIGH confidence)
+- WebSearch: `watchPosition` battery drain optimization — `timeout` option, `clearWatch` on backgrounding (MEDIUM confidence)
 
 ---
-*Pitfalls research for: Campus wayfinding / indoor navigation web app (CampusNav)*
-*Researched: 2026-02-18*
+*Pitfalls research for: CampusNav v1.6 GPS integration and UX refinements*
+*Researched: 2026-03-09*

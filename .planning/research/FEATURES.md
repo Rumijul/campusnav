@@ -1,223 +1,202 @@
-# Feature Research
+# Feature Landscape
 
-**Domain:** Campus wayfinding / indoor navigation web app
-**Researched:** 2026-02-18
-**Confidence:** HIGH
+**Domain:** Campus wayfinding / indoor navigation web app — v1.6 GPS & UX Refinements
+**Researched:** 2026-03-09
+**Confidence:** HIGH (GPS/geolocation), HIGH (gesture math), HIGH (directions UX), MEDIUM (admin linking UX patterns)
 
-## Feature Landscape
+---
 
-### Table Stakes (Users Expect These)
+## Scope Note
 
-Features users assume exist. Missing these = product feels incomplete or unusable.
+This file covers **the five new v1.6 features only**. All v1.0 and v1.5 features are already shipped and documented in earlier research. The five features below are additive on top of an existing system that has: multi-floor A* routing, Konva.js canvas with touch gestures, per-floor route visualization, admin node/edge editor, floor connector nodes with `connectsToNodeAboveId`/`connectsToNodeBelowId`, and normalized 0-1 coordinate system.
 
-| Feature                                                   | Why Expected                                                                                                                                                                                                            | Complexity | Notes                                                                                                                                                                              |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Interactive 2D floor plan map**                         | Core of any wayfinding app. Users need to see where they are and where things are. Every competitor (Mappedin, MazeMap, ArcGIS Indoors) has this as the foundation.                                                     | MEDIUM     | Pan, zoom, tap-to-select locations on a rendered floor plan. This is the canvas everything else lives on.                                                                          |
-| **Location search (by name/keyword)**                     | Users won't tap-hunt for "Room 204B." Mappedin highlights "search that drives discovery" as a core feature. MazeMap has search prominent on every map.                                                                  | MEDIUM     | Autocomplete/fuzzy search over room names, building names, POI categories. Must be fast (<200ms perceived).                                                                        |
-| **Tap-to-select start/destination on map**                | Alternative to search for users who know roughly where something is. All competitors support click/tap selection.                                                                                                       | LOW        | Click a room/POI on the map to set it as start or destination. Visual feedback (highlight, pin).                                                                                   |
-| **Visual route path on map**                              | The literal point of a wayfinding app. Mappedin, MazeMap, ArcGIS Indoors all draw routes on the map. Without this, there's no product.                                                                                  | MEDIUM     | Draw a clear, colored polyline along the computed path from start to destination. Must be visually distinct from the floor plan.                                                   |
-| **Step-by-step text directions**                          | Mappedin: "Directions that make sense — clear, step-by-step guidance with familiar landmarks." This bridges the gap between seeing a path and knowing what to do.                                                       | MEDIUM     | "Turn left at the elevator. Walk 50m to Room 204B." Ordered list of human-readable instructions derived from the path.                                                             |
-| **Shortest path computation (Dijkstra/A*)**               | Without shortest-path, routes would be arbitrary. Graph-based pathfinding is standard across all indoor navigation products.                                                                                            | MEDIUM     | Core algorithm. Weights represent real walking distances/times. Must run client-side in <100ms for a single floor.                                                                 |
-| **Wheelchair-accessible route option**                    | Mappedin: "Barrier-free navigation — routes prioritize elevators, ensuring everyone navigates independently." MazeMap's accessibility blog emphasizes accessible wayfinding. ADA/WCAG compliance increasingly expected. | MEDIUM     | Separate graph edges that exclude stairs and obstacles. Must be explicitly offered, not hidden behind settings.                                                                    |
-| **Side-by-side route comparison (standard + accessible)** | This is CampusNav's explicit core value. Showing both routes simultaneously rather than toggling is the design intent. Competitors typically offer a toggle/filter; showing both is better UX for awareness.            | MEDIUM     | Two routes rendered simultaneously with distinct colors. Summary stats (distance, time) for each. This makes accessibility visible, not an afterthought.                           |
-| **Location details panel**                                | Mappedin: "Descriptions, contact info, photos, links — everything visitors need." When you tap a room, you need to know what it is.                                                                                     | LOW        | Room name, number, type (lecture hall, restroom, office), floor, optional description. Appears on click/search selection.                                                          |
-| **Admin authentication**                                  | Admin-only editing requires auth. Standard security practice. No student-facing login needed per project spec.                                                                                                          | LOW        | Simple auth for admin routes. JWT or session-based. Single admin role is sufficient for v1.                                                                                        |
-| **Admin map editor (node/edge placement)**                | Mappedin has a full "Editor" product. MazeMap has "Map Editor." ArcGIS has "Floor Plan Editor." Admins need to build the navigation graph without writing code.                                                         | HIGH       | Drag-and-drop node placement on floor plan image. Edge creation between nodes. Set node types (room, hallway, entrance, stairs, elevator). This is the most complex UI in the app. |
-| **Admin data table view**                                 | Complement to visual editor. Admins need to bulk-view/edit node metadata (names, types, accessibility flags) without clicking each one on the map.                                                                      | MEDIUM     | Sortable, filterable table of all nodes/locations. Inline editing of properties. Syncs with map view.                                                                              |
-| **Mobile-responsive web UI**                              | Students use phones. MazeMap and Mappedin both emphasize mobile-first wayfinding. A web app that doesn't work on mobile is useless for the core use case (student walking around campus checking phone).                | MEDIUM     | Responsive design that works on phone-size screens. Touch-friendly controls. Map gestures (pinch-zoom, pan).                                                                       |
+---
 
-### Differentiators (Competitive Advantage)
+## Table Stakes
 
-Features that set CampusNav apart. Not required for basic function, but create significant value.
+Features users expect from each capability area. Missing these = the feature feels broken or incomplete.
+
+| Feature | Why Expected | Complexity | Depends On |
+|---------|--------------|------------|------------|
+| **GPS "you are here" dot visible on campus map** | Google Maps, Apple Maps, and every campus wayfinding competitor (MazeMap, Mappedin blue dot) trains users to expect a real-time location indicator. Without it, users feel disoriented. | MEDIUM | Browser Geolocation API, GPS bounds stored per floor/campus, nearest-node snap logic |
+| **GPS dot hides or degrades gracefully when accuracy is poor** | Indoor GPS via browser geolocation is notoriously inaccurate (20-50m+). Showing a confident dot at ±40m accuracy misleads users. The accuracy circle is the standard pattern (Google Maps light-blue circle). Hide dot when accuracy > 50m. | LOW | `position.coords.accuracy` threshold check |
+| **GPS permission denied → clean fallback to manual start selection** | Browsers require explicit user permission. ~15-30% of users deny location on first ask, or have previously denied it. A broken "loading…" state or silent failure destroys trust. The expected pattern is: detect denial → show explanatory message → fall back to manual start-point tap/search. | LOW | Permissions API + existing manual selection flow |
+| **Geolocation snaps to nearest walkable node as route start** | Raw lat/lng lands on a wall, courtyard, or area outside the floor plan. Users expect their location to resolve to a sensible start point — the nearest valid node — not an arbitrary canvas coordinate. | MEDIUM | Lat/lng → normalized 0-1 transform + nearest-node distance search over existing graph |
+| **Admin can configure lat/lng bounds per floor plan and campus map** | Without a bounding box, lat/lng → canvas coordinate math is impossible. Every geo-referencing workflow (HoloBuilder, QGIS, Mappedin) requires defining at least the two opposite corners of the map with real-world coordinates. | MEDIUM | New `gpsBounds` column on buildings/floors table; admin UI to enter NW + SE corner lat/lng |
+| **Multi-floor directions show a visual divider at each floor transition** | Users lose track of which segment of directions applies to which floor when the list is a flat stream. Mappedin, MazeMap, and the MDPI indoor navigation landmark research all use section headers or dividers at floor changes. Users expect "you are now on Floor 3" or a floor label before the next group of steps. | LOW | Existing per-floor route segments; connector node metadata already identifies transition points |
+| **Multi-floor directions name the specific connector (stairs/elevator)** | "Go to the stairs" is ambiguous when a building has 4 stairwells. Research on indoor landmark-based instructions (MDPI 2017) shows users navigate better when given specific landmark names: "Take Staircase B to Floor 3" vs "Take stairs to Floor 3." The connector node's `name` field must appear in the step. | LOW | Existing connector node `name` property already in DB schema |
+| **Pinch-to-zoom uses the touch midpoint as zoom origin** | When zoom origin is (0,0) or the stage center, the map jumps away from what the user is looking at during pinch. Every correctly-implemented mapping app (Google Maps, Apple Maps, MazeMap, Mappedin web SDK) keeps the content under the fingers stationary during zoom. This is the standard Konva multi-touch scale pattern: compute center between touches, apply scale-relative-to-pointer. | MEDIUM | Konva stage `touchmove`, `getCenter()` helper, stage position + scale simultaneous update |
+| **Two-finger rotation pivots around the touch midpoint** | Same principle as pinch-zoom focal point. If rotation pivots around (0,0), the map rotates wildly off screen. Users expect the content between their fingers to stay anchored. Academic research and standard implementations agree: midpoint of the two touch points is the pivot. | MEDIUM | Same gesture handler as pinch-zoom — extend to track rotation angle delta between touchmove events |
+
+---
+
+## Differentiators
+
+Features that go beyond what users expect and create meaningful value.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Always-visible accessibility** | CampusNav's core differentiator. Most competitors (Mappedin, MazeMap) offer accessible routes as an option/toggle you have to find. CampusNav shows the wheelchair-accessible alternative *alongside* the standard route by default. This makes accessibility awareness the norm, not an afterthought. | LOW (once routing exists) | Design decision, not a separate feature. Both routes computed and shown simultaneously. Color-coded. Always on, no toggle needed. |
-| **Zero-friction student access** | No login, no app download, no setup. Just open a URL and navigate. Competitors require app installs (MazeMap mobile) or enterprise platform access (ArcGIS). A web URL is the lowest barrier to entry. | LOW | Already the architecture choice (web app). Reinforce by avoiding any student-facing auth or onboarding flow. |
-| **Route time estimates** | Mappedin mentions "getting travelers to gates on time." Showing estimated walking time (standard speed + reduced mobility speed) for both routes gives actionable info. | LOW | Simple calculation: distance / walking speed. Use 1.4 m/s standard, 0.8 m/s reduced mobility. Display "~3 min" next to each route. |
-| **Shareable route URLs** | Students can share "how to get to Room 204B from the main entrance" via URL. No competitor in the campus space makes this seamless for web. | LOW | Encode start/destination in URL params. Reconstruct route on page load. Deep-linkable routes. |
-| **Category-based POI filtering** | Filter map to show only restrooms, elevators, exits, vending machines, etc. Mappedin has location categories. Useful for quick "where's the nearest restroom?" queries. | LOW | Filter buttons or checkboxes that show/hide POI types on the map. Simple boolean filtering on node type. |
-| **Nearest-X search** | "Find nearest restroom/exit/elevator from my selected location." Goes beyond search-by-name to spatial queries. | MEDIUM | Given a start point, find closest node of type X using graph distances. Return sorted list. |
-| **Keyboard navigation & screen reader support** | Mappedin emphasizes WCAG 2.1 AA compliance and screen reader compatibility. For a campus accessibility product, the web app itself must be accessible. | MEDIUM | ARIA labels, keyboard-navigable search and directions, skip-nav links, high-contrast mode. The app about accessibility must itself be accessible. |
-| **Print-friendly directions** | Students can print step-by-step directions. Simple but surprisingly useful for visitors, orientation events, and students who prefer paper. | LOW | CSS print stylesheet. Format directions as a clean numbered list with start/end. Exclude map chrome. |
+| **GPS accuracy ring (uncertainty circle) on campus dot** | Shows the GPS accuracy radius visually as a semi-transparent circle around the dot, exactly like Google Maps. Users can judge for themselves whether the position is reliable enough to use. Most campus web apps either omit the dot or show it without an accuracy ring. | LOW | Draw a Konva Circle with radius = `accuracy_meters` converted to canvas pixels using the GPS bounds scale; counter-scale like landmark markers |
+| **GPS dot auto-snaps to start and re-routes when user taps "use my location"** | Instead of forcing users to always manually set a start point, a single "use my location" button resolves their GPS position, snaps to nearest node, and immediately begins routing to any already-selected destination. MazeMap and Mappedin offer this as a core interaction. | MEDIUM | Ties GPS snap logic to the existing start-point selection state machine |
+| **Floor-transition step uses directional language (up/down) + floor number** | "Take Elevator A up to Floor 3" is more useful than "Take Elevator A to Floor 3." The direction (up/down) is derivable from the floor numbers and already-known current floor. Low implementation cost, meaningful clarity gain. | LOW | Compare source and destination floor numbers; prepend "up" or "down" to the step text |
+| **Admin floor-connector linking via floor-switcher select UI (no manual ID entry)** | Current system requires admins to manually enter `connectsToNodeAboveId` as a raw node ID. A dropdown or modal that loads the nodes on the adjacent floor and lets admin click the matching node reduces admin error and time. This is the UX pattern used by Situm editor and NavVis graph management tools. | MEDIUM | New UI component in admin editor: "Link to floor above/below" → switch to adjacent floor, click a node; stores the resolved ID |
+| **GPS bounds entry with map-click georeferencing helper** | Rather than typing lat/lng coordinates blindly, admin can open a helper modal that shows an OpenStreetMap tile overlay and lets them click to set the NW and SE corners of the floor plan. More discoverable than a text input pair. | HIGH | Requires embedding a lightweight tile map (Leaflet or similar) in admin panel; high complexity for moderate gain |
+| **"Located near [connector name]" in GPS snap feedback** | When the GPS dot snaps to a node that is a floor-connector (stair/elevator), display a small indicator: "You appear to be near Staircase A." Helps users confirm the snap makes sense. | LOW | Check snapped node type; if connector, show name in GPS status banner |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+---
 
-Features that seem good but create problems in this context.
+## Anti-Features
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| **Real-time GPS/indoor positioning (blue dot)** | "Show me where I am on the map right now." Users expect GPS-like experience from Google Maps. | Indoor positioning requires hardware infrastructure (BLE beacons, WiFi fingerprinting) that campuses don't have. Even Mappedin and ArcGIS sell IPS as a separate, expensive add-on. Without it, a "current location" feature would be inaccurate and frustrating. The project explicitly excludes GPS. | Manual start point selection: "I'm at [X]" tap or search. Users know which room they're in/near. For v1, this is sufficient and honest. |
-| **Multi-floor navigation** | "Navigate from Floor 1 to Floor 3." Seems essential. | Massively increases complexity: floor transitions, elevator/stair connections, multi-layer map rendering, floor picker UI. ArcGIS Indoors calls this a major feature. Project spec says single floor v1. Adding multi-floor prematurely would delay core value delivery. | Build single-floor with extensible data model (floor field on nodes). Add multi-floor in v2 when the graph model and UI are proven. |
-| **3D map rendering** | "3D maps look impressive." MazeMap and ArcGIS offer 3D. | 3D adds enormous rendering complexity, performance issues on mobile, and doesn't improve wayfinding on a single floor. 2D top-down is actually clearer for navigation — it's what every major mapping product defaults to. | High-quality 2D floor plan with clear visual hierarchy. 2D is faster, clearer, and more accessible. |
-| **Student accounts/login** | "Track favorites, save frequent routes, personalize." | Adds auth complexity, privacy concerns (tracking student movement), GDPR/FERPA compliance burden, and delays core feature delivery. For a "just get me there" tool, login is friction. Project spec explicitly says no student login. | Shareable URLs for bookmarking. Browser localStorage for recently searched locations (no server-side storage). |
-| **Real-time crowd density / occupancy** | MazeMap offers heatmaps. Seems useful for "avoid crowded areas." | Requires IoT sensors, real-time data infrastructure, ongoing maintenance. Way beyond scope of a wayfinding app. Adds no value without sensor hardware. | Not applicable for v1. If ever needed, could integrate as a data overlay in future. |
-| **Space/room booking** | MazeMap offers space booking as a feature. | Entirely separate product domain (calendar integration, conflict resolution, notifications). Would split focus from the core wayfinding value. | Link to existing campus booking system from the location details panel if a URL is available. |
-| **Turn-by-turn real-time navigation** | Google Maps-style "in 20 meters, turn right" with position tracking. | Requires real-time positioning (see GPS anti-feature above). Without knowing where the user is, turn-by-turn is impossible. Step-by-step text directions achieve the same goal for a "read before you walk" use case. | Step-by-step directions shown all at once. User reads the full route, then walks. Works without any positioning hardware. |
-| **Multi-language support** | Mappedin supports 40+ languages. | Significant translation effort. For a single-campus deployment, the user base is typically single-language or bilingual at most. Adds complexity to every UI string and every POI name. | English-only for v1. Design with i18n-ready string extraction so translation is possible later without rewriting. |
-| **Timetable / schedule integration** | MazeMap integrates with university timetable systems. | Requires integration with specific campus scheduling APIs (varies by institution). Adds coupling to external systems that may be unreliable or undocumented. | Show room information and let students mentally connect it with their schedule. A "next class: Room 204B" feature can be a v2+ integration. |
+Features to explicitly not build in v1.6.
 
-## Feature Dependencies
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Real-time GPS tracking (continuous watchPosition updates moving the dot)** | Indoor GPS from a browser is not accurate enough for real-time tracking. A dot that jumps 20-40 meters randomly as the user walks is worse than no dot. Mappedin's own documentation requires dedicated IPS hardware (BLE beacons, WiFi fingerprinting) for reliable real-time blue-dot. The project explicitly lists this as out-of-scope. | One-shot GPS fix on "use my location" button tap. The dot is a start-point setter, not a live tracker. |
+| **Compass-based map rotation (device orientation API)** | Requires `DeviceOrientationEvent` which is behind a permission on iOS 13+, has poor accuracy, and causes disorienting map spinning when the user moves slightly. Google Maps makes this opt-in for good reason. | Keep map rotation as a deliberate two-finger gesture only. Do not auto-rotate to match compass. |
+| **GPS indoors with floor detection** | Determining which floor the user is on from browser sensors (barometric pressure, GPS altitude) requires sensor fusion and calibration beyond the scope of this milestone. Altitude from GPS is very inaccurate (±15-25m). | GPS dot is only shown on the campus outdoor map. When a user enters a building and selects a floor manually, they are already on the correct floor. No indoor floor auto-detection. |
+| **Map tile embedding in main student view** | Adding real-world tile maps (Google Maps, Leaflet OSM) under the campus floor plan for outdoor segments creates licensing complexity, performance overhead, and visual inconsistency. The campus outdoor map is already a hand-drawn overhead image per project spec. | Keep the existing campus overhead image as the outdoor map layer. GPS dot lands on this image. |
+| **Admin GPS bounds via copy-paste from Google Maps** | While a Google Maps link parser sounds convenient, Google URL formats change and parsing them is fragile. | Input two fields: NW corner lat/lng and SE corner lat/lng as plain decimals. Provide a bboxfinder.com or OpenStreetMap link in the admin UI hint text so admins can look up coordinates externally. |
+| **Inertia/momentum scrolling for pinch-zoom gestures** | Inertia adds animation state, velocity tracking, and deceleration curves. The existing Konva drag implementation handles pan momentum natively for single-finger drag. Adding inertia to pinch-zoom is a high complexity addition for low perceptible value. | Fix the focal point and pivot correctness (which is the actual bug). Don't add inertia on top. |
+| **Floor-connector link visualization as animated arrows on the map** | Showing animated "you are connected to Floor 3 via this node" overlays on the student map adds visual clutter and confusion. Connector links are admin metadata. | Floor-transition information belongs in the step-by-step directions list, not the map canvas. |
+
+---
+
+## Feature Dependencies (v1.6 Specific)
 
 ```
-[Floor Plan Rendering (interactive map)]
-    └──requires──> [Admin Map Editor] (editor creates what the map displays)
-                       └──requires──> [Floor Plan Image Upload] (editor needs a base image)
+[GPS "You Are Here" Dot — student view]
+    └──requires──> [GPS Bounds configured per floor/campus] (admin feature)
+    └──requires──> [Lat/Lng → Normalized 0-1 Transform] (new math utility)
+    └──requires──> [Nearest-Node Snap] (distance search over existing graph nodes)
+    └──depends on──> [Existing campus map rendering] (dot is drawn on existing Konva stage)
 
-[Visual Route Path]
-    └──requires──> [Graph Data Model] (routes are computed on a graph)
-                       └──requires──> [Admin Node/Edge Editor] (graph is built by admin)
+[GPS Bounds Configuration — admin]
+    └──requires──> [New gpsBounds schema] (new DB column: northWest: {lat, lng}, southEast: {lat, lng})
+    └──depends on──> [Existing buildings/floors entity model]
 
-[Shortest Path Computation]
-    └──requires──> [Graph Data Model]
+[Nearest-Node Snap]
+    └──requires──> [GPS Bounds configured] (to convert lat/lng to canvas coords)
+    └──depends on──> [Existing node graph] (searches over nodes already in DB)
 
-[Wheelchair-Accessible Route]
-    └──requires──> [Shortest Path Computation] + [Accessibility Flags on Edges/Nodes]
+[Multi-Floor Directions — floor-transition step]
+    └──requires──> [Existing per-floor route segments] (already computed in v1.5)
+    └──requires──> [Connector node name field] (already in DB schema)
+    └──enhances──> [Existing step-by-step directions] (adds dividers + transition steps)
 
-[Side-by-Side Route Comparison]
-    └──requires──> [Shortest Path (standard)] + [Wheelchair-Accessible Route]
+[Admin Floor-Connector Linking UI]
+    └──requires──> [Existing admin floor tabs and building selector] (already in v1.5)
+    └──requires──> [Existing connectsToNodeAboveId/BelowId metadata] (already stored)
+    └──replaces──> [Manual node ID entry] (removes the raw ID text input)
 
-[Step-by-Step Text Directions]
-    └──requires──> [Visual Route Path] (directions derived from same path data)
+[Pinch-Zoom Focal Point Fix]
+    └──requires──> [Existing Konva touchmove handler] (refactor of existing code)
+    └──requires──> [getCenter() / getDistance() touch helpers] (new math utilities)
+    └──is independent of──> [GPS features, directions changes, admin linking]
 
-[Location Search]
-    └──requires──> [Location Data] (names, types populated via admin editor)
-
-[Tap-to-Select on Map]
-    └──requires──> [Floor Plan Rendering]
-
-[Location Details Panel]
-    └──requires──> [Location Data]
-
-[Shareable Route URLs]
-    └──requires──> [Routing System] (needs start/destination to encode)
-
-[Nearest-X Search]
-    └──requires──> [Shortest Path Computation] + [Location Categories/Types]
-
-[Admin Data Table]
-    └──enhances──> [Admin Map Editor] (alternative view of same data)
-
-[Route Time Estimates]
-    └──enhances──> [Visual Route Path] (adds time info to existing routes)
-
-[Print-Friendly Directions]
-    └──enhances──> [Step-by-Step Text Directions]
-
-[Category POI Filtering]
-    └──enhances──> [Floor Plan Rendering] + [Location Categories/Types]
+[Two-Finger Rotation Pivot Fix]
+    └──requires──> [Same gesture handler as pinch-zoom fix] (implemented together)
+    └──requires──> [Rotation angle delta tracking between touchmove events]
 ```
 
 ### Dependency Notes
 
-- **Everything depends on the Admin Editor building the graph**: The entire user-facing experience is blank without admin-created floor plan data, nodes, and edges. The editor must come first or in parallel with the map renderer.
-- **Routing depends on Graph Data Model**: All pathfinding, accessible routing, and directions flow from the navigation graph. The graph schema (nodes with types, edges with weights and accessibility flags) is the foundational data model.
-- **Accessible routing requires explicit edge/node attributes**: Each edge needs `wheelchair_accessible: boolean` (at minimum). Nodes like stairs need to be tagged so the accessible-routing algorithm can exclude them.
-- **Side-by-side comparison is a presentation feature**: Once both route types can be computed, showing them together is a UI/rendering concern, not an algorithm concern.
-- **Shareable URLs are nearly free**: Once routing works with start/destination IDs, encoding them in URL params is trivial.
+- **GPS features form a strict chain**: Bounds must be configured before any GPS dot can appear. Admin configures bounds → student gets dot. Do not ship the student-facing GPS feature in a phase before the admin bounds configuration phase.
+- **Directions improvements are independent**: The floor-transition step and divider enhancement only touches the directions rendering logic. It does not depend on GPS or gesture work.
+- **Admin connector linking is independent**: It is a pure UI improvement over the existing metadata entry flow. The underlying data model (`connectsToNodeAboveId`) is unchanged.
+- **Gesture fix is standalone**: The pinch-zoom and rotation fix is a pure refactor of the existing Konva touch handler. It does not share state with GPS, directions, or admin work.
+- **GPS snap uses normalized 0-1 coords**: The lat/lng → canvas coordinate transform produces values in 0-1 space (matching the existing coordinate system). The nearest-node search operates entirely in 0-1 space using Euclidean distance. No pixel coordinates involved.
 
-## MVP Definition
+---
 
-### Launch With (v1)
+## MVP Recommendation for v1.6
 
-Minimum viable product — what's needed to validate the concept.
+### Build (required for milestone)
 
-- [ ] **Interactive floor plan map** — The canvas. Without it, nothing else matters.
-- [ ] **Admin floor plan image upload** — Admin needs to set the base map image.
-- [ ] **Admin node/edge editor (drag-and-drop)** — Build the navigation graph visually on the floor plan.
-- [ ] **Admin data table view** — Bulk view/edit node metadata alongside the visual editor.
-- [ ] **Admin authentication** — Protect the editor. Simple login.
-- [ ] **Location search** — Find rooms by name/number with autocomplete.
-- [ ] **Tap-to-select start/destination** — Click on the map to set routing endpoints.
-- [ ] **Shortest path computation** — Dijkstra/A* on the navigation graph.
-- [ ] **Wheelchair-accessible shortest path** — Same algorithm, graph filtered to exclude non-accessible edges.
-- [ ] **Visual route paths on map (both routes)** — Two color-coded paths rendered simultaneously.
-- [ ] **Step-by-step text directions** — Human-readable turn-by-turn list for both routes.
-- [ ] **Route time estimates** — Walking time for standard and accessible routes.
-- [ ] **Location details panel** — Room name, type, info on tap/search.
-- [ ] **Mobile-responsive design** — Must work on phone screens (primary student use case).
+1. **Multi-floor directions — floor-transition dividers + connector naming** — Purely additive to existing directions output. No schema changes. Highest user value, lowest risk. Build first.
+2. **Admin GPS bounds setup** — New schema + simple admin form (two coordinate pairs). Required blocker for all GPS student features. Must ship before GPS dot.
+3. **GPS "you are here" dot — outdoor campus map only** — One-shot geolocation on "use my location" tap, accuracy ring, nearest-node snap as start-point setter, fallback to manual on denial. Scope strictly to the campus outdoor map (floor 0) to avoid indoor accuracy problems.
+4. **Pinch-zoom focal point fix** — Touch midpoint as zoom origin. Refactor of existing `touchmove` handler. Independent of all other work.
+5. **Two-finger rotation pivot fix** — Extend same gesture handler. Build in same phase as pinch-zoom fix.
+6. **Admin floor-connector linking UI** — Replaces manual ID entry with floor-switching select workflow. Admin quality-of-life improvement. Build after GPS and gesture work is stable.
 
-### Add After Validation (v1.x)
+### Defer
 
-Features to add once core is working and deployed.
+- **GPS bounds georeferencing helper** (map-click UI): High complexity, low urgency. Plain text inputs with external tool link is sufficient for v1.6.
+- **Real-time GPS tracking**: Explicitly out-of-scope; indoor accuracy insufficient.
+- **Compass rotation / device orientation**: Out-of-scope; permission friction + poor accuracy.
 
-- [ ] **Shareable route URLs** — Trigger: students want to send directions to friends or bookmark routes.
-- [ ] **Category-based POI filtering** — Trigger: map gets busy with many POIs and users want to filter.
-- [ ] **Nearest-X search** — Trigger: "where's the nearest restroom?" is a common user query pattern.
-- [ ] **Print-friendly directions** — Trigger: orientation events or visitor use cases emerge.
-- [ ] **Keyboard navigation & screen reader support (WCAG AA)** — Trigger: should be addressed early, but can be iteratively improved post-launch. Start with semantic HTML, enhance with ARIA.
-- [ ] **Admin: bulk import/export (JSON/CSV)** — Trigger: admin has too many nodes to create one-by-one.
+---
 
-### Future Consideration (v2+)
+## Complexity Summary
 
-Features to defer until product-market fit is established.
+| Feature | Complexity | Reasoning |
+|---------|------------|-----------|
+| Multi-floor directions — dividers + connector naming | LOW | Pure rendering change on existing data; connector name is already in DB |
+| Admin GPS bounds configuration | LOW-MEDIUM | New DB column + simple admin form (2 lat/lng pairs); CRUD only |
+| GPS dot — accuracy ring, one-shot fix, nearest-node snap | MEDIUM | New math utility (lat/lng ↔ 0-1), accuracy ring Konva shape, permission error handling |
+| GPS fallback UX on permission denied | LOW | Error code detection + existing manual selection flow |
+| Pinch-zoom focal point fix | MEDIUM | Konva multi-touch math: getCenter(), getDistance(), simultaneous scale+position update |
+| Two-finger rotation pivot fix | MEDIUM | Extends same handler; angle delta between two touchmove frames; likely coupled with zoom fix |
+| Admin floor-connector linking UI | MEDIUM | New modal/panel component; must load adjacent floor nodes; update existing node metadata flow |
 
-- [ ] **Multi-floor navigation** — Why defer: Single floor first. Needs floor picker UI, cross-floor transitions, multi-layer rendering. Design data model to be floor-aware from day one so migration isn't painful.
-- [ ] **Multi-building / outdoor campus map** — Why defer: MazeMap's biggest feature is indoor+outdoor. But outdoor adds a completely different map layer (satellite/street tiles). Out of scope until single-building is proven.
-- [ ] **i18n / multi-language** — Why defer: Extract strings into a locale file from day one, but don't build the translation infrastructure until there's demand.
-- [ ] **Timetable integration** — Why defer: Campus-specific API, high coupling, low certainty of API availability.
-- [ ] **Admin: multiple admin roles/permissions** — Why defer: Single admin role works for v1. RBAC adds complexity without clear benefit at launch scale.
+---
 
-## Feature Prioritization Matrix
+## Edge Cases by Feature
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Interactive floor plan map | HIGH | MEDIUM | P1 |
-| Admin map editor (node/edge) | HIGH | HIGH | P1 |
-| Admin data table view | MEDIUM | MEDIUM | P1 |
-| Location search | HIGH | MEDIUM | P1 |
-| Tap-to-select on map | HIGH | LOW | P1 |
-| Shortest path (Dijkstra/A*) | HIGH | MEDIUM | P1 |
-| Wheelchair-accessible route | HIGH | MEDIUM | P1 |
-| Side-by-side route display | HIGH | LOW | P1 |
-| Visual route path on map | HIGH | MEDIUM | P1 |
-| Step-by-step text directions | HIGH | MEDIUM | P1 |
-| Route time estimates | MEDIUM | LOW | P1 |
-| Location details panel | MEDIUM | LOW | P1 |
-| Admin authentication | MEDIUM | LOW | P1 |
-| Mobile-responsive design | HIGH | MEDIUM | P1 |
-| Shareable route URLs | MEDIUM | LOW | P2 |
-| Category POI filtering | MEDIUM | LOW | P2 |
-| Nearest-X search | MEDIUM | MEDIUM | P2 |
-| Print-friendly directions | LOW | LOW | P2 |
-| Keyboard/screen reader (WCAG) | HIGH | MEDIUM | P2 |
-| Admin bulk import/export | LOW | MEDIUM | P2 |
-| Multi-floor navigation | HIGH | HIGH | P3 |
-| Multi-building/outdoor | MEDIUM | HIGH | P3 |
-| Multi-language (i18n) | LOW | MEDIUM | P3 |
-| Timetable integration | LOW | HIGH | P3 |
+### GPS "You Are Here"
 
-**Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+- **GPS denied on first prompt**: Catch `PositionError.PERMISSION_DENIED` (code 1). Show inline message: "Location access denied — tap the map to set your start point." Do not re-prompt.
+- **GPS position times out**: Catch `PositionError.TIMEOUT` (code 3). Show: "Couldn't get your location — tap to set start manually."
+- **Accuracy > 50m**: Hide dot. Show: "Location accuracy too low to display." This is the threshold used by Mappedin's blue dot SDK and common in implementations reviewed.
+- **GPS position lands outside configured bounds**: The lat/lng is outside the bounding box of the floor plan. Show: "Your location appears to be outside this campus." Do not draw a dot outside the canvas.
+- **No GPS bounds configured for a floor**: GPS feature is silently unavailable for that floor. The "use my location" button should be disabled or hidden when `gpsBounds` is null for the current context.
+- **User snaps to a node that is far from their actual position**: Snap is best-effort. Don't show distance-to-snapped-node; just use it. The start-point remains tappable for correction.
 
-## Competitor Feature Analysis
+### Admin GPS Bounds
 
-| Feature | Mappedin | MazeMap | ArcGIS Indoors | CampusNav (Our Approach) |
-|---------|----------|---------|----------------|--------------------------|
-| Interactive indoor map | Yes (2D/3D, multi-floor) | Yes (2D/3D, multi-floor) | Yes (2D/3D, floor-aware) | 2D single floor. Simpler, faster, focused. |
-| Search/discovery | Advanced search with product/store search | Room/POI search with autocomplete | POI search via Viewer/Mobile apps | Name/keyword search with autocomplete. No product catalogs. |
-| Step-by-step directions | Yes, with landmarks | Yes | Yes, turn-by-turn | Yes, derived from graph path. Plain-language steps. |
-| Accessible routing | Toggle for elevator-prioritized routes | Accessible wayfinding mentioned | Accessible route option | **Both routes shown simultaneously by default.** No toggle needed. Accessibility is always visible. |
-| Indoor positioning | Optional add-on (BLE/WiFi) | Optional add-on | Optional add-on (ArcGIS IPS) | None. Manual "I'm at X" selection. Honest about limitations. |
-| Admin/map editor | Full editor product | Map Editor tool | Floor Plan Editor, ArcGIS Pro | Drag-and-drop node editor on floor plan + data table. Purpose-built for graph creation. |
-| Multi-floor | Yes | Yes | Yes | No (v1). Data model supports it for v2. |
-| Mobile support | Native apps + web | Native apps + web | Native apps + web viewers | Web-only, mobile-responsive. Zero install friction. |
-| Auth required | Enterprise accounts | Enterprise/institutional | Enterprise platform | No student auth. Admin-only auth. Minimal friction. |
-| Pricing | Enterprise SaaS | Enterprise SaaS | Enterprise GIS licensing | Free / self-hosted. Ideal for single-campus deployments. |
-| WCAG compliance | 2.1 AA | Mentioned (accessible wayfinding) | Enterprise-level accessibility | Target WCAG 2.1 AA for the web app itself. |
-| Analytics | Yes (navigation patterns) | Heatmaps, user analytics | Space analytics, dashboards | Not in v1. Could add lightweight route analytics later. |
-| Language support | 40+ languages | Multi-language | Multi-language | English only v1. i18n-ready string architecture. |
+- **Admin enters lat/lng with incorrect order (S before N or E before W)**: Validate that northWest.lat > southEast.lat and northWest.lng < southEast.lng. Show inline error.
+- **Admin saves bounds for a floor that has no nodes yet**: Valid — bounds are independent of nodes. GPS will work once nodes are added.
+- **Admin needs to find the correct coordinates**: Add helper text with a link to openstreetmap.org or bboxfinder.com so admin can look up coordinates visually.
+
+### Multi-Floor Directions
+
+- **Route only uses one floor (no floor transition)**: No divider, no transition step. Existing rendering unchanged.
+- **Route uses 3+ floors**: One divider + transition step per floor change, not just start and end floors.
+- **Connector node has no name set**: Fall back to connector type label: "Take Staircase to Floor N" or "Take Elevator to Floor N." Do not show undefined/null.
+- **Accessible and standard routes use different connectors**: Each route's transition steps may name different connectors. This is correct and expected behavior — do not merge them.
+
+### Pinch-Zoom / Rotation Gesture
+
+- **Single finger on canvas during attempted pinch**: Guard: only apply pinch logic when `e.touches.length === 2`. Single-touch remains pan.
+- **Rapid pinch reversal direction**: Stable midpoint tracking prevents jump. Compute fresh center and distance on every `touchmove` frame from raw touch positions.
+- **Zoom hits min/max scale limits during pinch**: Clamp scale to existing min/max bounds (already enforced). Do not allow stage to invert.
+- **Rotation combined with pinch simultaneously**: Both transforms apply in the same `touchmove` handler. Rotation delta + scale delta + position delta applied atomically in one `stage.setAttrs()` call to prevent frame tearing.
+
+### Admin Floor-Connector Linking
+
+- **Admin tries to link a node to itself or to a node on the same floor**: Validate: target node must be on a different floor (specifically the floor above or below). Show error if same floor selected.
+- **Linked node is later deleted**: The dangling ID reference must not crash routing. The existing two-pass `buildGraph` should skip `connectsToNodeAboveId` references to non-existent nodes gracefully (this should be verified in implementation).
+- **Admin wants to unlink a connector**: Provide a "Remove link" action that clears `connectsToNodeAboveId` / `connectsToNodeBelowId` to null.
+- **A staircase spans more than 2 floors**: The existing schema only stores "above" and "below" (two references). Multi-floor spanning staircases require chaining: floor 1 node links to floor 2 node, floor 2 node links to floor 3 node. The linking UI must support editing each floor's node independently.
+
+---
 
 ## Sources
 
-- **Mappedin** — [mappedin.com/wayfinding](https://www.mappedin.com/wayfinding/) — Enterprise wayfinding features, accessibility, multi-channel. Fetched 2026-02-18. **MEDIUM confidence** (marketing page, but detailed feature descriptions).
-- **MazeMap** — [mazemap.com](https://www.mazemap.com/) and [mazemap.com/industries/educational-institutions](https://www.mazemap.com/industries/educational-institutions) — Campus-specific wayfinding, education use cases, accessibility blog. Fetched 2026-02-18. **MEDIUM confidence** (marketing page with real university testimonials).
-- **MazeMap Accessibility Blog** — [mazemap.com/post/campus-accessibility-plan](https://www.mazemap.com/post/campus-accessibility-plan) — Detailed campus accessibility strategies. **MEDIUM confidence**.
-- **ArcGIS Indoors** — [esri.com/en-us/arcgis/products/arcgis-indoors/overview](https://www.esri.com/en-us/arcgis/products/arcgis-indoors/overview) — Enterprise indoor GIS: floor-aware maps, turn-by-turn, space management, Rutgers University case study. Fetched 2026-02-18. **HIGH confidence** (official product page from Esri).
-- **Domain knowledge** — Graph-based pathfinding (Dijkstra/A*), WCAG 2.1 AA standards, responsive web design patterns. **HIGH confidence** (well-established CS/web standards).
+- **MDN Geolocation API** — [developer.mozilla.org/en-US/docs/Web/API/Geolocation_API](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API) — Standard API, `accuracy` property, error codes. **HIGH confidence** (official spec).
+- **MDN Geolocation.watchPosition** — [developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/watchPosition) — `enableHighAccuracy`, `timeout`, `maximumAge` options. **HIGH confidence**.
+- **Mappedin Blue Dot developer docs** — [developer.mappedin.com/web-sdk/blue-dot](https://developer.mappedin.com/web-sdk/blue-dot) — Blue dot hidden when accuracy > 50m; accuracy shading option. **MEDIUM confidence** (official SDK docs).
+- **MazeMap Blue Dot Navigation blog** — [mazemap.com/post/blue-dot-navigation-part-1-outdoor-positioning](https://www.mazemap.com/post/blue-dot-navigation-part-1-outdoor-positioning) — Outdoor GPS accuracy discussion; transition to indoor IPS. **MEDIUM confidence**.
+- **Konva Multi-touch Scale Stage** — [konvajs.org/docs/sandbox/Multi-touch_Scale_Stage.html](https://konvajs.org/docs/sandbox/Multi-touch_Scale_Stage.html) — Official example: getCenter(), getDistance(), simultaneous scale+position update. **HIGH confidence** (official library docs).
+- **Konva Zooming Relative to Pointer** — [konvajs.org/docs/sandbox/Zooming_Relative_To_Pointer.html](https://konvajs.org/docs/sandbox/Zooming_Relative_To_Pointer.html) — Focal-point zoom math: mousePointTo formula, scale × position update pattern. **HIGH confidence**.
+- **Situm Floor Transition Paths docs** — [situm.com/docs/how-to-create-wayfinding-paths/](https://situm.com/docs/how-to-create-wayfinding-paths/) — Staircase/elevator node linking workflow across floors. **MEDIUM confidence** (competitor product docs).
+- **NavVis Managing Navigation Graphs** — [knowledge.navvis.com/docs/managing-navigation-graphs](https://knowledge.navvis.com/docs/managing-navigation-graphs) — Edge creation between floor-level nodes; manual graph editing. **MEDIUM confidence**.
+- **MDPI Indoor Navigation Landmark Instructions (2017)** — [mdpi.com/2220-9964/6/6/183](https://www.mdpi.com/2220-9964/6/6/183) — "Use the lift to go to the 2nd floor" as a directional step naming standard. **HIGH confidence** (peer-reviewed research).
+- **getAccurateCurrentPosition GitHub** — [github.com/gregsramblings/getAccurateCurrentPosition](https://github.com/gregsramblings/getAccurateCurrentPosition) — Pattern for waiting for accuracy threshold before accepting fix. **MEDIUM confidence**.
+- **Mapbox GL JS accuracy threshold issue #9177** — [github.com/mapbox/mapbox-gl-js/issues/9177](https://github.com/mapbox/mapbox-gl-js/issues/9177) — Community pattern: hide dot when accuracy exceeds threshold. **MEDIUM confidence** (real-world implementation pattern).
+- **HoloBuilder GPS-enabled floor plans** — [help.holobuilder.com/en/articles/5775768](https://help.holobuilder.com/en/articles/5775768-gps-enabled-floor-plans-how-to-add-gps-coordinates-to-a-sheet-in-the-web-editor) — Two-corner georeferencing workflow (NW + SE corners). **MEDIUM confidence** (competitor admin UX reference).
+- **Affine transform coordinate mapping** — [medium.com/@suverov.dmitriy/how-to-convert-latitude-and-longitude-coordinates-into-pixel-offsets](https://medium.com/@suverov.dmitriy/how-to-convert-latitude-and-longitude-coordinates-into-pixel-offsets-8461093cb9f5) — Linear interpolation formula for lat/lng to pixel using bounding box. **MEDIUM confidence**.
 
 ---
-*Feature research for: Campus wayfinding / indoor navigation web app*
-*Researched: 2026-02-18*
+*Feature research for: CampusNav v1.6 — GPS Integration & UX Refinements*
+*Researched: 2026-03-09*
