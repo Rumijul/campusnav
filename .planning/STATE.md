@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: GPS Integration & UX Refinements
 status: in_progress
-stopped_at: Phase 21 context gathered
-last_updated: "2026-03-10T05:35:00.919Z"
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-03-10T05:58:19.761Z"
 last_activity: 2026-03-09 — v1.6 roadmap created, Phases 21–25 defined
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 ---
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | — | — | — | — |
 
 *Updated after each plan completion*
+| Phase 21-touch-gesture-fixes P01 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Key decisions carried forward into v1.6:
 - Two-pass buildGraph for cross-floor edges — connector linking UI writes node metadata only; graph synthesis is unchanged
 - floorNumber=0 sentinel for campus overhead map — GPS bounds apply to campus map too (same floors table)
 - Backblaze B2 / Neon PostgreSQL — no infrastructure changes for v1.6
+- [Phase 21-touch-gesture-fixes]: Tests import named exports (toStageLocalFromScreen, computePivotPosition, applyRotationThreshold) that Plan 02 must add to useMapViewport.ts
+- [Phase 21-touch-gesture-fixes]: TOUCH-03 threshold is strict greater-than (> 2 degrees) not >=, validated at exact boundary by Test 7
 
 ### Pending Todos
 
@@ -91,7 +94,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T05:35:00.918Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-touch-gesture-fixes/21-CONTEXT.md
+Last session: 2026-03-10T05:58:19.760Z
+Stopped at: Completed 21-01-PLAN.md
+Resume file: None
 Next action: /gsd:plan-phase 21

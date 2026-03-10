@@ -9,9 +9,9 @@ Requirements for v1.6 GPS Integration & UX Refinements milestone.
 
 ### Touch Gestures
 
-- [ ] **TOUCH-01**: User's pinch-to-zoom zooms toward the midpoint of both fingers at all rotation angles (not the stage origin)
-- [ ] **TOUCH-02**: User's two-finger rotation pivots around the touch midpoint (not the stage origin)
-- [ ] **TOUCH-03**: Two-finger gesture applies a 2-degree rotation threshold to eliminate micro-rotation jitter during pinch-zoom
+- [x] **TOUCH-01**: User's pinch-to-zoom zooms toward the midpoint of both fingers at all rotation angles (not the stage origin)
+- [x] **TOUCH-02**: User's two-finger rotation pivots around the touch midpoint (not the stage origin)
+- [x] **TOUCH-03**: Two-finger gesture applies a 2-degree rotation threshold to eliminate micro-rotation jitter during pinch-zoom
 
 ### Directions
 
@@ -64,9 +64,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TOUCH-01 | Phase 21 | Pending |
-| TOUCH-02 | Phase 21 | Pending |
-| TOUCH-03 | Phase 21 | Pending |
+| TOUCH-01 | Phase 21 | Complete |
+| TOUCH-02 | Phase 21 | Complete |
+| TOUCH-03 | Phase 21 | Complete |
 | DIR-01 | Phase 22 | Pending |
 | DIR-02 | Phase 22 | Pending |
 | CONN-01 | Phase 23 | Pending |
