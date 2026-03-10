@@ -66,7 +66,11 @@ Full phase details: [.planning/milestones/v1.5-ROADMAP.md](milestones/v1.5-ROADM
   1. Pinching to zoom on a rotated floor plan keeps the map stationary under both fingers — the view does not jump or shift toward the stage origin
   2. Two-finger rotation pivots visibly around the midpoint between both fingers at all canvas rotation angles
   3. A slow pinch gesture that incidentally rotates less than 2 degrees does not apply any rotation — the map stays level during a pure zoom gesture
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 21-01-PLAN.md — Write failing tests (RED) for TOUCH-01, TOUCH-02, TOUCH-03 gesture math
+- [ ] 21-02-PLAN.md — Fix handleTouchMove with inverse-transform focal-point, rotation pivot, and 2° jitter threshold
 
 ### Phase 22: Multi-floor Direction Dividers
 **Goal**: Students following a cross-floor route can clearly see which steps belong to each floor, including which direction to travel at each floor transition
@@ -137,7 +141,7 @@ Full phase details: [.planning/milestones/v1.5-ROADMAP.md](milestones/v1.5-ROADM
 | 18. Admin Multi-floor Editor                        | v1.5      | 6/6            | Complete    | 2026-03-07 |
 | 19. Student Floor Tab UI                            | v1.5      | 5/5            | Complete    | 2026-03-07 |
 | 20. Deployment                                      | v1.5      | 3/3            | Complete    | 2026-03-08 |
-| 21. Touch Gesture Fixes                             | v1.6      | 0/TBD          | Not started | -          |
+| 21. Touch Gesture Fixes                             | v1.6      | 0/2            | In progress | -          |
 | 22. Multi-floor Direction Dividers                  | v1.6      | 0/TBD          | Not started | -          |
 | 23. Admin Floor-Connector Visual Linking            | v1.6      | 0/TBD          | Not started | -          |
 | 24. Admin GPS Bounds Configuration                  | v1.6      | 0/TBD          | Not started | -          |
