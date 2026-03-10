@@ -35,6 +35,62 @@ function getAngle(p1: { x: number; y: number }, p2: { x: number; y: number }): n
   return Math.atan2(p2.y - p1.y, p2.x - p1.x)
 }
 
+/* ──────────────── Exported gesture math helpers ──────────────── */
+
+/**
+ * Convert a container-relative screen point to stage-local coordinates using
+ * Konva's absolute inverse transform. Correct at any rotation angle — unlike
+ * the naive `(screenX - stage.x()) / stage.scaleX()` formula which fails when
+ * the stage is rotated.
+ */
+export type StageForGesture = {
+  getAbsoluteTransform: () => {
+    copy: () => { invert: () => { point: (p: { x: number; y: number }) => { x: number; y: number } } }
+  }
+  container: () => { getBoundingClientRect: () => { left: number; top: number } }
+}
+
+export function toStageLocalFromScreen(
+  stage: StageForGesture,
+  screenPoint: { x: number; y: number },
+): { x: number; y: number } {
+  const rect = stage.container().getBoundingClientRect()
+  const containerRelative = { x: screenPoint.x - rect.left, y: screenPoint.y - rect.top }
+  return stage.getAbsoluteTransform().copy().invert().point(containerRelative)
+}
+
+/**
+ * Compute the stage position that keeps a given stage-local anchor point fixed
+ * under a given screen position after applying newScale and newRotationDeg.
+ *
+ * Uses a Konva.Transform forward projection: rotate → scale → subtract from
+ * screenCenter to find the required stage translation.
+ */
+export function computePivotPosition(
+  stageLocal: { x: number; y: number },
+  screenCenter: { x: number; y: number },
+  newScale: number,
+  newRotationDeg: number,
+): { x: number; y: number } {
+  const t = new Konva.Transform()
+  t.rotate((newRotationDeg * Math.PI) / 180)
+  t.scale(newScale, newScale)
+  const projected = t.point(stageLocal)
+  return {
+    x: screenCenter.x - projected.x,
+    y: screenCenter.y - projected.y,
+  }
+}
+
+/**
+ * Returns true if the per-frame angular delta (in degrees) exceeds the 2-degree
+ * jitter threshold, meaning the rotation should be applied. Strict greater-than:
+ * exactly 2° returns false.
+ */
+export function applyRotationThreshold(angleDiffDeg: number): boolean {
+  return Math.abs(angleDiffDeg) > 2
+}
+
 /* ──────────────── Hook ──────────────── */
 
 interface UseMapViewportOptions {
@@ -143,29 +199,30 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
         return
       }
 
-      const pointTo = {
-        x: (center.x - stage.x()) / stage.scaleX(),
-        y: (center.y - stage.y()) / stage.scaleY(),
-      }
+      // Step 1: Get container-relative screen center
+      const rect = stage.container().getBoundingClientRect()
+      const screenCenter = { x: center.x - rect.left, y: center.y - rect.top }
 
+      // Step 2: Read stage-local point under finger BEFORE any mutation
+      // (getAbsoluteTransform is live — must capture before scale/rotation changes)
+      const stageLocal = stage.getAbsoluteTransform().copy().invert().point(screenCenter)
+
+      // Step 3: Compute and apply scale mutation, then notify callback
       const newScale = clamp(stage.scaleX() * (dist / lastDist.current), MIN_SCALE, MAX_SCALE)
-
-      const dx = center.x - (lastCenter.current?.x ?? center.x)
-      const dy = center.y - (lastCenter.current?.y ?? center.y)
-
       stage.scaleX(newScale)
       stage.scaleY(newScale)
-      stage.position({
-        x: center.x - pointTo.x * newScale + dx,
-        y: center.y - pointTo.y * newScale + dy,
-      })
       onScaleChange?.(newScale)
 
-      // Rotation: align map with walking direction
-      if (lastAngle.current !== null) {
-        const angleDiff = angle - lastAngle.current
-        stage.rotation(stage.rotation() + (angleDiff * 180) / Math.PI)
+      // Step 4: Apply rotation only if per-frame delta exceeds 2-degree threshold
+      const angleDiffDeg = (angle - (lastAngle.current ?? angle)) * (180 / Math.PI)
+      if (applyRotationThreshold(angleDiffDeg)) {
+        stage.rotation(stage.rotation() + angleDiffDeg)
       }
+
+      // Step 5: Recalculate position — keep stageLocal under screenCenter
+      // Forward-projects stageLocal through current (post-mutation) rotation + scale
+      const newPos = computePivotPosition(stageLocal, screenCenter, newScale, stage.rotation())
+      stage.position(newPos)
 
       // Update refs for next frame
       lastDist.current = dist
