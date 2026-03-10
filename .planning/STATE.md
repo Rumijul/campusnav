@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: GPS Integration & UX Refinements
 status: in_progress
-stopped_at: Completed 21-01-PLAN.md
-last_updated: "2026-03-10T05:58:19.761Z"
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-03-10T09:36:20.298Z"
 last_activity: 2026-03-09 — v1.6 roadmap created, Phases 21–25 defined
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 ---
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 21-touch-gesture-fixes P01 | 3 | 1 tasks | 1 files |
+| Phase 21-touch-gesture-fixes P02 | 15 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Key decisions carried forward into v1.6:
 - Backblaze B2 / Neon PostgreSQL — no infrastructure changes for v1.6
 - [Phase 21-touch-gesture-fixes]: Tests import named exports (toStageLocalFromScreen, computePivotPosition, applyRotationThreshold) that Plan 02 must add to useMapViewport.ts
 - [Phase 21-touch-gesture-fixes]: TOUCH-03 threshold is strict greater-than (> 2 degrees) not >=, validated at exact boundary by Test 7
+- [Phase 21-touch-gesture-fixes]: Use getAbsoluteTransform().copy().invert() for screen-to-stage-local in handleTouchMove — avoids brittle manual sin/cos that breaks at non-zero rotation
 
 ### Pending Todos
 
@@ -94,7 +96,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-10T05:58:19.760Z
-Stopped at: Completed 21-01-PLAN.md
+Last session: 2026-03-10T09:36:20.296Z
+Stopped at: Completed 21-02-PLAN.md
 Resume file: None
 Next action: /gsd:plan-phase 21

@@ -50,7 +50,7 @@ Full phase details: [.planning/milestones/v1.5-ROADMAP.md](milestones/v1.5-ROADM
 
 **Milestone Goal:** Add GPS-based "you are here" positioning and fix mobile gesture focal points, plus improve multi-floor directions clarity and admin floor-connector workflow.
 
-- [ ] **Phase 21: Touch Gesture Fixes** — Correct pinch-zoom and two-finger rotation to use the touch midpoint as focal/pivot point, with jitter elimination
+- [x] **Phase 21: Touch Gesture Fixes** — Correct pinch-zoom and two-finger rotation to use the touch midpoint as focal/pivot point, with jitter elimination (completed 2026-03-10)
 - [ ] **Phase 22: Multi-floor Direction Dividers** — Add floor-section headers and directional language to cross-floor route directions
 - [ ] **Phase 23: Admin Floor-Connector Visual Linking** — Replace manual node ID entry with dropdown-based bidirectional connector linking in the admin editor
 - [ ] **Phase 24: Admin GPS Bounds Configuration** — Schema, API endpoint, and admin form for configuring real-world lat/lng bounding boxes per floor and campus map
@@ -141,7 +141,7 @@ Plans:
 | 18. Admin Multi-floor Editor                        | v1.5      | 6/6            | Complete    | 2026-03-07 |
 | 19. Student Floor Tab UI                            | v1.5      | 5/5            | Complete    | 2026-03-07 |
 | 20. Deployment                                      | v1.5      | 3/3            | Complete    | 2026-03-08 |
-| 21. Touch Gesture Fixes                             | 1/2 | In Progress|  | -          |
+| 21. Touch Gesture Fixes                             | 2/2 | Complete   | 2026-03-10 | -          |
 | 22. Multi-floor Direction Dividers                  | v1.6      | 0/TBD          | Not started | -          |
 | 23. Admin Floor-Connector Visual Linking            | v1.6      | 0/TBD          | Not started | -          |
 | 24. Admin GPS Bounds Configuration                  | v1.6      | 0/TBD          | Not started | -          |
