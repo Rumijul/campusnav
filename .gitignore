@@ -6,7 +6,6 @@ dist
 data/
 
 # ── GSD baseline (auto-generated) ──
-.gsd
 Thumbs.db
 *.swp
 *.swo

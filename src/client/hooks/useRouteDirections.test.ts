@@ -266,79 +266,152 @@ function makeFloorMap(entries: [number, number][]): Map<number, NavFloor> {
 }
 
 describe('generateDirections — floor-change steps', () => {
-  // Shared layout: a(0,0) → b(0.5,0) → c(1,0)
-  // b is the connector node (stairs/elevator/ramp) on floor 1; c is on floor 2
-
-  it('Test 1: stairs-up — curr on floor 1, next on floor 2', () => {
+  it('uses explicit up wording for stairs and includes floor metadata', () => {
     const a = makeNode('a', 0, 0, { floorId: 1 })
     const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 1 })
     const c = makeNode('c', 1, 0, { floorId: 2 })
     const floorMap = makeFloorMap([[1, 1], [2, 2]])
+
     const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
     const step = result.steps[0] as DirectionStep
+
     expect(step.icon).toBe('stairs-up')
-    expect(step.instruction).toBe('Take the stairs to Floor 2')
+    expect(step.instruction).toBe('Take the stairs up to Floor 2')
     expect(step.isAccessibleSegment).toBe(false)
+    expect(step.floorId).toBe(1)
+    expect(step.floorNumber).toBe(1)
   })
 
-  it('Test 2: stairs-down — curr on floor 2, next on floor 1', () => {
+  it('uses explicit down wording for stairs', () => {
     const a = makeNode('a', 0, 0, { floorId: 2 })
     const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 2 })
     const c = makeNode('c', 1, 0, { floorId: 1 })
     const floorMap = makeFloorMap([[1, 1], [2, 2]])
+
     const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
     const step = result.steps[0] as DirectionStep
+
     expect(step.icon).toBe('stairs-down')
-    expect(step.instruction).toBe('Take the stairs to Floor 1')
+    expect(step.instruction).toBe('Take the stairs down to Floor 1')
   })
 
-  it('Test 3: elevator floor change — isAccessibleSegment true', () => {
-    const a = makeNode('a', 0, 0, { floorId: 1 })
-    const b = makeNode('b', 0.5, 0, { type: 'elevator', floorId: 1 })
-    const c = makeNode('c', 1, 0, { floorId: 2 })
+  it('uses explicit direction wording for elevator and ramp connectors', () => {
     const floorMap = makeFloorMap([[1, 1], [2, 2]])
+
+    const elevatorNodes = [
+      makeNode('a', 0, 0, { floorId: 1 }),
+      makeNode('b', 0.5, 0, { type: 'elevator', floorId: 1 }),
+      makeNode('c', 1, 0, { floorId: 2 }),
+    ]
+    const elevatorResult = generateDirections(
+      ['a', 'b', 'c'],
+      makeMap(elevatorNodes),
+      'standard',
+      floorMap,
+    )
+    const elevatorStep = elevatorResult.steps[0] as DirectionStep
+    expect(elevatorStep.icon).toBe('elevator')
+    expect(elevatorStep.instruction).toBe('Take the elevator up to Floor 2')
+    expect(elevatorStep.isAccessibleSegment).toBe(true)
+
+    const rampNodes = [
+      makeNode('d', 0, 0, { floorId: 2 }),
+      makeNode('e', 0.5, 0, { type: 'ramp', floorId: 2 }),
+      makeNode('f', 1, 0, { floorId: 1 }),
+    ]
+    const rampResult = generateDirections(['d', 'e', 'f'], makeMap(rampNodes), 'standard', floorMap)
+    const rampStep = rampResult.steps[0] as DirectionStep
+    expect(rampStep.icon).toBe('ramp')
+    expect(rampStep.instruction).toBe('Take the ramp down to Floor 1')
+    expect(rampStep.isAccessibleSegment).toBe(true)
+  })
+
+  it('uses floor numbers (not floorId ordering) to determine up/down direction', () => {
+    const a = makeNode('a', 0, 0, { floorId: 40 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 40 })
+    const c = makeNode('c', 1, 0, { floorId: 2 })
+    // Floor IDs are out of order (40 -> 2), but floor numbers show upward movement (1 -> 3)
+    const floorMap = makeFloorMap([
+      [40, 1],
+      [2, 3],
+    ])
+
     const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
     const step = result.steps[0] as DirectionStep
-    expect(step.icon).toBe('elevator')
-    expect(step.instruction).toBe('Take the elevator to Floor 2')
-    expect(step.isAccessibleSegment).toBe(true)
+
+    expect(step.icon).toBe('stairs-up')
+    expect(step.instruction).toBe('Take the stairs up to Floor 3')
   })
 
-  it('Test 4: ramp floor change — isAccessibleSegment true', () => {
-    const a = makeNode('a', 0, 0, { floorId: 1 })
-    const b = makeNode('b', 0.5, 0, { type: 'ramp', floorId: 1 })
-    const c = makeNode('c', 1, 0, { floorId: 2 })
-    const floorMap = makeFloorMap([[1, 1], [2, 2]])
-    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
-    const step = result.steps[0] as DirectionStep
-    expect(step.icon).toBe('ramp')
-    expect(step.instruction).toBe('Take the ramp to Floor 2')
-    expect(step.isAccessibleSegment).toBe(true)
-  })
+  it('falls back to floorId when floorMap is missing', () => {
+    const a = makeNode('a', 0, 0, { floorId: 7 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 7 })
+    const c = makeNode('c', 1, 0, { floorId: 9 })
 
-  it('Test 5: floorMap omitted — instruction falls back to floorId as floor number', () => {
-    const a = makeNode('a', 0, 0, { floorId: 1 })
-    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 1 })
-    const c = makeNode('c', 1, 0, { floorId: 2 })
-    // No floorMap passed — generateDirections uses undefined (empty Map default)
     const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard')
     const step = result.steps[0] as DirectionStep
+
     expect(step.icon).toBe('stairs-up')
-    // Fallback: floorNumber ?? next.floorId → uses next.floorId = 2
-    expect(step.instruction).toBe('Take the stairs to Floor 2')
+    expect(step.instruction).toBe('Take the stairs up to Floor 9')
+    expect(step.floorId).toBe(7)
+    expect(step.floorNumber).toBe(7)
+    expect(step.instruction).not.toContain('undefined')
   })
 
-  it('Test 6: same-floor nodes — no floor-change step emitted', () => {
-    // All nodes on floorId=1 — normal turn classification
+  it('falls back safely when a destination floorMap entry is missing', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.5, 0, { type: 'stairs', floorId: 1 })
+    const c = makeNode('c', 1, 0, { floorId: 99 })
+    const floorMap = makeFloorMap([[1, 1]])
+
+    const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
+    const step = result.steps[0] as DirectionStep
+
+    expect(step.icon).toBe('stairs-up')
+    expect(step.instruction).toBe('Take the stairs up to Floor 99')
+    expect(step.instruction).not.toContain('undefined')
+  })
+
+  it('includes floorId and floorNumber on every generated step including arrive', () => {
+    const a = makeNode('a', 0, 0, { floorId: 1 })
+    const b = makeNode('b', 0.3, 0, { type: 'stairs', floorId: 1 })
+    const c = makeNode('c', 0.6, 0, { floorId: 2 })
+    const d = makeNode('d', 1, 0, { floorId: 2, type: 'room', searchable: true, label: 'Lab' })
+    const floorMap = makeFloorMap([[1, 1], [2, 2]])
+
+    const result = generateDirections(['a', 'b', 'c', 'd'], makeMap([a, b, c, d]), 'standard', floorMap)
+
+    expect(result.steps).toHaveLength(3)
+    expect(result.steps.map((step) => [step.floorId, step.floorNumber])).toEqual([
+      [1, 1],
+      [2, 2],
+      [2, 2],
+    ])
+
+    result.steps.forEach((step) => {
+      expect(typeof step.floorId).toBe('number')
+      expect(typeof step.floorNumber).toBe('number')
+    })
+
+    const arrive = result.steps[result.steps.length - 1] as DirectionStep
+    expect(arrive.icon).toBe('arrive')
+    expect(arrive.floorId).toBe(2)
+    expect(arrive.floorNumber).toBe(2)
+  })
+
+  it('same-floor nodes keep normal turn instruction (no floor-change phrasing)', () => {
     const a = makeNode('a', 0, 0.5, { floorId: 1 })
     const b = makeNode('b', 0.5, 0.5, { type: 'hallway', floorId: 1 })
     const c = makeNode('c', 1, 0.5, { floorId: 1 })
     const floorMap = makeFloorMap([[1, 1]])
+
     const result = generateDirections(['a', 'b', 'c'], makeMap([a, b, c]), 'standard', floorMap)
     const step = result.steps[0] as DirectionStep
-    // Should be a straight step, not a floor-change step
+
     expect(step.icon).toBe('straight')
     expect(step.instruction).toBe('Continue straight')
+    expect(step.floorId).toBe(1)
+    expect(step.floorNumber).toBe(1)
   })
 })
 

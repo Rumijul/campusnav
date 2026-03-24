@@ -1,6 +1,6 @@
-import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '@shared/types'
+import type { NavBuilding, NavEdge, NavFloor, NavFloorGpsBounds, NavGraph, NavNode } from '@shared/types'
 import type Konva from 'konva'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
 import useImage from 'use-image'
 import { DataTabToolbar } from '../../components/admin/DataTabToolbar'
@@ -11,6 +11,14 @@ import EditorToolbar from '../../components/admin/EditorToolbar'
 import ManageFloorsModal from '../../components/admin/ManageFloorsModal'
 import { NodeDataTable } from '../../components/admin/NodeDataTable'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
+import {
+  applyConnectorUpdatesToFloorNodes,
+  applyConnectorUpdatesToNavGraph,
+  deriveConnectorCandidates,
+  isConnectorNodeType,
+  type ConnectorDirection,
+  type ConnectorUpdatedNode,
+} from '../../components/admin/connectorLinking'
 import FloorPlanImage from '../../components/FloorPlanImage'
 import {
   calcDistance,
@@ -24,6 +32,66 @@ import { useMapViewport } from '../../hooks/useMapViewport'
 
 interface MapEditorCanvasProps {
   onLogout: () => void
+}
+
+interface ConnectorLinkSuccessResponse {
+  ok: true
+  updatedNodes: ConnectorUpdatedNode[]
+}
+
+interface ConnectorLinkErrorResponse {
+  errorCode?: string
+  error?: string
+}
+
+function applyFloorGpsBoundsPatch(
+  floor: NavFloor,
+  gpsBounds: NavFloorGpsBounds | null,
+): NavFloor {
+  const { gpsBounds: _existingGpsBounds, ...floorWithoutGpsBounds } = floor
+
+  return gpsBounds
+    ? { ...floorWithoutGpsBounds, gpsBounds }
+    : floorWithoutGpsBounds
+}
+
+function patchNavGraphFloorGpsBounds(
+  navGraph: NavGraph | null,
+  floorId: number,
+  gpsBounds: NavFloorGpsBounds | null,
+): NavGraph | null {
+  if (!navGraph) return navGraph
+
+  let graphChanged = false
+
+  const buildings = navGraph.buildings.map((building) => {
+    let buildingChanged = false
+
+    const floors = building.floors.map((floor) => {
+      if (floor.id !== floorId) {
+        return floor
+      }
+
+      buildingChanged = true
+      return applyFloorGpsBoundsPatch(floor, gpsBounds)
+    })
+
+    if (!buildingChanged) {
+      return building
+    }
+
+    graphChanged = true
+    return {
+      ...building,
+      floors,
+    }
+  })
+
+  if (!graphChanged) {
+    return navGraph
+  }
+
+  return { buildings }
 }
 
 /* ──────────────── Component ──────────────── */
@@ -68,6 +136,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const [navGraph, setNavGraph] = useState<NavGraph | null>(null)
   const [manageFloorsOpen, setManageFloorsOpen] = useState(false)
   const [isSavingFloor, setIsSavingFloor] = useState(false)
+  const [connectorLinkError, setConnectorLinkError] = useState<string | null>(null)
+  const [isConnectorLinkPending, setIsConnectorLinkPending] = useState(false)
 
   const canvasWidth = canvasSize.width
   const canvasHeight = canvasSize.height
@@ -120,9 +190,25 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     ? undefined
     : nonCampusBuildings.find((b) => b.id === state.activeBuildingId)
 
+  const campusBuilding: NavBuilding | undefined = navGraph?.buildings.find((b) => b.name === 'Campus')
+
+  const manageFloorsBuilding: NavBuilding | undefined = isCampusActive
+    ? campusBuilding
+    : activeBuilding
+
   const sortedFloors: NavFloor[] = (activeBuilding?.floors ?? [])
     .slice()
     .sort((a, b) => a.floorNumber - b.floorNumber)
+
+  const selectedNode = useMemo(
+    () => (state.selectedNodeId ? (state.nodes.find((node) => node.id === state.selectedNodeId) ?? null) : null),
+    [state.selectedNodeId, state.nodes],
+  )
+
+  const connectorCandidates = useMemo(
+    () => deriveConnectorCandidates(navGraph, selectedNode),
+    [navGraph, selectedNode],
+  )
 
   // Handle building switch — switches building context, loads first floor
   const handleBuildingSwitch = useCallback(
@@ -307,6 +393,71 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
     [dispatch, recordHistory],
   )
 
+  // Handle connector link/unlink updates via the atomic server endpoint
+  const handleConnectorLinkChange = useCallback(
+    async (direction: ConnectorDirection, targetNodeId: string | null) => {
+      if (!selectedNode || !isConnectorNodeType(selectedNode.type)) return
+
+      setConnectorLinkError(null)
+      setIsConnectorLinkPending(true)
+
+      try {
+        const response = await fetch('/api/admin/connectors/link', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourceNodeId: selectedNode.id,
+            direction,
+            targetNodeId,
+          }),
+        })
+
+        const payload =
+          (await response.json().catch(() => ({}))) as
+            | ConnectorLinkSuccessResponse
+            | ConnectorLinkErrorResponse
+
+        if (!response.ok) {
+          const errorCode =
+            typeof payload.errorCode === 'string' ? payload.errorCode : 'CONNECTOR_LINK_ERROR'
+          const errorMessage =
+            typeof payload.error === 'string' ? payload.error : 'Failed to update connector link'
+          setConnectorLinkError(`${errorCode}: ${errorMessage}`)
+          return
+        }
+
+        if (!('ok' in payload) || payload.ok !== true || !Array.isArray(payload.updatedNodes)) {
+          setConnectorLinkError('INVALID_RESPONSE: Connector update response was malformed')
+          return
+        }
+
+        const successPayload = payload as ConnectorLinkSuccessResponse
+
+        setNavGraph((previousGraph) =>
+          applyConnectorUpdatesToNavGraph(previousGraph, successPayload.updatedNodes),
+        )
+
+        const patchedActiveFloorNodes = applyConnectorUpdatesToFloorNodes(
+          state.nodes,
+          successPayload.updatedNodes,
+        )
+        if (patchedActiveFloorNodes !== state.nodes) {
+          dispatch({
+            type: 'REPLACE_NODES',
+            nodes: patchedActiveFloorNodes,
+            isDirty: state.isDirty,
+          })
+        }
+      } catch {
+        setConnectorLinkError('NETWORK_ERROR: Unable to update floor connector link')
+      } finally {
+        setIsConnectorLinkPending(false)
+      }
+    },
+    [dispatch, selectedNode, state.isDirty, state.nodes],
+  )
+
   // Handle save — POST graph to server, context-aware (campus vs floor)
   const handleSave = useCallback(async () => {
     if (isCampusActive) {
@@ -329,7 +480,17 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       })
       if (res.ok) {
         dispatch({ type: 'MARK_SAVED' })
-        setNavGraph({ buildings: navGraph!.buildings.map((b) => b.name === 'Campus' ? { ...b, floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }] } : b) })
+        setNavGraph((previousGraph) => {
+          if (!previousGraph) return previousGraph
+
+          return {
+            buildings: previousGraph.buildings.map((building) =>
+              building.name === 'Campus'
+                ? { ...building, floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }] }
+                : building,
+            ),
+          }
+        })
       }
     } else {
       // Building/floor save: wrap active floor nodes into the full NavGraph
@@ -570,26 +731,23 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
 
         {/* Campus empty state overlay */}
         {isCampusActive && !image && (
-          <div
+          <button
+            type="button"
             className="absolute inset-0 flex items-center justify-center pointer-events-auto cursor-pointer"
             onClick={handleUploadClick}
           >
-            <div className="text-center text-slate-500 hover:text-slate-700">
+            <span className="text-center text-slate-500 hover:text-slate-700">
               <p className="text-lg font-medium">Upload campus map to begin</p>
               <p className="text-sm">Click to upload an overhead image</p>
-            </div>
-          </div>
+            </span>
+          </button>
         )}
 
         {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
         <div className="pointer-events-none absolute right-0 top-0 h-full">
           <div className="pointer-events-auto h-full">
             <EditorSidePanel
-              selectedNode={
-                state.selectedNodeId
-                  ? (state.nodes.find((n) => n.id === state.selectedNodeId) ?? null)
-                  : null
-              }
+              selectedNode={selectedNode}
               selectedEdge={selectedEdgeWithNames}
               onUpdateNode={(id, changes) => {
                 dispatch({ type: 'UPDATE_NODE', id, changes })
@@ -613,6 +771,10 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
               }}
               isCampusActive={isCampusActive}
               buildings={nonCampusBuildings}
+              connectorCandidates={connectorCandidates}
+              onConnectorLinkChange={handleConnectorLinkChange}
+              connectorLinkError={connectorLinkError}
+              isConnectorLinkPending={isConnectorLinkPending}
             />
           </div>
         </div>
@@ -673,19 +835,22 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       />
 
       {/* Manage Floors modal */}
-      {manageFloorsOpen && activeBuilding && (
+      {manageFloorsOpen && manageFloorsBuilding && (
         <ManageFloorsModal
           isOpen={manageFloorsOpen}
-          buildingId={activeBuilding.id}
-          floors={activeBuilding.floors}
+          buildingId={manageFloorsBuilding.id}
+          floors={manageFloorsBuilding.floors}
+          isCampusMode={isCampusActive}
           onClose={() => setManageFloorsOpen(false)}
           onFloorAdded={(newFloor) => {
             setManageFloorsOpen(false)
             setNavGraph((prev) => {
-              if (!prev || !activeBuilding) return prev
+              if (!prev || !manageFloorsBuilding) return prev
               return {
                 buildings: prev.buildings.map((b) =>
-                  b.id === activeBuilding.id ? { ...b, floors: [...b.floors, newFloor] } : b,
+                  b.id === manageFloorsBuilding.id
+                    ? { ...b, floors: [...b.floors, newFloor] }
+                    : b,
                 ),
               }
             })
@@ -693,17 +858,22 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           onFloorDeleted={(floorId) => {
             setManageFloorsOpen(false)
             setNavGraph((prev) => {
-              if (!prev || !activeBuilding) return prev
+              if (!prev || !manageFloorsBuilding) return prev
               return {
                 buildings: prev.buildings.map((b) =>
-                  b.id === activeBuilding.id
+                  b.id === manageFloorsBuilding.id
                     ? { ...b, floors: b.floors.filter((f) => f.id !== floorId) }
                     : b,
                 ),
               }
             })
           }}
-          onFloorImageReplaced={() => { loadNavGraph() }}
+          onFloorImageReplaced={() => {
+            loadNavGraph()
+          }}
+          onFloorGpsBoundsSaved={(floorId, gpsBounds) => {
+            setNavGraph((prev) => patchNavGraphFloorGpsBounds(prev, floorId, gpsBounds))
+          }}
         />
       )}
     </div>

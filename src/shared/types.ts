@@ -150,6 +150,21 @@ export interface NavEdge extends NavEdgeData {
 }
 
 /**
+ * Optional real-world GPS bounds used to project normalized floor coordinates
+ * onto latitude/longitude space.
+ */
+export interface NavFloorGpsBounds {
+  /** Minimum latitude represented by this floor map */
+  minLat: number
+  /** Maximum latitude represented by this floor map */
+  maxLat: number
+  /** Minimum longitude represented by this floor map */
+  minLng: number
+  /** Maximum longitude represented by this floor map */
+  maxLng: number
+}
+
+/**
  * A single floor within a building, containing all nodes and edges on that floor.
  */
 export interface NavFloor {
@@ -161,6 +176,8 @@ export interface NavFloor {
   imagePath: string
   /** ISO 8601 timestamp of last graph modification */
   updatedAt: string
+  /** Optional GPS calibration bounds for this floor */
+  gpsBounds?: NavFloorGpsBounds
   /** All navigation nodes on this floor */
   nodes: NavNode[]
   /** All navigation edges on this floor */

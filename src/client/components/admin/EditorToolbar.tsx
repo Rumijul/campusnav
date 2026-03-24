@@ -79,7 +79,7 @@ export default function EditorToolbar({
         >
           {isCampusActive ? 'Upload Campus Map' : 'Upload Floor Plan'}
         </button>
-        {!isCampusActive && onManageFloors && (
+        {onManageFloors && (
           <button
             type="button"
             className="bg-white text-gray-700 border border-gray-300 px-3 py-1 rounded text-sm font-medium hover:bg-gray-50"

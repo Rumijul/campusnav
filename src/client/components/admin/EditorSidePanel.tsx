@@ -1,4 +1,6 @@
 import type { NavBuilding, NavEdge, NavNode, NavNodeType } from '@shared/types'
+import type { ConnectorCandidate, ConnectorDirection } from './connectorLinking'
+import { formatConnectorCandidateLabel, isConnectorNodeType } from './connectorLinking'
 
 /* ──────────────── Helpers ──────────────── */
 
@@ -26,6 +28,14 @@ const NODE_TYPE_LABELS: Record<NavNodeType, string> = {
   hallway: 'Hallway',
 }
 
+function resolveConnectorSelectValue(
+  currentNodeId: string | undefined,
+  options: ConnectorCandidate[],
+): string {
+  if (!currentNodeId) return ''
+  return options.some((candidate) => candidate.nodeId === currentNodeId) ? currentNodeId : ''
+}
+
 /* ──────────────── Props ──────────────── */
 
 interface EditorSidePanelProps {
@@ -38,6 +48,10 @@ interface EditorSidePanelProps {
   onClose: () => void
   isCampusActive?: boolean
   buildings?: NavBuilding[]
+  connectorCandidates?: { above: ConnectorCandidate[]; below: ConnectorCandidate[] }
+  onConnectorLinkChange?: (direction: ConnectorDirection, targetNodeId: string | null) => void
+  connectorLinkError?: string | null
+  isConnectorLinkPending?: boolean
 }
 
 /* ──────────────── Component ──────────────── */
@@ -52,8 +66,23 @@ export default function EditorSidePanel({
   onClose,
   isCampusActive,
   buildings,
+  connectorCandidates,
+  onConnectorLinkChange,
+  connectorLinkError,
+  isConnectorLinkPending,
 }: EditorSidePanelProps) {
   if (!selectedNode && !selectedEdge) return null
+
+  const aboveCandidates = connectorCandidates?.above ?? []
+  const belowCandidates = connectorCandidates?.below ?? []
+  const showFloorConnections =
+    !!selectedNode && !isCampusActive && isConnectorNodeType(selectedNode.type)
+  const selectedAboveNodeId = selectedNode
+    ? resolveConnectorSelectValue(selectedNode.connectsToNodeAboveId, aboveCandidates)
+    : ''
+  const selectedBelowNodeId = selectedNode
+    ? resolveConnectorSelectValue(selectedNode.connectsToNodeBelowId, belowCandidates)
+    : ''
 
   return (
     <div className="absolute right-0 top-0 h-full w-72 bg-white border-l shadow-lg overflow-y-auto z-10 flex flex-col">
@@ -173,6 +202,72 @@ export default function EditorSidePanel({
               {NODE_TYPE_LABELS[selectedNode.type]}
             </p>
           </div>
+
+          {/* Floor connector linking controls */}
+          {showFloorConnections && (
+            <div className="flex flex-col gap-3 rounded border border-blue-100 bg-blue-50/40 p-3">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                  Floor Connections
+                </span>
+                <p className="text-xs text-gray-500">
+                  Link this connector to nodes on the floor above or below.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="connector-above"
+                  className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+                >
+                  Above
+                </label>
+                <select
+                  id="connector-above"
+                  value={selectedAboveNodeId}
+                  onChange={(e) => onConnectorLinkChange?.('above', e.target.value || null)}
+                  disabled={!onConnectorLinkChange || isConnectorLinkPending}
+                  className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  <option value="">Unlink</option>
+                  {aboveCandidates.map((candidate) => (
+                    <option key={candidate.nodeId} value={candidate.nodeId}>
+                      {formatConnectorCandidateLabel(candidate)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="connector-below"
+                  className="text-xs font-medium text-gray-600 uppercase tracking-wide"
+                >
+                  Below
+                </label>
+                <select
+                  id="connector-below"
+                  value={selectedBelowNodeId}
+                  onChange={(e) => onConnectorLinkChange?.('below', e.target.value || null)}
+                  disabled={!onConnectorLinkChange || isConnectorLinkPending}
+                  className="border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-500"
+                >
+                  <option value="">Unlink</option>
+                  {belowCandidates.map((candidate) => (
+                    <option key={candidate.nodeId} value={candidate.nodeId}>
+                      {formatConnectorCandidateLabel(candidate)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {connectorLinkError && (
+                <p role="alert" className="text-xs text-red-700" aria-live="polite">
+                  {connectorLinkError}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Room Number */}
           <div className="flex flex-col gap-1">

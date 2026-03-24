@@ -1,0 +1,174 @@
+---
+phase: 17-multi-floor-pathfinding-engine
+plan: 01
+type: tdd
+wave: 1
+depends_on: []
+files_modified:
+  - src/shared/pathfinding/graph-builder.ts
+  - src/shared/__tests__/fixtures/multi-floor-test-graph.json
+  - src/shared/__tests__/graph-builder.test.ts
+autonomous: true
+requirements:
+  - MFLR-03
+
+must_haves:
+  truths:
+    - "buildGraph synthesizes bidirectional inter-floor edges from connectsToNodeAboveId / connectsToNodeBelowId on every stairs/elevator/ramp node"
+    - "Inter-floor edges carry standardWeight=0.3 and accessibleWeight=Infinity (stairs) or 0.45 (elevator/ramp) — following dual-weight pattern"
+    - "flattenNavGraph is no longer called inside buildGraph; buildGraph iterates buildings → floors internally"
+    - "All existing graph-builder tests still pass after the change"
+  artifacts:
+    - path: "src/shared/pathfinding/graph-builder.ts"
+      provides: "Cross-floor edge synthesis inside buildGraph; flattenNavGraph export retained for admin editor (MapEditorCanvas.tsx)"
+      contains: "connectsToNodeAboveId"
+    - path: "src/shared/__tests__/fixtures/multi-floor-test-graph.json"
+      provides: "Two-floor NavGraph with connector nodes linking Floor 1 → Floor 2"
+    - path: "src/shared/__tests__/graph-builder.test.ts"
+      provides: "Tests confirming inter-floor edges are synthesized with correct weights"
+  key_links:
+    - from: "src/shared/pathfinding/graph-builder.ts"
+      to: "NavNodeData.connectsToNodeAboveId / connectsToNodeBelowId"
+      via: "loop over all nodes after adding them; check type === stairs|elevator|ramp"
+      pattern: "connectsToNodeAboveId|connectsToNodeBelowId"
+---
+
+<objective>
+Replace the flattenNavGraph Phase 16 compatibility shim with real cross-floor edge synthesis inside buildGraph. After this plan, the ngraph.graph will contain inter-floor links alongside intra-floor links, making the A* engine capable of routing across floors.
+
+Purpose: The shim was the explicit Phase 17 replacement target (documented in graph-builder.ts). Removing it and synthesizing real inter-floor edges is the foundational step for MFLR-03.
+Output: Updated graph-builder.ts, a multi-floor test fixture, and passing graph-builder tests covering inter-floor edge cases.
+</objective>
+
+<execution_context>
+@C:/Users/admin/.claude/get-shit-done/workflows/execute-plan.md
+@C:/Users/admin/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/STATE.md
+@.planning/ROADMAP.md
+@.planning/phases/17-multi-floor-pathfinding-engine/17-CONTEXT.md
+
+<interfaces>
+<!-- Key types the executor needs. No codebase exploration required. -->
+
+From src/shared/types.ts (NavNodeData — floor connector fields):
+```typescript
+export interface NavNodeData {
+  x: number
+  y: number
+  label: string
+  type: NavNodeType  // 'stairs' | 'elevator' | 'ramp' | 'room' | ...
+  searchable: boolean
+  floorId: number
+  connectsToFloorAboveId?: number
+  connectsToFloorBelowId?: number
+  connectsToNodeAboveId?: string   // ID of counterpart node on floor above
+  connectsToNodeBelowId?: string   // ID of counterpart node on floor below
+  roomNumber?: string
+  description?: string
+  accessibilityNotes?: string
+}
+
+export interface NavNode extends NavNodeData { id: string }
+export interface NavEdge extends NavEdgeData { id: string; sourceId: string; targetId: string }
+export interface NavFloor { id: number; floorNumber: number; imagePath: string; updatedAt: string; nodes: NavNode[]; edges: NavEdge[] }
+export interface NavBuilding { id: number; name: string; floors: NavFloor[] }
+export interface NavGraph { buildings: NavBuilding[] }
+```
+
+From src/shared/pathfinding/graph-builder.ts (current implementation):
+```typescript
+export function flattenNavGraph(navGraph: NavGraph): { nodes: NavNode[]; edges: NavEdge[] }
+// Export RETAINED — admin editor (MapEditorCanvas.tsx) depends on it.
+// The Phase 17 change is to stop calling this inside buildGraph, not to delete it.
+
+export function buildGraph(navGraph: NavGraph): Graph<NavNodeData, NavEdgeData>
+// Currently calls flattenNavGraph internally; to be updated to iterate buildings→floors directly (no longer calls flattenNavGraph)
+
+export function calculateWeight(ax, ay, bx, by): number
+// Euclidean distance — reuse for intra-floor edge weights; NOT used for inter-floor edges
+```
+
+From src/shared/__tests__/graph-builder.test.ts (existing tests):
+```typescript
+// Tests expect graph.getNodesCount() === 7 (from fixtures/test-graph.json single-floor fixture)
+// Tests expect graph.getLink('junction-1', 'stairs-1') accessible=false, accessibleWeight=Infinity
+// These existing tests MUST continue to pass after the change
+```
+</interfaces>
+</context>
+
+<feature>
+  <name>Cross-floor edge synthesis in buildGraph</name>
+  <files>
+    src/shared/pathfinding/graph-builder.ts,
+    src/shared/__tests__/fixtures/multi-floor-test-graph.json,
+    src/shared/__tests__/graph-builder.test.ts
+  </files>
+  <behavior>
+    **Fixture (multi-floor-test-graph.json):**
+    - Two floors in one building
+    - Floor 1 (id: 1, floorNumber: 1): nodes: entrance (hallway), corridor-1 (hallway), stairs-f1 (stairs, connectsToNodeAboveId: "stairs-f2"), elevator-f1 (elevator, connectsToNodeAboveId: "elevator-f2")
+    - Floor 2 (id: 2, floorNumber: 2): nodes: stairs-f2 (stairs, connectsToNodeBelowId: "stairs-f1"), elevator-f2 (elevator, connectsToNodeBelowId: "elevator-f1"), room-201 (room)
+    - Floor 1 edges: entrance→corridor-1, corridor-1→stairs-f1 (not accessible), corridor-1→elevator-f1 (accessible)
+    - Floor 2 edges: stairs-f2→room-201 (not accessible), elevator-f2→room-201 (accessible)
+    - No inter-floor edges in JSON — synthesized by buildGraph
+
+    **buildGraph behavior tests:**
+    - Test 1: After buildGraph, graph has 6 nodes (3 per floor) — count correct
+    - Test 2: graph.getLink('stairs-f1', 'stairs-f2') exists — inter-floor edge synthesized
+    - Test 3: graph.getLink('stairs-f2', 'stairs-f1') exists — bidirectional
+    - Test 4: stairs inter-floor edge: standardWeight=0.3, accessibleWeight=Infinity, accessible=false, bidirectional=true
+    - Test 5: graph.getLink('elevator-f1', 'elevator-f2') exists — elevator inter-floor edge synthesized
+    - Test 6: elevator inter-floor edge: standardWeight=0.3, accessibleWeight=0.45, accessible=true, bidirectional=true
+    - Test 7: Existing single-floor test-graph.json tests still pass (node count=7, edge data, Infinity normalization)
+
+    **buildGraph implementation:**
+    - Remove the flattenNavGraph CALL from inside buildGraph; keep the flattenNavGraph export (admin editor depends on it)
+    - Iterate navGraph.buildings → building.floors → add nodes, add edges (with Infinity normalization as before)
+    - After all nodes/edges added: iterate all nodes again; for nodes where connectsToNodeAboveId is set AND the target node exists in graph → add inter-floor link (both directions)
+    - Connector type determines accessibleWeight: stairs → Infinity (accessible=false), elevator/ramp → 0.45 (accessible=true)
+    - Standard weight for all inter-floor edges: 0.3
+    - Use a Set of processed pairs to avoid adding duplicate inter-floor links (since connectsToNodeAboveId on floor 1 and connectsToNodeBelowId on floor 2 both reference the same edge)
+  </behavior>
+  <implementation>
+    RED: Write the 7 tests above in graph-builder.test.ts (import multi-floor-test-graph.json as multiFloorGraph). Run `npm test -- graph-builder` — all new tests must fail, all existing tests must pass.
+
+    GREEN: Update buildGraph in graph-builder.ts:
+    1. Remove the flattenNavGraph CALL inside buildGraph; iterate buildings→floors directly instead
+    2. Keep the Infinity normalization logic for intra-floor edges (accessible=false → accessibleWeight: Infinity)
+    3. After all nodes + intra-floor edges are added, do a second pass over all nodes:
+       - If node type is 'stairs', 'elevator', or 'ramp' AND node.connectsToNodeAboveId is defined AND graph.hasNode(connectsToNodeAboveId):
+         - Determine accessibleWeight: stairs → Infinity; elevator/ramp → 0.45
+         - Determine accessible: stairs → false; elevator/ramp → true
+         - Add link(node.id, connectsToNodeAboveId, { standardWeight: 0.3, accessibleWeight, accessible, bidirectional: true })
+         - Add link(connectsToNodeAboveId, node.id, { standardWeight: 0.3, accessibleWeight, accessible, bidirectional: true })
+       - Skip if link already exists (use graph.hasLink or a processed Set)
+    4. Keep the flattenNavGraph export — the admin editor (MapEditorCanvas.tsx) depends on it. Only remove the internal call from buildGraph.
+
+    REFACTOR: Ensure JSDoc on buildGraph is updated; remove the shim JSDoc block.
+    Run `npm test -- graph-builder` — all tests pass.
+  </implementation>
+</feature>
+
+<verification>
+```
+npm test -- graph-builder
+```
+All 7 new tests pass. All existing graph-builder tests pass. Zero TypeScript errors: `npx tsc --noEmit`.
+</verification>
+
+<success_criteria>
+- `flattenNavGraph` is no longer called inside `buildGraph` (internal call removed; export retained for admin editor)
+- `buildGraph` synthesizes inter-floor edges without any JSON-stored inter-floor edge data
+- Stairs inter-floor edges: standardWeight=0.3, accessibleWeight=Infinity, accessible=false
+- Elevator/ramp inter-floor edges: standardWeight=0.3, accessibleWeight=0.45, accessible=true
+- All inter-floor edges are bidirectional
+- npm test -- graph-builder: all pass
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/17-multi-floor-pathfinding-engine/17-01-SUMMARY.md`
+</output>
