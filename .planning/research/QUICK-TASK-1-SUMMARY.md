@@ -4,18 +4,27 @@
 **Branch:** gsd/quick/1-make-full-research-paper-about-this-proj
 
 ## What Changed
-- Reviewed and consolidated the existing draft content from `QUANTI SCRATCH.pdf`.
-- Wrote a complete, polished research paper draft in Markdown format for GP-ESS.
-- Expanded the draft into full academic structure with abstract, Chapter 1 (problem/background/literature), Chapter 2 (quantitative methodology), Chapter 3 (system design + technical validation), conclusion/recommendations, references, and appendix questionnaire.
-- Incorporated project-specific implementation evidence (automated test validation results) to ground the paper in the actual CampusNav system.
+- Ran a two-pass self-audit of the first full draft and documented concrete gaps.
+- Re-researched methodology and citation quality using skill-guided workflow (`research-summarizer`, `copy-editing`).
+- Revised the research paper to improve:
+  - evidence integrity,
+  - statistical-method clarity,
+  - source quality,
+  - Philippine legal accessibility framing,
+  - pre-results transparency (no fabricated user-study results).
+- Corrected technical validation reporting by excluding mirrored `.gsd/worktrees` test duplication.
+- Added a dedicated audit report with pass-1 findings and pass-2 verification.
 
 ## Files Modified
 - `.gsd/quick/1-make-full-research-paper-about-this-proj/GP-ESS-Full-Research-Paper.md`
+- `.gsd/quick/1-make-full-research-paper-about-this-proj/2-AUDIT.md`
 - `.gsd/quick/1-make-full-research-paper-about-this-proj/1-SUMMARY.md`
 
 ## Verification
-- Confirmed source draft was readable from `C:\Users\admin\Downloads\QUANTI SCRATCH.pdf` via text extraction.
-- Ran project tests to validate technical claims included in the paper:
-  - `npm test -- --run`
-  - Result: 10 test files passed, 144 tests passed.
-- Reviewed final markdown structure and section completeness for academic continuity.
+- Source and quality audit completed in two passes (before and after re-research).
+- Technical verification commands run:
+  - `npm test -- --run` (baseline; includes mirrored worktree duplicates)
+  - `npx vitest --run --exclude ".gsd/**"` (corrected baseline)
+- Corrected technical evidence used in revised paper:
+  - **5 test files passed, 72 tests passed**.
+- Final markdown reviewed for structure, consistency, and non-fabrication of participant results.
