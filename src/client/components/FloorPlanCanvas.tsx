@@ -1,3 +1,9 @@
+import {
+  accuracyMetersToMapPixelRadius,
+  isGpsBoundsCalibrated,
+  isGpsFixConfident,
+  projectLatLngToNormalizedPoint,
+} from '@shared/gps'
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
 import type { NavBuilding, NavFloor, NavNode } from '@shared/types'
@@ -7,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
 import { filterNodesByActiveFloor, filterRouteSegmentByFloor, totalFloorCount } from '../hooks/useFloorFiltering'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
+import { useGeolocation } from '../hooks/useGeolocation'
 import { useGraphData } from '../hooks/useGraphData'
 import { useMapViewport } from '../hooks/useMapViewport'
 import { routesAreIdentical, useRouteDirections } from '../hooks/useRouteDirections'
@@ -15,6 +22,7 @@ import { useViewportSize } from '../hooks/useViewportSize'
 import { DirectionsSheet } from './DirectionsSheet'
 import FloorPlanImage from './FloorPlanImage'
 import { FloorTabStrip } from './FloorTabStrip'
+import { GpsLocationLayer } from './GpsLocationLayer'
 import GridBackground from './GridBackground'
 import { LandmarkLayer } from './LandmarkLayer'
 import { LocationDetailSheet } from './LocationDetailSheet'
@@ -398,6 +406,65 @@ export default function FloorPlanCanvas() {
 
   const activeRouteColor = activeMode === 'standard' ? '#3b82f6' : '#22c55e'
 
+  const geolocationEnabled = Boolean(activeFloor && isGpsBoundsCalibrated(activeFloor.gpsBounds))
+  const geolocation = useGeolocation({ enabled: geolocationEnabled })
+
+  const gpsLayerState = useMemo(() => {
+    if (!imageRect || !activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) {
+      return {
+        visible: false,
+        centerX: 0,
+        centerY: 0,
+        accuracyRadiusPx: 0,
+      }
+    }
+
+    if (geolocation.status !== 'ready' || geolocation.fix == null) {
+      return {
+        visible: false,
+        centerX: 0,
+        centerY: 0,
+        accuracyRadiusPx: 0,
+      }
+    }
+
+    if (!isGpsFixConfident(geolocation.fix.accuracyMeters)) {
+      return {
+        visible: false,
+        centerX: 0,
+        centerY: 0,
+        accuracyRadiusPx: 0,
+      }
+    }
+
+    const projectedPoint = projectLatLngToNormalizedPoint(
+      geolocation.fix.latitude,
+      geolocation.fix.longitude,
+      activeFloor.gpsBounds,
+    )
+
+    if (projectedPoint == null) {
+      return {
+        visible: false,
+        centerX: 0,
+        centerY: 0,
+        accuracyRadiusPx: 0,
+      }
+    }
+
+    return {
+      visible: true,
+      centerX: imageRect.x + projectedPoint.x * imageRect.width,
+      centerY: imageRect.y + projectedPoint.y * imageRect.height,
+      accuracyRadiusPx: accuracyMetersToMapPixelRadius(
+        geolocation.fix.accuracyMeters,
+        activeFloor.gpsBounds,
+        imageRect.width,
+        imageRect.height,
+      ),
+    }
+  }, [activeFloor, geolocation, imageRect])
+
   const interactionDisabled = isLoading || isFailed
 
   return (
@@ -486,6 +553,15 @@ export default function FloorPlanCanvas() {
           stageScale={stageScale}
           onClearStart={routeSelection.clearStart}
           onClearDestination={routeSelection.clearDestination}
+        />
+
+        {/* Student GPS marker — center dot + confidence ring for valid fixes */}
+        <GpsLocationLayer
+          visible={gpsLayerState.visible}
+          centerX={gpsLayerState.centerX}
+          centerY={gpsLayerState.centerY}
+          accuracyRadiusPx={gpsLayerState.accuracyRadiusPx}
+          stageScale={stageScale}
         />
 
         {/* UI overlay — loading/error states */}

@@ -21,11 +21,12 @@
 ## Verification
 
 - `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md`
-- `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print $2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`
+- `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print \$2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`
 - `npm test -- src/shared/gps.test.ts`
 - `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`
 - `npm test -- src/shared/gps.test.ts -t "returns null for out-of-bounds coordinates"`
 - `npm test -- src/client/hooks/useGeolocation.test.ts`
+- `npm test -- src/client/hooks/useGeolocation.test.ts -t "maps permission denied geolocation errors to explicit status"`
 - `npm test -- src/client/components/GpsLocationLayer.test.tsx`
 - `npm test -- src/client/gps/studentGpsState.test.ts`
 - `npm test -- src/client/components/SearchOverlay.gps.test.tsx`
@@ -54,7 +55,7 @@
   - Verify: `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md && npm test -- src/shared/gps.test.ts`
   - Done when: checkpoint artifact exists with a resolvable commit hash and shared GPS helper tests pass for projection, threshold, and snap behaviors.
 
-- [ ] **T02: Add geolocation runtime hook and render GPS dot + accuracy ring in FloorPlanCanvas** `est:1.75h`
+- [x] **T02: Add geolocation runtime hook and render GPS dot + accuracy ring in FloorPlanCanvas** `est:1.75h`
   - Why: R011–R013 require real browser geolocation lifecycle handling plus map-layer rendering gates tied to calibrated bounds and confidence threshold.
   - Files: `src/client/hooks/useGeolocation.ts`, `src/client/hooks/useGeolocation.test.ts`, `src/client/components/GpsLocationLayer.tsx`, `src/client/components/GpsLocationLayer.test.tsx`, `src/client/components/FloorPlanCanvas.tsx`
   - Do: Implement a browser geolocation watch hook with explicit success/error status modeling and cleanup; add a dedicated GPS marker/ring Konva layer; integrate helper-based marker derivation into `FloorPlanCanvas` so dot/ring render only on calibrated floors with accuracy ≤50m.
