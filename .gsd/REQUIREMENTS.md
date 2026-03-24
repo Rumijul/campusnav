@@ -4,39 +4,6 @@ This file is the explicit capability and coverage contract for the project.
 
 ## Active
 
-### R006 — Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
-- Class: admin/support
-- Status: active
-- Description: Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
-- Why it matters: Reduces admin errors and speeds map maintenance.
-- Source: user
-- Primary owning slice: M001/S25
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from CONN-01.
-
-### R007 — Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
-- Class: integration
-- Status: active
-- Description: Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
-- Why it matters: Prevents asymmetric routing failures.
-- Source: user
-- Primary owning slice: M001/S25
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from CONN-02.
-
-### R008 — Admin can remove existing connector links between nodes.
-- Class: admin/support
-- Status: active
-- Description: Admin can remove existing connector links between nodes.
-- Why it matters: Supports correction workflows and map evolution.
-- Source: user
-- Primary owning slice: M001/S25
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from CONN-03.
-
 ### R009 — Admin can configure min/max latitude and longitude bounds per floor and for campus map.
 - Class: admin/support
 - Status: active
@@ -171,6 +138,39 @@ This file is the explicit capability and coverage contract for the project.
 - Validation: Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`.
 - Notes: Migrated from DIR-02.
 
+### R006 — Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
+- Class: admin/support
+- Status: validated
+- Description: Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
+- Why it matters: Reduces admin errors and speeds map maintenance.
+- Source: user
+- Primary owning slice: M001/S25
+- Supporting slices: none
+- Validation: Validated in S25 by connector-only Above/Below dropdown controls in `EditorSidePanel` and candidate filtering in `deriveConnectorCandidates` (same building + adjacent floor + connector type, no manual node-ID entry). Proven by passing `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from CONN-01.
+
+### R007 — Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
+- Class: integration
+- Status: validated
+- Description: Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
+- Why it matters: Prevents asymmetric routing failures.
+- Source: user
+- Primary owning slice: M001/S25
+- Supporting slices: none
+- Validation: Validated in S25 by transactional `linkConnectorNodes` write path and protected `POST /api/admin/connectors/link` endpoint that atomically writes source + reciprocal counterpart updates and stale-link cleanup. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, targeted invalid-direction check `npm test -- src/server/connectorLinking.test.ts -t "returns LINK_VALIDATION_ERROR when direction/floor pairing is invalid"`, and full suite `npm test`.
+- Notes: Migrated from CONN-02.
+
+### R008 — Admin can remove existing connector links between nodes.
+- Class: admin/support
+- Status: validated
+- Description: Admin can remove existing connector links between nodes.
+- Why it matters: Supports correction workflows and map evolution.
+- Source: user
+- Primary owning slice: M001/S25
+- Supporting slices: none
+- Validation: Validated in S25 by unlink flows that clear both sides (`above/below` node/floor fields) and client patch application that reflects server `updatedNodes` without one-sided drift. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from CONN-03.
+
 ## Deferred
 
 ### R016 — GPS bounds can be configured using map-click calibration helper instead of text input only.
@@ -250,9 +250,9 @@ This file is the explicit capability and coverage contract for the project.
 | R003 | quality-attribute | validated | M001/S23 | none | validated |
 | R004 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by contiguous floor-section grouping + conditional headers in DirectionsSheet; proven by passing `npm test -- src/client/components/directionSections.test.ts` and full suite `npm test`. |
 | R005 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`. |
-| R006 | admin/support | active | M001/S25 | none | mapped |
-| R007 | integration | active | M001/S25 | none | mapped |
-| R008 | admin/support | active | M001/S25 | none | mapped |
+| R006 | admin/support | validated | M001/S25 | none | Validated in S25 by connector-only Above/Below dropdown controls in `EditorSidePanel` and candidate filtering in `deriveConnectorCandidates` (same building + adjacent floor + connector type, no manual node-ID entry). Proven by passing `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`. |
+| R007 | integration | validated | M001/S25 | none | Validated in S25 by transactional `linkConnectorNodes` write path and protected `POST /api/admin/connectors/link` endpoint that atomically writes source + reciprocal counterpart updates and stale-link cleanup. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, targeted invalid-direction check `npm test -- src/server/connectorLinking.test.ts -t "returns LINK_VALIDATION_ERROR when direction/floor pairing is invalid"`, and full suite `npm test`. |
+| R008 | admin/support | validated | M001/S25 | none | Validated in S25 by unlink flows that clear both sides (`above/below` node/floor fields) and client patch application that reflects server `updatedNodes` without one-sided drift. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`. |
 | R009 | admin/support | active | M001/S26 | none | mapped |
 | R010 | quality-attribute | active | M001/S26 | none | mapped |
 | R011 | primary-user-loop | active | M001/S27 | none | mapped |
@@ -269,7 +269,7 @@ This file is the explicit capability and coverage contract for the project.
 
 ## Coverage Summary
 
-- Active requirements: 10
-- Mapped to slices: 10
-- Validated: 5 (R001, R002, R003, R004, R005)
+- Active requirements: 7
+- Mapped to slices: 7
+- Validated: 8 (R001, R002, R003, R004, R005, R006, R007, R008)
 - Unmapped active requirements: 0
