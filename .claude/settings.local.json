@@ -37,7 +37,28 @@
       "Bash(timeout 8 npx tsx:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(grep:*)",
-      "Bash(rtk read:*)"
+      "Bash(rtk read:*)",
+      "Skill(hookify:hookify)",
+      "Bash(docker --version 2>&1 && docker compose version 2>&1)",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(python:*)",
+      "Skill(gsd:execute-phase)",
+      "Bash(echo Failed to parse map response:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "Bash(sc query:*)",
+      "Bash(Get-Service:*)",
+      "Bash(docker ps:*)",
+      "mcp__plugin_serena_serena__replace_content",
+      "Skill(gsd:pause-work)",
+      "Bash(cd C:\\\\Users\\\\admin\\\\Desktop\\\\projects\\\\campusnav:*)",
+      "Bash(echo === 21-01 SUMMARY ===:*)"
     ]
   }
 }
