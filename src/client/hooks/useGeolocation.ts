@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export type GeolocationStatus =
   | 'unsupported'
@@ -81,9 +81,7 @@ export function createGeolocationSnapshot(
 }
 
 export function mapGeolocationErrorCode(code: number): 'permission-denied' | 'unavailable' {
-  return code === GEOLOCATION_PERMISSION_DENIED_CODE
-    ? 'permission-denied'
-    : 'unavailable'
+  return code === GEOLOCATION_PERMISSION_DENIED_CODE ? 'permission-denied' : 'unavailable'
 }
 
 export function startGeolocationWatch({
@@ -176,7 +174,10 @@ function resolveNavigatorGeolocation(): GeolocationAdapter | null {
 
 export function useGeolocation(options: UseGeolocationOptions = {}): GeolocationSnapshot {
   const enabled = options.enabled ?? true
-  const geolocation = options.geolocation ?? resolveNavigatorGeolocation()
+  const geolocation = useMemo(
+    () => options.geolocation ?? resolveNavigatorGeolocation(),
+    [options.geolocation],
+  )
   const watchOptions = options.watchOptions ?? DEFAULT_WATCH_OPTIONS
 
   const [snapshot, setSnapshot] = useState<GeolocationSnapshot>(() => {

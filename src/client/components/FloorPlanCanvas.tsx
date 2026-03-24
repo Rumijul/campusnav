@@ -3,6 +3,7 @@ import {
   isGpsBoundsCalibrated,
   isGpsFixConfident,
   projectLatLngToNormalizedPoint,
+  snapLatLngToNearestWalkableNode,
 } from '@shared/gps'
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
@@ -11,7 +12,12 @@ import type Konva from 'konva'
 import KonvaModule from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage, Text } from 'react-konva'
-import { filterNodesByActiveFloor, filterRouteSegmentByFloor, totalFloorCount } from '../hooks/useFloorFiltering'
+import { deriveStudentGpsState } from '../gps/studentGpsState'
+import {
+  filterNodesByActiveFloor,
+  filterRouteSegmentByFloor,
+  totalFloorCount,
+} from '../hooks/useFloorFiltering'
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useGraphData } from '../hooks/useGraphData'
@@ -88,13 +94,13 @@ export default function FloorPlanCanvas() {
 
   // Non-campus buildings for the building selector
   const nonCampusBuildings = useMemo(
-    () => allBuildings.filter(b => b.name !== 'Campus'),
+    () => allBuildings.filter((b) => b.name !== 'Campus'),
     [allBuildings],
   )
 
   // Campus building (may be undefined — only present if admin uploaded campus map)
   const campusBuilding = useMemo(
-    () => allBuildings.find(b => b.name === 'Campus'),
+    () => allBuildings.find((b) => b.name === 'Campus'),
     [allBuildings],
   )
 
@@ -102,7 +108,7 @@ export default function FloorPlanCanvas() {
   const activeBuilding = useMemo(() => {
     if (activeBuildingId === 'campus') return campusBuilding
     if (activeBuildingId === null) return undefined
-    return allBuildings.find(b => b.id === activeBuildingId)
+    return allBuildings.find((b) => b.id === activeBuildingId)
   }, [activeBuildingId, allBuildings, campusBuilding])
 
   // Sorted floors for the active building (for floor tab buttons)
@@ -113,7 +119,7 @@ export default function FloorPlanCanvas() {
 
   // The currently active NavFloor object
   const activeFloor = useMemo(
-    () => sortedActiveFloors.find(f => f.id === activeFloorId) ?? null,
+    () => sortedActiveFloors.find((f) => f.id === activeFloorId) ?? null,
     [sortedActiveFloors, activeFloorId],
   )
 
@@ -121,7 +127,9 @@ export default function FloorPlanCanvas() {
   const floorCount = useMemo(() => totalFloorCount(allBuildings), [allBuildings])
 
   // Compute target for useFloorPlanImage — must be stable (not constructed inline) to avoid hook dependency issues
-  const floorImageTarget = useMemo<{ buildingId: number; floorNumber: number } | 'campus' | undefined>(() => {
+  const floorImageTarget = useMemo<
+    { buildingId: number; floorNumber: number } | 'campus' | undefined
+  >(() => {
     if (activeBuildingId === 'campus') return 'campus'
     if (!activeBuilding || !activeFloor) return undefined
     return { buildingId: activeBuilding.id, floorNumber: activeFloor.floorNumber }
@@ -143,9 +151,7 @@ export default function FloorPlanCanvas() {
   // Floor map for floor-change direction step lookup (floor number by floor ID)
   const floorMap = useMemo<Map<number, NavFloor>>(() => {
     if (graphState.status !== 'loaded') return new Map()
-    return new Map(
-      graphState.data.buildings.flatMap((b) => b.floors).map((f) => [f.id, f]),
-    )
+    return new Map(graphState.data.buildings.flatMap((b) => b.floors).map((f) => [f.id, f]))
   }, [graphState])
 
   // Show tab strip: only when > 1 total floor AND DirectionsSheet is closed
@@ -158,7 +164,12 @@ export default function FloorPlanCanvas() {
   }, [nodes, activeFloor])
 
   // Compute turn-by-turn directions for each mode
-  const standardDirections = useRouteDirections(routeResult?.standard ?? null, nodeMap, 'standard', floorMap)
+  const standardDirections = useRouteDirections(
+    routeResult?.standard ?? null,
+    nodeMap,
+    'standard',
+    floorMap,
+  )
   const accessibleDirections = useRouteDirections(
     routeResult?.accessible ?? null,
     nodeMap,
@@ -199,11 +210,9 @@ export default function FloorPlanCanvas() {
   useEffect(() => {
     if (graphState.status !== 'loaded') return
     if (activeFloorId !== null) return // already initialized
-    const firstBuilding = graphState.data.buildings.find(b => b.name !== 'Campus')
+    const firstBuilding = graphState.data.buildings.find((b) => b.name !== 'Campus')
     if (!firstBuilding) return
-    const floor1 = firstBuilding.floors
-      .slice()
-      .sort((a, b) => a.floorNumber - b.floorNumber)[0]
+    const floor1 = firstBuilding.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
     if (floor1) {
       setActiveBuildingId(firstBuilding.id)
       setActiveFloorId(floor1.id)
@@ -277,7 +286,7 @@ export default function FloorPlanCanvas() {
   /** Switch to a new floor — updates state and re-fits the canvas */
   const handleFloorSwitch = useCallback(
     (floor: NavFloor) => {
-      const building = allBuildings.find(b => b.floors.some(f => f.id === floor.id))
+      const building = allBuildings.find((b) => b.floors.some((f) => f.id === floor.id))
       if (building) setActiveBuildingId(building.id)
       setActiveFloorId(floor.id)
       fitToScreen(width, height, true)
@@ -291,12 +300,12 @@ export default function FloorPlanCanvas() {
       setActiveBuildingId(id)
       if (id === 'campus') {
         // Campus has exactly one map — no floor tabs. Set activeFloorId to campus floor id.
-        const campusBld = allBuildings.find(b => b.name === 'Campus')
+        const campusBld = allBuildings.find((b) => b.name === 'Campus')
         const campusFloor = campusBld?.floors[0]
         if (campusFloor) setActiveFloorId(campusFloor.id)
       } else {
         // Switch to floor 1 (lowest floorNumber) of the newly selected building
-        const bld = allBuildings.find(b => b.id === id)
+        const bld = allBuildings.find((b) => b.id === id)
         const firstFloor = bld?.floors.slice().sort((a, b) => a.floorNumber - b.floorNumber)[0]
         if (firstFloor) setActiveFloorId(firstFloor.id)
         fitToScreen(width, height, true)
@@ -339,7 +348,15 @@ export default function FloorPlanCanvas() {
     } else {
       showToast('No route found', true)
     }
-  }, [routeSelection.start, routeSelection.destination, engine, fitToBounds, showToast, floorMap, handleFloorSwitch])
+  }, [
+    routeSelection.start,
+    routeSelection.destination,
+    engine,
+    fitToBounds,
+    showToast,
+    floorMap,
+    handleFloorSwitch,
+  ])
 
   // Clear route result and close sheet when selections change (start or dest cleared)
   useEffect(() => {
@@ -409,6 +426,49 @@ export default function FloorPlanCanvas() {
   const geolocationEnabled = Boolean(activeFloor && isGpsBoundsCalibrated(activeFloor.gpsBounds))
   const geolocation = useGeolocation({ enabled: geolocationEnabled })
 
+  const gpsProjectedPoint = useMemo(() => {
+    if (!activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) return null
+    if (geolocation.status !== 'ready' || geolocation.fix == null) return null
+
+    return projectLatLngToNormalizedPoint(
+      geolocation.fix.latitude,
+      geolocation.fix.longitude,
+      activeFloor.gpsBounds,
+    )
+  }, [activeFloor, geolocation])
+
+  const nearestGpsNodeMatch = useMemo(() => {
+    if (!activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) return null
+    if (geolocation.status !== 'ready' || geolocation.fix == null) return null
+    if (!isGpsFixConfident(geolocation.fix.accuracyMeters)) return null
+
+    return snapLatLngToNearestWalkableNode(
+      geolocation.fix.latitude,
+      geolocation.fix.longitude,
+      activeFloor.gpsBounds,
+      activeFloor.nodes,
+      activeFloor.edges,
+    )
+  }, [activeFloor, geolocation])
+
+  const studentGpsState = useMemo(() => {
+    if (!activeFloor) return null
+
+    return deriveStudentGpsState({
+      hasFloorCalibration: isGpsBoundsCalibrated(activeFloor.gpsBounds),
+      geolocationStatus: geolocation.status,
+      accuracyMeters: geolocation.accuracyMeters,
+      nearestNodeId: nearestGpsNodeMatch?.node.id ?? null,
+    })
+  }, [activeFloor, geolocation, nearestGpsNodeMatch])
+
+  const handleUseMyLocation = useCallback(() => {
+    if (nearestGpsNodeMatch == null) return
+
+    routeSelection.setStart(nearestGpsNodeMatch.node)
+    showToast('Start set to your current location')
+  }, [nearestGpsNodeMatch, routeSelection, showToast])
+
   const gpsLayerState = useMemo(() => {
     if (!imageRect || !activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) {
       return {
@@ -419,7 +479,7 @@ export default function FloorPlanCanvas() {
       }
     }
 
-    if (geolocation.status !== 'ready' || geolocation.fix == null) {
+    if (geolocation.status !== 'ready' || geolocation.fix == null || gpsProjectedPoint == null) {
       return {
         visible: false,
         centerX: 0,
@@ -437,25 +497,10 @@ export default function FloorPlanCanvas() {
       }
     }
 
-    const projectedPoint = projectLatLngToNormalizedPoint(
-      geolocation.fix.latitude,
-      geolocation.fix.longitude,
-      activeFloor.gpsBounds,
-    )
-
-    if (projectedPoint == null) {
-      return {
-        visible: false,
-        centerX: 0,
-        centerY: 0,
-        accuracyRadiusPx: 0,
-      }
-    }
-
     return {
       visible: true,
-      centerX: imageRect.x + projectedPoint.x * imageRect.width,
-      centerY: imageRect.y + projectedPoint.y * imageRect.height,
+      centerX: imageRect.x + gpsProjectedPoint.x * imageRect.width,
+      centerY: imageRect.y + gpsProjectedPoint.y * imageRect.height,
       accuracyRadiusPx: accuracyMetersToMapPixelRadius(
         geolocation.fix.accuracyMeters,
         activeFloor.gpsBounds,
@@ -463,7 +508,7 @@ export default function FloorPlanCanvas() {
         imageRect.height,
       ),
     }
-  }, [activeFloor, geolocation, imageRect])
+  }, [activeFloor, geolocation, gpsProjectedPoint, imageRect])
 
   const interactionDisabled = isLoading || isFailed
 
@@ -474,6 +519,8 @@ export default function FloorPlanCanvas() {
         selection={routeSelection}
         nodes={nodes}
         onRouteTrigger={handleRouteTrigger}
+        gpsState={studentGpsState}
+        onUseMyLocation={handleUseMyLocation}
         sheetOpen={sheetOpen}
         hasRoute={routeResult !== null}
         onOpenSheet={() => setSheetOpen(true)}
@@ -625,8 +672,8 @@ export default function FloorPlanCanvas() {
                 : detailNode !== null
                   ? '196px'
                   : showTabStrip
-                    ? '64px'   // 48px strip height + 16px gap
-                    : '16px'
+                    ? '64px' // 48px strip height + 16px gap
+                    : '16px',
             }}
           >
             {routeResult.standard.found && (

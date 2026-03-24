@@ -1,5 +1,6 @@
 import type { NavNode, NavNodeType } from '@shared/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { StudentGpsState } from '../gps/studentGpsState'
 import { useLocationSearch } from '../hooks/useLocationSearch'
 import type { RouteSelection } from '../hooks/useRouteSelection'
 
@@ -34,6 +35,10 @@ interface SearchOverlayProps {
   selection: RouteSelection
   nodes: NavNode[]
   onRouteTrigger: () => void
+  /** Optional geolocation-derived state for use-location action + fallback copy. */
+  gpsState?: StudentGpsState | null
+  /** Sets route start from nearest walkable node to current GPS fix. */
+  onUseMyLocation?: () => void
   /** When true (sheet is open), compact strip collapses to a minimal pill */
   sheetOpen?: boolean
   /** Called when user taps the compact A→B strip to reopen the directions sheet */
@@ -54,6 +59,8 @@ export function SearchOverlay({
   selection,
   nodes,
   onRouteTrigger,
+  gpsState,
+  onUseMyLocation,
   sheetOpen = false,
   onOpenSheet,
   hasRoute = false,
@@ -142,6 +149,13 @@ export function SearchOverlay({
   const handleSwap = useCallback(() => {
     selection.swap()
   }, [selection])
+
+  const canUseMyLocation = gpsState?.canUseMyLocation === true && onUseMyLocation != null
+
+  const handleUseMyLocation = useCallback(() => {
+    if (!canUseMyLocation) return
+    onUseMyLocation?.()
+  }, [canUseMyLocation, onUseMyLocation])
 
   // Handle keyboard escape
   useEffect(() => {
@@ -394,6 +408,29 @@ export function SearchOverlay({
             <SwapIcon />
           </button>
         </div>
+
+        {gpsState && (
+          <div className="mt-3 border-t border-slate-200 pt-3">
+            <button
+              type="button"
+              className={`inline-flex items-center gap-2 text-sm font-medium transition-colors ${
+                canUseMyLocation
+                  ? 'text-blue-600 hover:text-blue-700'
+                  : 'text-slate-400 cursor-not-allowed'
+              }`}
+              aria-label="Use my location"
+              onClick={handleUseMyLocation}
+              disabled={!canUseMyLocation}
+            >
+              <MyLocationIcon />
+              <span>Use my location</span>
+            </button>
+
+            {gpsState.fallbackMessage && (
+              <p className="mt-1 text-xs text-slate-500">{gpsState.fallbackMessage}</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -440,6 +477,21 @@ function BackIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function MyLocationIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <title>My location</title>
+      <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
       />
     </svg>
   )

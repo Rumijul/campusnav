@@ -62,7 +62,7 @@
   - Verify: `npm test -- src/client/hooks/useGeolocation.test.ts src/client/components/GpsLocationLayer.test.tsx`
   - Done when: calibrated floors render confidence-aware marker visuals for valid fixes, low-confidence fixes suppress marker rendering, and watch lifecycle tests pass.
 
-- [ ] **T03: Wire “Use my location” nearest-node start selection with graceful fallback messaging** `est:1.5h`
+- [x] **T03: Wire “Use my location” nearest-node start selection with graceful fallback messaging** `est:1.5h`
   - Why: R014–R015 are completed only when students can start routes from snapped GPS location and still navigate manually when GPS paths fail.
   - Files: `src/client/gps/studentGpsState.ts`, `src/client/gps/studentGpsState.test.ts`, `src/client/components/FloorPlanCanvas.tsx`, `src/client/components/SearchOverlay.tsx`, `src/client/components/SearchOverlay.gps.test.tsx`
   - Do: Add derived student GPS UI-state helpers (button enablement + reasoned fallback text), wire “Use my location” in `SearchOverlay`, snap latest valid fix to nearest walkable node on active floor, and route through `routeSelection.setStart` without regressing manual A/B selection flow.
