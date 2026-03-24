@@ -47,3 +47,9 @@ Satisfy the process-governance gate first, then build the pure GPS math foundati
 - `.gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md` — checkpoint commit evidence for R022.
 - `src/shared/gps.ts` — pure projection, accuracy, and nearest-node helpers.
 - `src/shared/gps.test.ts` — passing unit coverage for helper correctness and edge cases.
+
+## Observability Impact
+
+- Signals introduced/clarified: deterministic helper outputs for projection validity, confidence gating (`<=50m` vs `>50m`), and nearest-node snap resolution (`nodeId` selected vs `null`).
+- Inspection path for future tasks: `src/shared/gps.test.ts` assertions become the canonical diagnostic surface for out-of-bounds fixes, low-confidence suppression, and no-candidate snap outcomes.
+- Failure visibility: helpers return explicit null/false outcomes for unusable fixes so UI layers can expose fallback copy without logging raw latitude/longitude.

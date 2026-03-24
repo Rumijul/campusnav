@@ -23,6 +23,8 @@
 - `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md`
 - `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print $2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`
 - `npm test -- src/shared/gps.test.ts`
+- `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`
+- `npm test -- src/shared/gps.test.ts -t "returns null for out-of-bounds coordinates"`
 - `npm test -- src/client/hooks/useGeolocation.test.ts`
 - `npm test -- src/client/components/GpsLocationLayer.test.tsx`
 - `npm test -- src/client/gps/studentGpsState.test.ts`
@@ -45,7 +47,7 @@
 
 ## Tasks
 
-- [ ] **T01: Capture checkpoint evidence and implement shared GPS projection/snap helpers** `est:1.25h`
+- [x] **T01: Capture checkpoint evidence and implement shared GPS projection/snap helpers** `est:1.25h`
   - Why: R022 requires commit-first traceability, and R011–R014 depend on deterministic projection/snap math that can be validated independently of UI wiring.
   - Files: `.gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md`, `src/shared/gps.ts`, `src/shared/gps.test.ts`
   - Do: Create a checkpoint commit before implementation edits and record the commit hash/timestamp in `S27-CHECKPOINT.md`; add pure helpers for bounds projection (including latitude-axis inversion), accuracy-to-pixel radius conversion, and nearest-walkable-node selection; cover edge/failure cases with focused unit tests.
