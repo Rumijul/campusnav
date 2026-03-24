@@ -1,0 +1,126 @@
+---
+phase: 14.1-node-selection-fixes-and-admin-room-number-edit
+plan: "01"
+subsystem: ui
+tags: [konva, react, admin, map-editor]
+
+# Dependency graph
+requires:
+  - phase: 09-admin-map-editor-visual
+    provides: FloorPlanImage component + MapEditorCanvas with NodeMarkerLayer
+  - phase: 10-admin-map-editor-management
+    provides: handleNodeClick, SELECT_NODE dispatch, EditorSidePanel
+provides:
+  - Toggle deselect: clicking already-selected node dispatches SELECT_NODE null
+  - Floor plan image click deselects in select mode
+  - Optional onClick prop on FloorPlanImage component
+affects: [14.1-02, 14.1-03]
+
+# Tech tracking
+tech-stack:
+  added: []
+  patterns:
+    - Conditional spread for exactOptionalPropertyTypes-safe optional Konva event props
+    - Mode guard in onClick handler prevents interference with add-node/add-edge modes
+
+key-files:
+  created: []
+  modified:
+    - src/client/components/FloorPlanImage.tsx
+    - src/client/pages/admin/MapEditorCanvas.tsx
+
+key-decisions:
+  - "Conditional spread {...(onClick ? { onClick } : {})} used instead of onClick={onClick} — exactOptionalPropertyTypes requires the prop be absent when undefined, not passed as undefined"
+  - "state.selectedNodeId added to handleNodeClick dep array — without it, stale closure causes toggle to fail on second click"
+  - "Mode guard (state.mode === 'select') in FloorPlanImage onClick prevents interference with add-node node placement and add-edge creation"
+
+patterns-established:
+  - "exactOptionalPropertyTypes-safe optional Konva event prop: conditional spread pattern"
+
+requirements-completed: [FIX-03]
+
+# Metrics
+duration: 2min
+completed: "2026-02-27"
+---
+
+# Phase 14.1 Plan 01: Node Selection Fixes Summary
+
+**Toggle deselect for already-selected nodes and floor plan image click deselect via two surgical changes to FloorPlanImage and MapEditorCanvas**
+
+## Performance
+
+- **Duration:** 2 min
+- **Started:** 2026-02-27T19:36:27Z
+- **Completed:** 2026-02-27T19:38:30Z
+- **Tasks:** 2
+- **Files modified:** 2
+
+## Accomplishments
+- FloorPlanImage gets optional `onClick?: () => void` prop, wired to Konva Image via conditional spread
+- handleNodeClick toggle guard: clicking already-selected node dispatches `SELECT_NODE id: null` instead of re-selecting
+- `state.selectedNodeId` added to handleNodeClick dep array preventing stale closure
+- FloorPlanImage onClick wired in MapEditorCanvas with mode guard — only clears selection in select mode
+
+## Task Commits
+
+Each task was committed atomically:
+
+1. **Task 1: Add optional onClick prop to FloorPlanImage** - `e9648f1` (feat)
+2. **Task 2: Fix handleNodeClick toggle and wire FloorPlanImage onClick in MapEditorCanvas** - `bb3e5b1` (fix)
+
+**Plan metadata:** (docs commit follows)
+
+## Files Created/Modified
+- `src/client/components/FloorPlanImage.tsx` - Added `onClick?: () => void` to interface + destructure + conditional spread on Konva Image
+- `src/client/pages/admin/MapEditorCanvas.tsx` - Toggle guard in handleNodeClick + state.selectedNodeId in dep array + FloorPlanImage onClick wired with mode guard
+
+## Decisions Made
+- Conditional spread `{...(onClick ? { onClick } : {})}` instead of `onClick={onClick}` — `exactOptionalPropertyTypes: true` in tsconfig requires Konva event props to be absent (not undefined) when not provided.
+- `state.selectedNodeId` added to handleNodeClick dep array — required for toggle comparison to read current (not stale) selected node.
+- Mode guard `if (state.mode === 'select')` inside FloorPlanImage onClick — in add-node mode, stage handleStageClick also fires and handles placement; the onClick must not clear selection state that would interfere.
+
+## Deviations from Plan
+
+### Auto-fixed Issues
+
+**1. [Rule 1 - Bug] Fixed exactOptionalPropertyTypes incompatibility for Konva onClick**
+- **Found during:** Task 1 (Add optional onClick prop to FloorPlanImage)
+- **Issue:** `onClick={onClick}` where onClick is `(() => void) | undefined` fails `exactOptionalPropertyTypes` — Konva's event prop type does not accept undefined
+- **Fix:** Used conditional spread `{...(onClick ? { onClick } : {})}` so the prop is absent when undefined rather than passed as undefined
+- **Files modified:** src/client/components/FloorPlanImage.tsx
+- **Verification:** `npx tsc --noEmit` exits 0
+- **Committed in:** e9648f1 (Task 1 commit)
+
+---
+
+**Total deviations:** 1 auto-fixed (Rule 1 - Bug: type incompatibility)
+**Impact on plan:** Fix required for TypeScript correctness. Zero scope creep.
+
+## Issues Encountered
+None beyond the exactOptionalPropertyTypes fix documented above.
+
+## User Setup Required
+None - no external service configuration required.
+
+## Next Phase Readiness
+- Node toggle deselect and floor plan image deselect both working
+- TypeScript: 0 errors in modified files; Biome: 0 violations
+- Ready for Plan 02 (admin room number edit) which builds on MapEditorCanvas
+
+## Self-Check: PASSED
+
+- FloorPlanImage.tsx: FOUND
+- MapEditorCanvas.tsx: FOUND
+- 14.1-01-SUMMARY.md: FOUND
+- Commit e9648f1: FOUND
+- Commit bb3e5b1: FOUND
+- Commit 16521a2: FOUND
+- TypeScript: exit 0 (zero errors)
+- onClick? in FloorPlanImage interface: FOUND
+- selectedNodeId === nodeId toggle guard: FOUND
+- state.selectedNodeId in dep array: FOUND
+
+---
+*Phase: 14.1-node-selection-fixes-and-admin-room-number-edit*
+*Completed: 2026-02-27*
