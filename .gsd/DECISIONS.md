@@ -14,3 +14,4 @@
 | D008 | Represent campus map as `floorNumber = 0` sentinel | Cleanly separates campus graph from building floors without nullable floor numbers. | 2026-03-07 |
 | D009 | Use Backblaze B2 (S3-compatible) for production image storage | No credit-card blocker, compatible SDK path, low migration complexity. | 2026-03-08 |
 | D010 | For touch gestures, use inverse-transform focal mapping + 2° rotation dead zone | Fixes pinch/rotate drift and micro-jitter on rotated canvases. | 2026-03-10 |
+| D011 | Determine cross-floor up/down direction from resolved floor numbers and carry `floorId`/`floorNumber` on each direction step | Floor IDs are identifiers, not guaranteed vertical order; floor-aware steps let the directions sheet render stable floor sections without extra lookups. | 2026-03-24 |
