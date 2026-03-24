@@ -38,7 +38,7 @@
 
 ## Tasks
 
-- [ ] **T01: Add floor-aware direction contracts and up/down floor-change wording** `est:1h`
+- [x] **T01: Add floor-aware direction contracts and up/down floor-change wording** `est:1h`
   - Why: Closes R005 and establishes the floor metadata contract required for section headers in R004.
   - Files: `src/client/hooks/useRouteDirections.ts`, `src/client/hooks/useRouteDirections.test.ts`
   - Do: Extend `DirectionStep` with floor context, update floor-change instruction generation to include explicit up/down language based on floor-number direction, and add/update tests for up/down text, floor-number-vs-floorId ordering, fallback when `floorMap` is missing, and floor metadata on generated steps.

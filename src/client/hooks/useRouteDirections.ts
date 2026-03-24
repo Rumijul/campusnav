@@ -29,6 +29,10 @@ export interface DirectionStep {
   durationSec: number
   /** True if this segment passes through a ramp or elevator node */
   isAccessibleSegment: boolean
+  /** Floor ID where this instruction is presented */
+  floorId: number
+  /** Resolved floor number for display/grouping; falls back to floorId when metadata is missing */
+  floorNumber: number
 }
 
 export interface DirectionsResult {
@@ -84,6 +88,31 @@ function euclideanDist(ax: number, ay: number, bx: number, by: number): number {
   const dx = bx - ax
   const dy = by - ay
   return Math.sqrt(dx * dx + dy * dy)
+}
+
+/**
+ * Resolve a floor number from floor metadata, falling back to floorId when metadata is missing.
+ */
+function resolveFloorNumber(floorId: number, floorMap: Map<number, NavFloor>): number {
+  return floorMap.get(floorId)?.floorNumber ?? floorId
+}
+
+/**
+ * Determine vertical movement direction between two floors.
+ * Uses resolved floor numbers first; if tied, falls back to floorId to keep output deterministic.
+ */
+function getVerticalDirection(
+  fromFloorId: number,
+  toFloorId: number,
+  floorMap: Map<number, NavFloor>,
+): 'up' | 'down' {
+  const fromFloorNumber = resolveFloorNumber(fromFloorId, floorMap)
+  const toFloorNumber = resolveFloorNumber(toFloorId, floorMap)
+
+  if (toFloorNumber > fromFloorNumber) return 'up'
+  if (toFloorNumber < fromFloorNumber) return 'down'
+
+  return toFloorId >= fromFloorId ? 'up' : 'down'
 }
 
 /**
@@ -170,34 +199,42 @@ export function generateDirections(
 
     const distanceM = euclideanDist(prev.x, prev.y, curr.x, curr.y)
     const durationSec = distanceM / speed
+    const currFloorNumber = resolveFloorNumber(curr.floorId, floorMap)
+    const nextFloorNumber = resolveFloorNumber(next.floorId, floorMap)
 
     // Floor-change detection: check if curr→next crosses a floor boundary
     if (curr.floorId !== next.floorId) {
+      const verticalDirection = getVerticalDirection(curr.floorId, next.floorId, floorMap)
+
       // Determine direction icon based on connector type and vertical direction
       let icon: StepIcon
       if (curr.type === 'stairs') {
-        icon = next.floorId > curr.floorId ? 'stairs-up' : 'stairs-down'
+        icon = verticalDirection === 'up' ? 'stairs-up' : 'stairs-down'
       } else if (curr.type === 'elevator') {
         icon = 'elevator'
       } else if (curr.type === 'ramp') {
         icon = 'ramp'
       } else {
         // Fallback: should not occur in a well-formed graph
-        icon = 'stairs-up'
+        icon = verticalDirection === 'up' ? 'stairs-up' : 'stairs-down'
       }
 
       // Determine connector type name for instruction text
       const connectorTypeName =
         curr.type === 'elevator' ? 'elevator' : curr.type === 'ramp' ? 'ramp' : 'stairs'
 
-      // Look up destination floor number; fall back to next.floorId if not in map
-      const destFloor = floorMap.get(next.floorId)
-      const floorNumber = destFloor?.floorNumber ?? next.floorId
-      const instruction = `Take the ${connectorTypeName} to Floor ${floorNumber}`
-
+      const instruction = `Take the ${connectorTypeName} ${verticalDirection} to Floor ${nextFloorNumber}`
       const isAccessibleSegment = curr.type === 'elevator' || curr.type === 'ramp'
 
-      steps.push({ instruction, icon, distanceM, durationSec, isAccessibleSegment })
+      steps.push({
+        instruction,
+        icon,
+        distanceM,
+        durationSec,
+        isAccessibleSegment,
+        floorId: curr.floorId,
+        floorNumber: currFloorNumber,
+      })
       totalDistanceNorm += distanceM
       continue
     }
@@ -210,7 +247,15 @@ export function generateDirections(
     const instruction = buildInstruction(icon, curr)
     const isAccessibleSegment = curr.type === 'ramp' || curr.type === 'elevator'
 
-    steps.push({ instruction, icon, distanceM, durationSec, isAccessibleSegment })
+    steps.push({
+      instruction,
+      icon,
+      distanceM,
+      durationSec,
+      isAccessibleSegment,
+      floorId: curr.floorId,
+      floorNumber: currFloorNumber,
+    })
     totalDistanceNorm += distanceM
   }
 
@@ -233,6 +278,8 @@ export function generateDirections(
     distanceM: arriveDistance,
     durationSec: arriveDuration,
     isAccessibleSegment: last.type === 'ramp' || last.type === 'elevator',
+    floorId: last.floorId,
+    floorNumber: resolveFloorNumber(last.floorId, floorMap),
   })
 
   totalDistanceNorm += arriveDistance
