@@ -2,6 +2,7 @@ import type { PathResult } from '@shared/pathfinding/types'
 import type { NavNode } from '@shared/types'
 import { useEffect, useRef, useState } from 'react'
 import type { DirectionStep, DirectionsResult, StepIcon } from '../hooks/useRouteDirections'
+import { groupDirectionSections } from './directionSections'
 
 // ============================================================
 // Props
@@ -281,6 +282,31 @@ function StepItem({ step }: { step: DirectionStep }) {
   )
 }
 
+function DirectionSectionList({ steps }: { steps: DirectionStep[] }) {
+  const sections = groupDirectionSections(steps)
+  const showFloorHeaders = sections.length > 1
+
+  return (
+    <>
+      {sections.map((section, sectionIndex) => (
+        <div key={`${section.floorId}-${section.floorNumber}-${sectionIndex}`}>
+          {showFloorHeaders && (
+            <div className="px-4 pt-3 pb-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Floor {section.floorNumber}
+              </p>
+            </div>
+          )}
+          {section.steps.map((step, stepIndex) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
+            <StepItem key={`${sectionIndex}-${stepIndex}`} step={step} />
+          ))}
+        </div>
+      ))}
+    </>
+  )
+}
+
 // ============================================================
 // BackArrowIcon
 // ============================================================
@@ -459,10 +485,7 @@ export function DirectionsSheet({
               </span>
             </div>
             <div className="pb-10">
-              {standardDirections.steps.map((step, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
-                <StepItem key={i} step={step} />
-              ))}
+              <DirectionSectionList steps={standardDirections.steps} />
             </div>
           </>
         )}
@@ -492,10 +515,7 @@ export function DirectionsSheet({
               />
             </div>
             <div className="pb-10">
-              {activeDirections.steps.map((step, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: steps are ordered and stable within a single route render
-                <StepItem key={i} step={step} />
-              ))}
+              <DirectionSectionList steps={activeDirections.steps} />
             </div>
           </>
         )}

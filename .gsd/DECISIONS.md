@@ -15,3 +15,4 @@
 | D009 | Use Backblaze B2 (S3-compatible) for production image storage | No credit-card blocker, compatible SDK path, low migration complexity. | 2026-03-08 |
 | D010 | For touch gestures, use inverse-transform focal mapping + 2° rotation dead zone | Fixes pinch/rotate drift and micro-jitter on rotated canvases. | 2026-03-10 |
 | D011 | Determine cross-floor up/down direction from resolved floor numbers and carry `floorId`/`floorNumber` on each direction step | Floor IDs are identifiers, not guaranteed vertical order; floor-aware steps let the directions sheet render stable floor sections without extra lookups. | 2026-03-24 |
+| D012 | Group direction UI by contiguous floor runs (not global floor merge) and render floor headers only when more than one section exists | Returning to an earlier floor should create a new section in sequence, and single-floor routes should remain visually flat without redundant headers. | 2026-03-24 |

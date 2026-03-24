@@ -44,7 +44,7 @@
   - Do: Extend `DirectionStep` with floor context, update floor-change instruction generation to include explicit up/down language based on floor-number direction, and add/update tests for up/down text, floor-number-vs-floorId ordering, fallback when `floorMap` is missing, and floor metadata on generated steps.
   - Verify: `npm test -- src/client/hooks/useRouteDirections.test.ts`
   - Done when: floor-change steps always include up/down wording and tests prove floor metadata + fallback behavior.
-- [ ] **T02: Group direction steps by floor and render section headers in DirectionsSheet** `est:1h`
+- [x] **T02: Group direction steps by floor and render section headers in DirectionsSheet** `est:1h`
   - Why: Closes R004 by converting flat direction lists into floor-scannable sections for cross-floor routes.
   - Files: `src/client/components/directionSections.ts`, `src/client/components/directionSections.test.ts`, `src/client/components/DirectionsSheet.tsx`
   - Do: Create a pure helper that groups contiguous steps by floor, add unit tests for grouping boundaries and single-floor behavior, and refactor DirectionsSheet rendering to use grouped sections with conditional floor headers in both identical-route and tabbed-route modes.
