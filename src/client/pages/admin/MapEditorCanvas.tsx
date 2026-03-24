@@ -1,4 +1,4 @@
-import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '@shared/types'
+import type { NavBuilding, NavEdge, NavFloor, NavFloorGpsBounds, NavGraph, NavNode } from '@shared/types'
 import type Konva from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
@@ -42,6 +42,56 @@ interface ConnectorLinkSuccessResponse {
 interface ConnectorLinkErrorResponse {
   errorCode?: string
   error?: string
+}
+
+function applyFloorGpsBoundsPatch(
+  floor: NavFloor,
+  gpsBounds: NavFloorGpsBounds | null,
+): NavFloor {
+  const { gpsBounds: _existingGpsBounds, ...floorWithoutGpsBounds } = floor
+
+  return gpsBounds
+    ? { ...floorWithoutGpsBounds, gpsBounds }
+    : floorWithoutGpsBounds
+}
+
+function patchNavGraphFloorGpsBounds(
+  navGraph: NavGraph | null,
+  floorId: number,
+  gpsBounds: NavFloorGpsBounds | null,
+): NavGraph | null {
+  if (!navGraph) return navGraph
+
+  let graphChanged = false
+
+  const buildings = navGraph.buildings.map((building) => {
+    let buildingChanged = false
+
+    const floors = building.floors.map((floor) => {
+      if (floor.id !== floorId) {
+        return floor
+      }
+
+      buildingChanged = true
+      return applyFloorGpsBoundsPatch(floor, gpsBounds)
+    })
+
+    if (!buildingChanged) {
+      return building
+    }
+
+    graphChanged = true
+    return {
+      ...building,
+      floors,
+    }
+  })
+
+  if (!graphChanged) {
+    return navGraph
+  }
+
+  return { buildings }
 }
 
 /* ──────────────── Component ──────────────── */
@@ -139,6 +189,12 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const activeBuilding: NavBuilding | undefined = isCampusActive
     ? undefined
     : nonCampusBuildings.find((b) => b.id === state.activeBuildingId)
+
+  const campusBuilding: NavBuilding | undefined = navGraph?.buildings.find((b) => b.name === 'Campus')
+
+  const manageFloorsBuilding: NavBuilding | undefined = isCampusActive
+    ? campusBuilding
+    : activeBuilding
 
   const sortedFloors: NavFloor[] = (activeBuilding?.floors ?? [])
     .slice()
@@ -424,7 +480,17 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       })
       if (res.ok) {
         dispatch({ type: 'MARK_SAVED' })
-        setNavGraph({ buildings: navGraph!.buildings.map((b) => b.name === 'Campus' ? { ...b, floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }] } : b) })
+        setNavGraph((previousGraph) => {
+          if (!previousGraph) return previousGraph
+
+          return {
+            buildings: previousGraph.buildings.map((building) =>
+              building.name === 'Campus'
+                ? { ...building, floors: [{ ...campusFloor, nodes: state.nodes, edges: state.edges }] }
+                : building,
+            ),
+          }
+        })
       }
     } else {
       // Building/floor save: wrap active floor nodes into the full NavGraph
@@ -665,15 +731,16 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
 
         {/* Campus empty state overlay */}
         {isCampusActive && !image && (
-          <div
+          <button
+            type="button"
             className="absolute inset-0 flex items-center justify-center pointer-events-auto cursor-pointer"
             onClick={handleUploadClick}
           >
-            <div className="text-center text-slate-500 hover:text-slate-700">
+            <span className="text-center text-slate-500 hover:text-slate-700">
               <p className="text-lg font-medium">Upload campus map to begin</p>
               <p className="text-sm">Click to upload an overhead image</p>
-            </div>
-          </div>
+            </span>
+          </button>
         )}
 
         {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
@@ -768,19 +835,22 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       />
 
       {/* Manage Floors modal */}
-      {manageFloorsOpen && activeBuilding && (
+      {manageFloorsOpen && manageFloorsBuilding && (
         <ManageFloorsModal
           isOpen={manageFloorsOpen}
-          buildingId={activeBuilding.id}
-          floors={activeBuilding.floors}
+          buildingId={manageFloorsBuilding.id}
+          floors={manageFloorsBuilding.floors}
+          isCampusMode={isCampusActive}
           onClose={() => setManageFloorsOpen(false)}
           onFloorAdded={(newFloor) => {
             setManageFloorsOpen(false)
             setNavGraph((prev) => {
-              if (!prev || !activeBuilding) return prev
+              if (!prev || !manageFloorsBuilding) return prev
               return {
                 buildings: prev.buildings.map((b) =>
-                  b.id === activeBuilding.id ? { ...b, floors: [...b.floors, newFloor] } : b,
+                  b.id === manageFloorsBuilding.id
+                    ? { ...b, floors: [...b.floors, newFloor] }
+                    : b,
                 ),
               }
             })
@@ -788,17 +858,22 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
           onFloorDeleted={(floorId) => {
             setManageFloorsOpen(false)
             setNavGraph((prev) => {
-              if (!prev || !activeBuilding) return prev
+              if (!prev || !manageFloorsBuilding) return prev
               return {
                 buildings: prev.buildings.map((b) =>
-                  b.id === activeBuilding.id
+                  b.id === manageFloorsBuilding.id
                     ? { ...b, floors: b.floors.filter((f) => f.id !== floorId) }
                     : b,
                 ),
               }
             })
           }}
-          onFloorImageReplaced={() => { loadNavGraph() }}
+          onFloorImageReplaced={() => {
+            loadNavGraph()
+          }}
+          onFloorGpsBoundsSaved={(floorId, gpsBounds) => {
+            setNavGraph((prev) => patchNavGraphFloorGpsBounds(prev, floorId, gpsBounds))
+          }}
         />
       )}
     </div>

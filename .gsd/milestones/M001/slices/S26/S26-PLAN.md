@@ -24,6 +24,7 @@
 - `npm test -- src/server/floorGpsBounds.test.ts -t "returns FLOOR_NOT_FOUND when floor id does not exist"`
 - `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`
 - `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`
+- `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx -t "renders inline validation error and blocks save for partial gps tuple"`
 - `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`
 - `npm test`
 
@@ -56,7 +57,7 @@
   - Verify: `npm test -- src/server/floorGpsBounds.test.ts`
   - Done when: endpoint returns server-authoritative `gpsBounds` on success, emits deterministic 4xx diagnostics on invalid input, and failure-path tests prove no partial tuple persistence.
 
-- [ ] **T03: Deliver admin GPS bounds form UX and campus-mode access wiring** `est:1.75h`
+- [x] **T03: Deliver admin GPS bounds form UX and campus-mode access wiring** `est:1.75h`
   - Why: R009 and R010 are only complete when admins can edit bounds in UI for both building floors and campus floor with inline guardrails.
   - Files: `src/client/components/admin/EditorToolbar.tsx`, `src/client/components/admin/ManageFloorsModal.tsx`, `src/client/components/admin/gpsBoundsForm.ts`, `src/client/components/admin/gpsBoundsForm.test.ts`, `src/client/components/admin/ManageFloorsModal.gps.test.tsx`, `src/client/pages/admin/MapEditorCanvas.tsx`
   - Do: Add per-floor GPS bounds inputs + row save controls in `ManageFloorsModal`, derive validation state in pure helper(s) (`min < max`, complete tuple), render inline errors and disable invalid saves, enable Manage Floors access in campus context, and patch `navGraph` floor metadata from endpoint response.
