@@ -2,74 +2,6 @@
 
 This file is the explicit capability and coverage contract for the project.
 
-## Active
-
-### R011 — Student sees a “you are here” GPS dot on map when valid bounds are configured.
-- Class: primary-user-loop
-- Status: active
-- Description: Student sees a “you are here” GPS dot on map when valid bounds are configured.
-- Why it matters: Improves start-point awareness and navigation confidence.
-- Source: user
-- Primary owning slice: M001/S27
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from GPS-03.
-
-### R012 — GPS dot displays an accuracy ring proportional to reported uncertainty.
-- Class: quality-attribute
-- Status: active
-- Description: GPS dot displays an accuracy ring proportional to reported uncertainty.
-- Why it matters: Communicates confidence level of location estimate.
-- Source: user
-- Primary owning slice: M001/S27
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from GPS-04.
-
-### R013 — GPS dot is hidden when reported accuracy exceeds 50 meters.
-- Class: quality-attribute
-- Status: active
-- Description: GPS dot is hidden when reported accuracy exceeds 50 meters.
-- Why it matters: Avoids showing misleading location in poor-signal conditions.
-- Source: user
-- Primary owning slice: M001/S27
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from GPS-05.
-
-### R014 — Student can use current location as route start by snapping to nearest walkable node.
-- Class: primary-user-loop
-- Status: active
-- Description: Student can use current location as route start by snapping to nearest walkable node.
-- Why it matters: Reduces friction for route setup and keeps routing graph-consistent.
-- Source: user
-- Primary owning slice: M001/S27
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from GPS-06.
-
-### R015 — If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
-- Class: continuity
-- Status: active
-- Description: If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
-- Why it matters: Core navigation remains usable for all users/devices.
-- Source: user
-- Primary owning slice: M001/S27
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from GPS-07.
-
-### R022 — Work on active milestone slices starts with a checkpoint commit before research.
-- Class: process-governance
-- Status: active
-- Description: For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
-- Why it matters: Preserves rollback safety, keeps exploratory diffs traceable, and prevents mixing uncheckpointed edits with research outcomes.
-- Source: user override
-- Primary owning slice: M001/S27
-- Supporting slices: M001 (all remaining active slices)
-- Validation: mapped
-- Notes: Added from override 2026-03-24; implemented via decision D006.
-
 ## Validated
 
 ### R001 — Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
@@ -182,6 +114,72 @@ This file is the explicit capability and coverage contract for the project.
 - Validation: Validated in S26 by pure GPS bounds form validation (`deriveGpsBoundsFormState`) and row-level UI gating (`deriveGpsBoundsRowUiState`) enforcing complete tuple + strict ordering (`minLat < maxLat`, `minLng < maxLng`) with inline errors and blocked saves. Proven by passing `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx -t "renders inline validation error and blocks save for partial gps tuple"`, server range guard check `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`, and full suite `npm test`.
 - Notes: S26 completed 2026-03-24; validation is enforced in both pure helper logic and modal row UX before network mutation.
 
+### R011 — Student sees a “you are here” GPS dot on map when valid bounds are configured.
+- Class: primary-user-loop
+- Status: validated
+- Description: Student sees a “you are here” GPS dot on map when valid bounds are configured.
+- Why it matters: Improves start-point awareness and navigation confidence.
+- Source: user
+- Primary owning slice: M001/S27
+- Supporting slices: none
+- Validation: Validated in S27 by calibrated-floor geolocation projection wiring in `FloorPlanCanvas` + dedicated Konva marker layer rendering in `GpsLocationLayer`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/hooks/useGeolocation.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from GPS-03.
+
+### R012 — GPS dot displays an accuracy ring proportional to reported uncertainty.
+- Class: quality-attribute
+- Status: validated
+- Description: GPS dot displays an accuracy ring proportional to reported uncertainty.
+- Why it matters: Communicates confidence level of location estimate.
+- Source: user
+- Primary owning slice: M001/S27
+- Supporting slices: none
+- Validation: Validated in S27 by `accuracyMetersToMapPixelRadius` scaling and `GpsLocationLayer` accuracy-ring rendering (ring shown when radius > 0); proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from GPS-04.
+
+### R013 — GPS dot is hidden when reported accuracy exceeds 50 meters.
+- Class: quality-attribute
+- Status: validated
+- Description: GPS dot is hidden when reported accuracy exceeds 50 meters.
+- Why it matters: Avoids showing misleading location in poor-signal conditions.
+- Source: user
+- Primary owning slice: M001/S27
+- Supporting slices: none
+- Validation: Validated in S27 by confidence gate `isGpsFixConfident` (<=50m) and marker suppression in `FloorPlanCanvas`/`deriveStudentGpsState`; proven by passing `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`, `npm test -- src/client/gps/studentGpsState.test.ts`, and full suite `npm test`.
+- Notes: Migrated from GPS-05.
+
+### R014 — Student can use current location as route start by snapping to nearest walkable node.
+- Class: primary-user-loop
+- Status: validated
+- Description: Student can use current location as route start by snapping to nearest walkable node.
+- Why it matters: Reduces friction for route setup and keeps routing graph-consistent.
+- Source: user
+- Primary owning slice: M001/S27
+- Supporting slices: none
+- Validation: Validated in S27 by nearest walkable-node snap helper `snapLatLngToNearestWalkableNode` and `FloorPlanCanvas` `handleUseMyLocation -> routeSelection.setStart(...)` wiring through `SearchOverlay`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from GPS-06.
+
+### R015 — If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
+- Class: continuity
+- Status: validated
+- Description: If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
+- Why it matters: Core navigation remains usable for all users/devices.
+- Source: user
+- Primary owning slice: M001/S27
+- Supporting slices: none
+- Validation: Validated in S27 by explicit fallback-state derivation (`deriveStudentGpsState`) for unsupported/permission-denied/unavailable/low-confidence/no-nearest cases and SearchOverlay manual-control continuity; proven by passing `npm test -- src/client/hooks/useGeolocation.test.ts -t "maps permission denied geolocation errors to explicit status"`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`.
+- Notes: Migrated from GPS-07.
+
+### R022 — For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
+- Class: process-governance
+- Status: validated
+- Description: For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
+- Why it matters: Preserves rollback safety, keeps exploratory diffs traceable, and prevents mixing uncheckpointed edits with research outcomes.
+- Source: user override
+- Primary owning slice: M001/S27
+- Supporting slices: M001 (all remaining active slices)
+- Validation: Validated in S27 by checkpoint artifact presence and resolvable commit hash prior to implementation deep-dive; proven by passing `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md` and `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print \$2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`.
+- Notes: Added from override 2026-03-24; implemented via decision D006.
+
 ## Deferred
 
 ### R016 — GPS bounds can be configured using map-click calibration helper instead of text input only.
@@ -266,22 +264,22 @@ This file is the explicit capability and coverage contract for the project.
 | R008 | admin/support | validated | M001/S25 | none | Validated in S25 by unlink flows that clear both sides (`above/below` node/floor fields) and client patch application that reflects server `updatedNodes` without one-sided drift. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`. |
 | R009 | admin/support | validated | M001/S26 | none | Validated in S26 by floor-level GPS bounds persistence columns (`gpsMinLat/gpsMaxLat/gpsMinLng/gpsMaxLng`), protected mutation endpoint `PUT /api/admin/floors/:id/gps-bounds`, and admin Manage Floors row controls available in both building and campus mode. Proven by passing `test -f drizzle/0003_floor_gps_bounds.sql`, `npm test -- src/server/floorGpsBounds.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`, and `npm test`. |
 | R010 | quality-attribute | validated | M001/S26 | none | Validated in S26 by pure GPS bounds form validation (`deriveGpsBoundsFormState`) and row-level UI gating (`deriveGpsBoundsRowUiState`) enforcing complete tuple + strict ordering (`minLat < maxLat`, `minLng < maxLng`) with inline errors and blocked saves. Proven by passing `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx -t "renders inline validation error and blocks save for partial gps tuple"`, server range guard check `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`, and full suite `npm test`. |
-| R011 | primary-user-loop | active | M001/S27 | none | mapped |
-| R012 | quality-attribute | active | M001/S27 | none | mapped |
-| R013 | quality-attribute | active | M001/S27 | none | mapped |
-| R014 | primary-user-loop | active | M001/S27 | none | mapped |
-| R015 | continuity | active | M001/S27 | none | mapped |
-| R022 | process-governance | active | M001/S27 | M001 (all remaining active slices) | mapped |
+| R011 | primary-user-loop | validated | M001/S27 | none | Validated in S27 by calibrated-floor geolocation projection wiring in `FloorPlanCanvas` + dedicated Konva marker layer rendering in `GpsLocationLayer`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/hooks/useGeolocation.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`. |
+| R012 | quality-attribute | validated | M001/S27 | none | Validated in S27 by `accuracyMetersToMapPixelRadius` scaling and `GpsLocationLayer` accuracy-ring rendering (ring shown when radius > 0); proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`. |
+| R013 | quality-attribute | validated | M001/S27 | none | Validated in S27 by confidence gate `isGpsFixConfident` (<=50m) and marker suppression in `FloorPlanCanvas`/`deriveStudentGpsState`; proven by passing `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`, `npm test -- src/client/gps/studentGpsState.test.ts`, and full suite `npm test`. |
+| R014 | primary-user-loop | validated | M001/S27 | none | Validated in S27 by nearest walkable-node snap helper `snapLatLngToNearestWalkableNode` and `FloorPlanCanvas` `handleUseMyLocation -> routeSelection.setStart(...)` wiring through `SearchOverlay`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`. |
+| R015 | continuity | validated | M001/S27 | none | Validated in S27 by explicit fallback-state derivation (`deriveStudentGpsState`) for unsupported/permission-denied/unavailable/low-confidence/no-nearest cases and SearchOverlay manual-control continuity; proven by passing `npm test -- src/client/hooks/useGeolocation.test.ts -t "maps permission denied geolocation errors to explicit status"`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`. |
 | R016 | admin/support | deferred | none | none | unmapped |
 | R017 | differentiator | deferred | none | none | unmapped |
 | R018 | differentiator | deferred | none | none | unmapped |
 | R019 | primary-user-loop | deferred | none | none | unmapped |
 | R020 | anti-feature | out-of-scope | none | none | n/a |
 | R021 | anti-feature | out-of-scope | none | none | n/a |
+| R022 | process-governance | validated | M001/S27 | M001 (all remaining active slices) | Validated in S27 by checkpoint artifact presence and resolvable commit hash prior to implementation deep-dive; proven by passing `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md` and `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print \$2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`. |
 
 ## Coverage Summary
 
-- Active requirements: 6
-- Mapped to slices: 6
-- Validated: 10 (R001, R002, R003, R004, R005, R006, R007, R008, R009, R010)
+- Active requirements: 0
+- Mapped to slices: 0
+- Validated: 16 (R001, R002, R003, R004, R005, R006, R007, R008, R009, R010, R011, R012, R013, R014, R015, R022)
 - Unmapped active requirements: 0

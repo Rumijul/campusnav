@@ -44,7 +44,7 @@ Show any student the quickest route from where they are to where they need to be
 - [x] Multi-floor directions show floor section dividers and explicit up/down floor-change language
 - [x] Admin can visually link floor-connector nodes across floors without manually entering node IDs
 - [x] Admin can configure real-world GPS bounds (lat/lng) for each floor plan and the campus map
-- [ ] App uses browser Geolocation to show a GPS "you are here" dot and snap to nearest node as start point
+- [x] App uses browser Geolocation to show a GPS "you are here" dot, accuracy ring, and nearest-node snap as an optional start point with graceful fallback
 - [x] Pinch-to-zoom uses the touch midpoint as the zoom focal point; two-finger rotation pivots around the touch midpoint
 
 ### Out of Scope
@@ -86,7 +86,7 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 ## Constraints
 
 - **Platform**: Web application — must work in modern browsers on both desktop and mobile
-- **No GPS**: Users manually select their location; no device location services used
+- **GPS assist**: Browser geolocation is optional and confidence-gated (<=50m); manual start selection remains fully supported fallback.
 - **Multi-floor**: v1.5 ships multi-floor; architecture uses buildings/floors entity model
 - **Tech stack**: React + Hono + Konva.js + PostgreSQL (established in v1.0, DB upgraded v1.5)
 - **Authentication**: Only needed for admin panel, not for student wayfinding
@@ -117,7 +117,7 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 | Backblaze B2 over Cloudflare R2 | No credit card required; S3-compatible drop-in — same @aws-sdk/client-s3 client | ✓ Good — zero code change, all 7 smoke tests passed |
 | ResizeObserver for canvas dimensions | Replaces hardcoded windowHeight−52 — fixes canvas stretch when multiple toolbar rows present | ✓ Good — confirmed in Phase 18 human verification |
 | Optimistic floor list updates in admin editor | Replace full refetch with local state patch after floor add/delete — eliminates update lag | ✓ Good — instant UI response, confirmed in human verification |
-| Commit-before-research execution order for active slices | Mandatory checkpoint commit before research keeps diffs reversible and traceable in auto-mode loops | ⏳ Active in S27 per override + D006 |
+| Commit-before-research execution order for active slices | Mandatory checkpoint commit before research keeps diffs reversible and traceable in auto-mode loops | ✅ Enforced and validated in S27 via checkpoint artifact + hash resolvability checks (D006, R022) |
 
 ## Current Milestone: v1.6 GPS Integration & UX Refinements
 
@@ -127,8 +127,8 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 - ✅ Multi-floor directions with floor-change dividers and explicit up/down floor language
 - ✅ Admin visual floor-connector linking (no manual node ID entry)
 - ✅ GPS bounds configuration per floor + campus map (admin)
-- ⏳ GPS "you are here" dot + nearest-node snap for students
-- ⏳ Workflow override: active slice work begins with checkpoint commit before research
+- ✅ GPS "you are here" dot + nearest-node snap for students (with confidence-gated rendering + explicit fallback messaging)
+- ✅ Workflow override: active slice work begins with checkpoint commit before research (validated by S27 checkpoint evidence)
 - ✅ Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
 
 ## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
@@ -137,4 +137,4 @@ Multi-floor, multi-building campus navigation system deployed on Render + Neon +
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-24 after S27 override propagation (commit-before-research protocol documented across planning artifacts)*
+*Last updated: 2026-03-25 after S27 completion (student geolocation assist + checkpoint-governance requirement validated)*

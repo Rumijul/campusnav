@@ -64,5 +64,5 @@
   > After this: unit tests prove Admin Floor-Connector Visual Linking — Replace manual node ID entry with dropdown-based bidirectional connector linking in the admin editor works
 - [x] **S26: Admin GPS Bounds Configuration — Schema, API endpoint, and admin form for configuring real World lat/lng bounding boxes per floor and campus map — completed 2026 03 24** `risk:medium` `depends:[S25]`
   > After this: unit tests prove Admin GPS Bounds Configuration — Schema, API endpoint, and admin form for configuring real-world lat/lng bounding boxes per floor and campus map works
-- [ ] **S27: Student GPS Dot — Browser Geolocation Powered "you are here" dot with accuracy ring, nearest Node snap, and graceful fallback** `risk:medium` `depends:[S26]`
+- [x] **S27: Student GPS Dot — Browser Geolocation Powered "you are here" dot with accuracy ring, nearest Node snap, and graceful fallback — completed 2026 03 25** `risk:medium` `depends:[S26]`
   > After this: unit tests prove Student GPS Dot — Browser Geolocation-powered "you are here" dot with accuracy ring, nearest-node snap, and graceful fallback works, and execution evidence shows the pre-research checkpoint commit required by D006.
