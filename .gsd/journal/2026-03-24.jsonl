@@ -37,3 +37,11 @@
 {"ts":"2026-03-24T07:32:00.008Z","flowId":"61eca394-7ddc-42fb-8446-d7ce0bc00b44","seq":2,"eventType":"dispatch-match","rule":"planning (no research, not S01) → research-slice","data":{"unitType":"research-slice","unitId":"M001/S25"}}
 {"ts":"2026-03-24T07:32:00.035Z","flowId":"61eca394-7ddc-42fb-8446-d7ce0bc00b44","seq":3,"eventType":"unit-start","data":{"unitType":"research-slice","unitId":"M001/S25"}}
 {"ts":"2026-03-24T07:53:19.568Z","flowId":"61eca394-7ddc-42fb-8446-d7ce0bc00b44","seq":4,"eventType":"unit-end","data":{"unitType":"research-slice","unitId":"M001/S25","status":"completed","artifactVerified":true},"causedBy":{"flowId":"61eca394-7ddc-42fb-8446-d7ce0bc00b44","seq":3}}
+{"ts":"2026-03-24T07:53:21.873Z","flowId":"61eca394-7ddc-42fb-8446-d7ce0bc00b44","seq":5,"eventType":"iteration-end","data":{"iteration":4}}
+{"ts":"2026-03-24T07:53:21.875Z","flowId":"23e31e34-5ad8-4a8a-8dcb-db3266726f12","seq":1,"eventType":"iteration-start","data":{"iteration":5}}
+{"ts":"2026-03-24T07:53:22.389Z","flowId":"23e31e34-5ad8-4a8a-8dcb-db3266726f12","seq":2,"eventType":"dispatch-match","rule":"planning → plan-slice","data":{"unitType":"plan-slice","unitId":"M001/S25"}}
+{"ts":"2026-03-24T07:53:22.415Z","flowId":"23e31e34-5ad8-4a8a-8dcb-db3266726f12","seq":3,"eventType":"unit-start","data":{"unitType":"plan-slice","unitId":"M001/S25"}}
+{"ts":"2026-03-24T08:49:22.016Z","flowId":"7ff4f4c4-1b60-451f-9031-d51fe6ee0526","seq":1,"eventType":"iteration-start","data":{"iteration":1}}
+{"ts":"2026-03-24T08:49:22.561Z","flowId":"7ff4f4c4-1b60-451f-9031-d51fe6ee0526","seq":2,"eventType":"dispatch-match","rule":"planning → plan-slice","data":{"unitType":"plan-slice","unitId":"M001/S25"}}
+{"ts":"2026-03-24T08:49:22.590Z","flowId":"7ff4f4c4-1b60-451f-9031-d51fe6ee0526","seq":3,"eventType":"unit-start","data":{"unitType":"plan-slice","unitId":"M001/S25"}}
+{"ts":"2026-03-24T08:56:58.874Z","flowId":"7ff4f4c4-1b60-451f-9031-d51fe6ee0526","seq":4,"eventType":"unit-end","data":{"unitType":"plan-slice","unitId":"M001/S25","status":"completed","artifactVerified":true},"causedBy":{"flowId":"7ff4f4c4-1b60-451f-9031-d51fe6ee0526","seq":3}}
