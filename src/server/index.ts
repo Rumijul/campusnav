@@ -17,7 +17,11 @@ import { authRoutes } from './auth/routes'
 import { ConnectorLinkingError, linkConnectorNodesFromPayload } from './connectorLinking'
 import { db } from './db/client'
 import { buildings, edges, floors, nodes } from './db/schema'
-import { serializeFloorGpsBounds } from './floorGpsBounds'
+import {
+  FloorGpsBoundsError,
+  serializeFloorGpsBounds,
+  updateFloorGpsBoundsFromPayload,
+} from './floorGpsBounds'
 import { seedIfEmpty } from './db/seed'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -358,6 +362,37 @@ app.post('/api/admin/floors', async (c) => {
   } catch (err) {
     console.error('Add floor failed:', err)
     return c.json({ error: 'Failed to add floor' }, 500)
+  }
+})
+
+/**
+ * PUT /api/admin/floors/:id/gps-bounds
+ * Updates floor GPS calibration bounds using full-tuple set/clear operations.
+ */
+app.put('/api/admin/floors/:id/gps-bounds', async (c) => {
+  const floorId = Number(c.req.param('id'))
+  if (!Number.isInteger(floorId) || floorId <= 0) {
+    return c.json({ errorCode: 'INVALID_REQUEST', error: 'floorId must be a positive integer' }, 400)
+  }
+
+  let body: unknown
+
+  try {
+    body = await c.req.json()
+  } catch {
+    return c.json({ errorCode: 'INVALID_REQUEST', error: 'Request body must be valid JSON' }, 400)
+  }
+
+  try {
+    const result = await updateFloorGpsBoundsFromPayload(floorId, body)
+    return c.json(result)
+  } catch (error) {
+    if (error instanceof FloorGpsBoundsError) {
+      return c.json({ errorCode: error.code, error: error.message }, error.status)
+    }
+
+    console.error('Floor GPS bounds update failed:', error)
+    return c.json({ errorCode: 'INTERNAL_ERROR', error: 'Failed to update floor GPS bounds' }, 500)
   }
 })
 

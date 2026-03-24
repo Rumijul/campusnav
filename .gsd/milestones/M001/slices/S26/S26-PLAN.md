@@ -21,6 +21,7 @@
 - `npm test -- src/server/floorGpsBounds.test.ts`
 - `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`
 - `npm test -- src/server/floorGpsBounds.test.ts -t "returns GPS_BOUNDS_INCOMPLETE when tuple is partially provided"`
+- `npm test -- src/server/floorGpsBounds.test.ts -t "returns FLOOR_NOT_FOUND when floor id does not exist"`
 - `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`
 - `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`
 - `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`
@@ -48,7 +49,7 @@
   - Verify: `npm test -- src/server/floorGpsBounds.test.ts -t "serializes gpsBounds only when complete tuple is present"`
   - Done when: migration artifacts exist, shared types compile with optional floor `gpsBounds`, and map serialization tests confirm complete-only emission.
 
-- [ ] **T02: Implement protected floor GPS bounds update endpoint with deterministic validation diagnostics** `est:1.25h`
+- [x] **T02: Implement protected floor GPS bounds update endpoint with deterministic validation diagnostics** `est:1.25h`
   - Why: R009/R010 require a single authoritative write path that rejects malformed tuples and preserves inspectable failure states.
   - Files: `src/server/floorGpsBounds.ts`, `src/server/index.ts`, `src/server/floorGpsBounds.test.ts`
   - Do: Implement `PUT /api/admin/floors/:id/gps-bounds` (JWT-protected) accepting either a full numeric tuple or full null tuple, enforce `minLat < maxLat` and `minLng < maxLng`, validate floor existence, update via typed Drizzle `update(...).set(...).where(...)`, and return stable success/error payloads.
