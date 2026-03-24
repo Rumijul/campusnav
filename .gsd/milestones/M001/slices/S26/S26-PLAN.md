@@ -20,6 +20,7 @@
 - `test -f drizzle/0003_floor_gps_bounds.sql`
 - `npm test -- src/server/floorGpsBounds.test.ts`
 - `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`
+- `npm test -- src/server/floorGpsBounds.test.ts -t "returns GPS_BOUNDS_INCOMPLETE when tuple is partially provided"`
 - `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`
 - `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`
 - `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`
@@ -40,7 +41,7 @@
 
 ## Tasks
 
-- [ ] **T01: Add GPS bounds persistence schema and `GET /api/map` contract surface** `est:1h`
+- [x] **T01: Add GPS bounds persistence schema and `GET /api/map` contract surface** `est:1h`
   - Why: R009 needs durable floor-level bounds storage and a serialized graph contract S27 can consume.
   - Files: `src/server/db/schema.ts`, `drizzle/0003_floor_gps_bounds.sql`, `drizzle/meta/0003_snapshot.json`, `drizzle/meta/_journal.json`, `src/shared/types.ts`, `src/server/floorGpsBounds.ts`, `src/server/index.ts`, `src/server/floorGpsBounds.test.ts`
   - Do: Add nullable GPS bounds columns to `floors`, generate migration artifacts, extend `NavFloor` with optional `gpsBounds`, add server helper(s) for tuple completeness/shape mapping, and serialize `gpsBounds` in `GET /api/map` only when all four values are present.

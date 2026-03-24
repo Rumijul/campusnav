@@ -17,6 +17,7 @@ import { authRoutes } from './auth/routes'
 import { ConnectorLinkingError, linkConnectorNodesFromPayload } from './connectorLinking'
 import { db } from './db/client'
 import { buildings, edges, floors, nodes } from './db/schema'
+import { serializeFloorGpsBounds } from './floorGpsBounds'
 import { seedIfEmpty } from './db/seed'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -158,6 +159,7 @@ app.get('/api/map', async (c) => {
           floorNumber: f.floorNumber,
           imagePath: f.imagePath,
           updatedAt: f.updatedAt,
+          ...serializeFloorGpsBounds(f),
           nodes: (nodesByFloor.get(f.id) ?? []).map((n) => ({
             id: n.id,
             x: n.x,

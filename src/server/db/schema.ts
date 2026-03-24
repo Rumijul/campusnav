@@ -12,6 +12,10 @@ export const floors = pgTable('floors', {
   floorNumber: integer('floor_number').notNull(),
   imagePath: text('image_path').notNull(),
   updatedAt: text('updated_at').notNull(), // ISO 8601 string — matches project text convention
+  gpsMinLat: real('gps_min_lat'),
+  gpsMaxLat: real('gps_max_lat'),
+  gpsMinLng: real('gps_min_lng'),
+  gpsMaxLng: real('gps_max_lng'),
 })
 
 export const nodes = pgTable('nodes', {
