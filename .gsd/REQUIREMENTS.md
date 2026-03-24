@@ -1,32 +1,10 @@
 # Requirements
 
-Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
+This file is the explicit capability and coverage contract for the project.
 
 ## Active
 
-### R004 — Multi-floor direction section dividers
-- Class: primary-user-loop
-- Status: active
-- Description: Multi-floor route directions display a floor-section header between steps on different floors.
-- Why it matters: Students can follow cross-floor routes without losing context between floors.
-- Source: user
-- Primary owning slice: M001/S24
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from DIR-01.
-
-### R005 — Floor-change direction includes up/down language
-- Class: primary-user-loop
-- Status: active
-- Description: Floor-change direction steps include clear up/down directional language (e.g., “up to Floor 3”).
-- Why it matters: Students need explicit movement guidance at connector transitions.
-- Source: user
-- Primary owning slice: M001/S24
-- Supporting slices: none
-- Validation: mapped
-- Notes: Migrated from DIR-02.
-
-### R006 — Visual connector linking in admin
+### R006 — Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
 - Class: admin/support
 - Status: active
 - Description: Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
@@ -37,7 +15,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from CONN-01.
 
-### R007 — Connector links save bidirectionally and atomically
+### R007 — Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
 - Class: integration
 - Status: active
 - Description: Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
@@ -48,7 +26,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from CONN-02.
 
-### R008 — Connector links removable in admin
+### R008 — Admin can remove existing connector links between nodes.
 - Class: admin/support
 - Status: active
 - Description: Admin can remove existing connector links between nodes.
@@ -59,7 +37,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from CONN-03.
 
-### R009 — Admin GPS bounds per floor and campus map
+### R009 — Admin can configure min/max latitude and longitude bounds per floor and for campus map.
 - Class: admin/support
 - Status: active
 - Description: Admin can configure min/max latitude and longitude bounds per floor and for campus map.
@@ -70,7 +48,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-01.
 
-### R010 — GPS bounds validation in admin form
+### R010 — Admin GPS bounds form enforces minLat < maxLat and minLng < maxLng with inline errors.
 - Class: quality-attribute
 - Status: active
 - Description: Admin GPS bounds form enforces minLat < maxLat and minLng < maxLng with inline errors.
@@ -81,7 +59,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-02.
 
-### R011 — Student GPS dot display
+### R011 — Student sees a “you are here” GPS dot on map when valid bounds are configured.
 - Class: primary-user-loop
 - Status: active
 - Description: Student sees a “you are here” GPS dot on map when valid bounds are configured.
@@ -92,7 +70,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-03.
 
-### R012 — GPS accuracy ring
+### R012 — GPS dot displays an accuracy ring proportional to reported uncertainty.
 - Class: quality-attribute
 - Status: active
 - Description: GPS dot displays an accuracy ring proportional to reported uncertainty.
@@ -103,7 +81,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-04.
 
-### R013 — GPS dot hidden on low-accuracy readings
+### R013 — GPS dot is hidden when reported accuracy exceeds 50 meters.
 - Class: quality-attribute
 - Status: active
 - Description: GPS dot is hidden when reported accuracy exceeds 50 meters.
@@ -114,7 +92,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-05.
 
-### R014 — Use-my-location nearest-node snap
+### R014 — Student can use current location as route start by snapping to nearest walkable node.
 - Class: primary-user-loop
 - Status: active
 - Description: Student can use current location as route start by snapping to nearest walkable node.
@@ -125,7 +103,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: mapped
 - Notes: Migrated from GPS-06.
 
-### R015 — Graceful GPS fallback
+### R015 — If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
 - Class: continuity
 - Status: active
 - Description: If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
@@ -138,7 +116,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 
 ## Validated
 
-### R001 — Pinch-zoom focal point remains at touch midpoint
+### R001 — Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
 - Class: quality-attribute
 - Status: validated
 - Description: Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
@@ -149,7 +127,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: validated
 - Notes: Migrated from TOUCH-01 (completed in Phase 21 / S23).
 
-### R002 — Two-finger rotation pivots around touch midpoint
+### R002 — Two-finger rotation pivots around the touch midpoint rather than stage origin.
 - Class: quality-attribute
 - Status: validated
 - Description: Two-finger rotation pivots around the touch midpoint rather than stage origin.
@@ -160,7 +138,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: validated
 - Notes: Migrated from TOUCH-02 (completed in Phase 21 / S23).
 
-### R003 — Rotation dead-zone prevents jitter
+### R003 — Two-finger gesture applies a 2-degree per-frame threshold to suppress micro-rotation jitter.
 - Class: quality-attribute
 - Status: validated
 - Description: Two-finger gesture applies a 2-degree per-frame threshold to suppress micro-rotation jitter.
@@ -171,9 +149,31 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: validated
 - Notes: Migrated from TOUCH-03 (completed in Phase 21 / S23).
 
+### R004 — Multi-floor route directions display a floor-section header between steps on different floors.
+- Class: primary-user-loop
+- Status: validated
+- Description: Multi-floor route directions display a floor-section header between steps on different floors.
+- Why it matters: Students can follow cross-floor routes without losing context between floors.
+- Source: user
+- Primary owning slice: M001/S24
+- Supporting slices: none
+- Validation: Validated in S24 by contiguous floor-section grouping + conditional headers in DirectionsSheet; proven by passing `npm test -- src/client/components/directionSections.test.ts` and full suite `npm test`.
+- Notes: Migrated from DIR-01.
+
+### R005 — Floor-change direction steps include clear up/down directional language (e.g., “up to Floor 3”).
+- Class: primary-user-loop
+- Status: validated
+- Description: Floor-change direction steps include clear up/down directional language (e.g., “up to Floor 3”).
+- Why it matters: Students need explicit movement guidance at connector transitions.
+- Source: user
+- Primary owning slice: M001/S24
+- Supporting slices: none
+- Validation: Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`.
+- Notes: Migrated from DIR-02.
+
 ## Deferred
 
-### R016 — Admin map-click GPS calibration helper
+### R016 — GPS bounds can be configured using map-click calibration helper instead of text input only.
 - Class: admin/support
 - Status: deferred
 - Description: GPS bounds can be configured using map-click calibration helper instead of text input only.
@@ -184,7 +184,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: unmapped
 - Notes: Migrated from GPS-V2-01.
 
-### R017 — GPS floor auto-detection
+### R017 — System infers current floor from sensor signals (e.g., altitude/barometric data).
 - Class: differentiator
 - Status: deferred
 - Description: System infers current floor from sensor signals (e.g., altitude/barometric data).
@@ -195,7 +195,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: unmapped
 - Notes: Migrated from GPS-V2-02.
 
-### R018 — Compass-based map auto-rotation
+### R018 — Device orientation can auto-rotate map to match heading.
 - Class: differentiator
 - Status: deferred
 - Description: Device orientation can auto-rotate map to match heading.
@@ -206,7 +206,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: unmapped
 - Notes: Migrated from GPS-V2-03.
 
-### R019 — Connector landmark naming in floor transitions
+### R019 — Floor-transition instruction names specific connector landmark (e.g., “Take Staircase A to Floor 2”).
 - Class: primary-user-loop
 - Status: deferred
 - Description: Floor-transition instruction names specific connector landmark (e.g., “Take Staircase A to Floor 2”).
@@ -219,7 +219,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 
 ## Out of Scope
 
-### R020 — Real-time continuous indoor tracking
+### R020 — Continuous high-confidence indoor live tracking.
 - Class: anti-feature
 - Status: out-of-scope
 - Description: Continuous high-confidence indoor live tracking.
@@ -230,7 +230,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 - Validation: n/a
 - Notes: Explicitly excluded in legacy requirements.
 
-### R021 — Timetable/schedule integration
+### R021 — Integrating class schedules with route planning.
 - Class: anti-feature
 - Status: out-of-scope
 - Description: Integrating class schedules with route planning.
@@ -248,8 +248,8 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 | R001 | quality-attribute | validated | M001/S23 | none | validated |
 | R002 | quality-attribute | validated | M001/S23 | none | validated |
 | R003 | quality-attribute | validated | M001/S23 | none | validated |
-| R004 | primary-user-loop | active | M001/S24 | none | mapped |
-| R005 | primary-user-loop | active | M001/S24 | none | mapped |
+| R004 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by contiguous floor-section grouping + conditional headers in DirectionsSheet; proven by passing `npm test -- src/client/components/directionSections.test.ts` and full suite `npm test`. |
+| R005 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`. |
 | R006 | admin/support | active | M001/S25 | none | mapped |
 | R007 | integration | active | M001/S25 | none | mapped |
 | R008 | admin/support | active | M001/S25 | none | mapped |
@@ -269,7 +269,7 @@ Migrated and normalized from legacy `.planning/REQUIREMENTS.md`.
 
 ## Coverage Summary
 
-- Active requirements: 12
-- Mapped to slices: 12
-- Validated: 3
+- Active requirements: 10
+- Mapped to slices: 10
+- Validated: 5 (R001, R002, R003, R004, R005)
 - Unmapped active requirements: 0

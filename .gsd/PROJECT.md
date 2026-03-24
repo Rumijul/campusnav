@@ -41,11 +41,11 @@ Show any student the quickest route from where they are to where they need to be
 
 <!-- v1.6 GPS Integration & UX Refinements -->
 
-- [ ] Multi-floor directions show a floor-transition step (connector name + floor number) and section divider between floor segments
+- [x] Multi-floor directions show floor section dividers and explicit up/down floor-change language
 - [ ] Admin can visually link floor-connector nodes across floors without manually entering node IDs
 - [ ] Admin can configure real-world GPS bounds (lat/lng) for each floor plan and the campus map
 - [ ] App uses browser Geolocation to show a GPS "you are here" dot and snap to nearest node as start point
-- [ ] Pinch-to-zoom uses the touch midpoint as the zoom focal point; two-finger rotation pivots around the touch midpoint
+- [x] Pinch-to-zoom uses the touch midpoint as the zoom focal point; two-finger rotation pivots around the touch midpoint
 
 ### Out of Scope
 
@@ -122,11 +122,11 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 **Goal:** Add GPS-based "you are here" positioning and fix mobile gesture focal points, plus improve multi-floor directions clarity and admin floor-connector workflow.
 
 **Target features:**
-- Multi-floor directions with floor-change dividers and connector naming
-- Admin visual floor-connector linking (no manual node ID entry)
-- GPS bounds configuration per floor + campus map (admin)
-- GPS "you are here" dot + nearest-node snap for students
-- Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
+- ✅ Multi-floor directions with floor-change dividers and explicit up/down floor language
+- ⏳ Admin visual floor-connector linking (no manual node ID entry)
+- ⏳ GPS bounds configuration per floor + campus map (admin)
+- ⏳ GPS "you are here" dot + nearest-node snap for students
+- ✅ Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
 
 ## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
 
@@ -134,4 +134,4 @@ Multi-floor, multi-building campus navigation system deployed on Render + Neon +
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-09 after v1.6 milestone started*
+*Last updated: 2026-03-24 after S24 closure (multi-floor direction dividers + directional language validated)*

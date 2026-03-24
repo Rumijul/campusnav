@@ -57,7 +57,7 @@
   > After this: unit tests prove Deployment — completed 2026-03-08 works
 - [x] **S23: Touch Gesture Fixes** `risk:medium` `depends:[S22]`
   > After this: Create the failing test scaffold that defines expected behavior for all three gesture fixes before any production code is written.
-- [ ] **S24: Multi Floor Direction Dividers — Add floor Section headers and directional language to cross Floor route directions** `risk:medium` `depends:[S23]`
+- [x] **S24: Multi Floor Direction Dividers — Add floor Section headers and directional language to cross Floor route directions — completed 2026 03 24** `risk:medium` `depends:[S23]`
   > After this: unit tests prove Multi-floor Direction Dividers — Add floor-section headers and directional language to cross-floor route directions works
 - [ ] **S25: Admin Floor Connector Visual Linking — Replace manual node ID entry with dropdown Based bidirectional connector linking in the admin editor** `risk:medium` `depends:[S24]`
   > After this: unit tests prove Admin Floor-Connector Visual Linking — Replace manual node ID entry with dropdown-based bidirectional connector linking in the admin editor works
