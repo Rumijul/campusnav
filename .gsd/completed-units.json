@@ -1,0 +1,14 @@
+[
+  "plan-slice/M001/S25",
+  "execute-task/M001/S25/T01",
+  "execute-task/M001/S25/T02",
+  "complete-slice/M001/S25",
+  "run-uat/M001/S25",
+  "research-slice/M001/S26",
+  "plan-slice/M001/S26",
+  "execute-task/M001/S26/T01",
+  "execute-task/M001/S26/T02",
+  "execute-task/M001/S26/T03",
+  "complete-slice/M001/S26",
+  "run-uat/M001/S26"
+]
