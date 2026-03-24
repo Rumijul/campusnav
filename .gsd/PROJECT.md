@@ -92,6 +92,7 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 - **Authentication**: Only needed for admin panel, not for student wayfinding
 - **Coordinate system**: Normalized 0-1 — do not switch to pixel coordinates
 - **Image storage**: Backblaze B2 (S3-compatible) for floor plan and campus images in production
+- **Execution protocol (override 2026-03-24)**: For active milestone work, create a checkpoint commit before any research/deep-dive activity
 
 ## Key Decisions
 
@@ -116,6 +117,7 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 | Backblaze B2 over Cloudflare R2 | No credit card required; S3-compatible drop-in — same @aws-sdk/client-s3 client | ✓ Good — zero code change, all 7 smoke tests passed |
 | ResizeObserver for canvas dimensions | Replaces hardcoded windowHeight−52 — fixes canvas stretch when multiple toolbar rows present | ✓ Good — confirmed in Phase 18 human verification |
 | Optimistic floor list updates in admin editor | Replace full refetch with local state patch after floor add/delete — eliminates update lag | ✓ Good — instant UI response, confirmed in human verification |
+| Commit-before-research execution order for active slices | Mandatory checkpoint commit before research keeps diffs reversible and traceable in auto-mode loops | ⏳ Active in S27 per override + D006 |
 
 ## Current Milestone: v1.6 GPS Integration & UX Refinements
 
@@ -126,6 +128,7 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 - ✅ Admin visual floor-connector linking (no manual node ID entry)
 - ✅ GPS bounds configuration per floor + campus map (admin)
 - ⏳ GPS "you are here" dot + nearest-node snap for students
+- ⏳ Workflow override: active slice work begins with checkpoint commit before research
 - ✅ Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
 
 ## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
@@ -134,4 +137,4 @@ Multi-floor, multi-building campus navigation system deployed on Render + Neon +
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-24 after S26 closure (admin GPS bounds configuration validated; R009-R010 complete)*
+*Last updated: 2026-03-24 after S27 override propagation (commit-before-research protocol documented across planning artifacts)*

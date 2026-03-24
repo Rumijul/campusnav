@@ -59,6 +59,17 @@ This file is the explicit capability and coverage contract for the project.
 - Validation: mapped
 - Notes: Migrated from GPS-07.
 
+### R022 — Work on active milestone slices starts with a checkpoint commit before research.
+- Class: process-governance
+- Status: active
+- Description: For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
+- Why it matters: Preserves rollback safety, keeps exploratory diffs traceable, and prevents mixing uncheckpointed edits with research outcomes.
+- Source: user override
+- Primary owning slice: M001/S27
+- Supporting slices: M001 (all remaining active slices)
+- Validation: mapped
+- Notes: Added from override 2026-03-24; implemented via decision D006.
+
 ## Validated
 
 ### R001 — Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
@@ -260,6 +271,7 @@ This file is the explicit capability and coverage contract for the project.
 | R013 | quality-attribute | active | M001/S27 | none | mapped |
 | R014 | primary-user-loop | active | M001/S27 | none | mapped |
 | R015 | continuity | active | M001/S27 | none | mapped |
+| R022 | process-governance | active | M001/S27 | M001 (all remaining active slices) | mapped |
 | R016 | admin/support | deferred | none | none | unmapped |
 | R017 | differentiator | deferred | none | none | unmapped |
 | R018 | differentiator | deferred | none | none | unmapped |
@@ -269,7 +281,7 @@ This file is the explicit capability and coverage contract for the project.
 
 ## Coverage Summary
 
-- Active requirements: 5
-- Mapped to slices: 5
+- Active requirements: 6
+- Mapped to slices: 6
 - Validated: 10 (R001, R002, R003, R004, R005, R006, R007, R008, R009, R010)
 - Unmapped active requirements: 0

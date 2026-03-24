@@ -8,6 +8,7 @@
 - Admins can visually link floor connectors across floors without manual node-ID entry.
 - Admins can configure per-floor and campus GPS bounds in the editor.
 - Students can use browser geolocation for a "you are here" dot and nearest-node route start, with graceful fallback when GPS is unavailable.
+- Remaining active slices start with a checkpoint commit before research/deep-dive work begins (override 2026-03-24).
 
 ## Slices
 
@@ -64,4 +65,4 @@
 - [x] **S26: Admin GPS Bounds Configuration — Schema, API endpoint, and admin form for configuring real World lat/lng bounding boxes per floor and campus map — completed 2026 03 24** `risk:medium` `depends:[S25]`
   > After this: unit tests prove Admin GPS Bounds Configuration — Schema, API endpoint, and admin form for configuring real-world lat/lng bounding boxes per floor and campus map works
 - [ ] **S27: Student GPS Dot — Browser Geolocation Powered "you are here" dot with accuracy ring, nearest Node snap, and graceful fallback** `risk:medium` `depends:[S26]`
-  > After this: unit tests prove Student GPS Dot — Browser Geolocation-powered "you are here" dot with accuracy ring, nearest-node snap, and graceful fallback works
+  > After this: unit tests prove Student GPS Dot — Browser Geolocation-powered "you are here" dot with accuracy ring, nearest-node snap, and graceful fallback works, and execution evidence shows the pre-research checkpoint commit required by D006.
