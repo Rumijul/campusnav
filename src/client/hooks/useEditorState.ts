@@ -28,6 +28,7 @@ export type EditorAction =
   | { type: 'PLACE_NODE'; node: NavNode }
   | { type: 'MOVE_NODE'; id: string; x: number; y: number }
   | { type: 'UPDATE_NODE'; id: string; changes: Partial<NavNode> }
+  | { type: 'REPLACE_NODES'; nodes: NavNode[]; isDirty: boolean }
   | { type: 'SELECT_NODE'; id: string | null }
   | { type: 'SET_PENDING_EDGE_SOURCE'; id: string | null }
   | { type: 'CREATE_EDGE'; edge: NavEdge }
@@ -106,6 +107,16 @@ function editorReducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         nodes: state.nodes.map((n) => (n.id === action.id ? { ...n, ...action.changes } : n)),
         isDirty: true,
+      }
+
+    case 'REPLACE_NODES':
+      return {
+        ...state,
+        nodes: action.nodes,
+        selectedNodeId: action.nodes.some((node) => node.id === state.selectedNodeId)
+          ? state.selectedNodeId
+          : null,
+        isDirty: action.isDirty,
       }
 
     case 'SELECT_NODE':

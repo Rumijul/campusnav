@@ -1,6 +1,6 @@
 import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '@shared/types'
 import type Konva from 'konva'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Stage } from 'react-konva'
 import useImage from 'use-image'
 import { DataTabToolbar } from '../../components/admin/DataTabToolbar'
@@ -11,6 +11,14 @@ import EditorToolbar from '../../components/admin/EditorToolbar'
 import ManageFloorsModal from '../../components/admin/ManageFloorsModal'
 import { NodeDataTable } from '../../components/admin/NodeDataTable'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
+import {
+  applyConnectorUpdatesToFloorNodes,
+  applyConnectorUpdatesToNavGraph,
+  deriveConnectorCandidates,
+  isConnectorNodeType,
+  type ConnectorDirection,
+  type ConnectorUpdatedNode,
+} from '../../components/admin/connectorLinking'
 import FloorPlanImage from '../../components/FloorPlanImage'
 import {
   calcDistance,
@@ -24,6 +32,16 @@ import { useMapViewport } from '../../hooks/useMapViewport'
 
 interface MapEditorCanvasProps {
   onLogout: () => void
+}
+
+interface ConnectorLinkSuccessResponse {
+  ok: true
+  updatedNodes: ConnectorUpdatedNode[]
+}
+
+interface ConnectorLinkErrorResponse {
+  errorCode?: string
+  error?: string
 }
 
 /* ──────────────── Component ──────────────── */
@@ -68,6 +86,8 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const [navGraph, setNavGraph] = useState<NavGraph | null>(null)
   const [manageFloorsOpen, setManageFloorsOpen] = useState(false)
   const [isSavingFloor, setIsSavingFloor] = useState(false)
+  const [connectorLinkError, setConnectorLinkError] = useState<string | null>(null)
+  const [isConnectorLinkPending, setIsConnectorLinkPending] = useState(false)
 
   const canvasWidth = canvasSize.width
   const canvasHeight = canvasSize.height
@@ -123,6 +143,16 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const sortedFloors: NavFloor[] = (activeBuilding?.floors ?? [])
     .slice()
     .sort((a, b) => a.floorNumber - b.floorNumber)
+
+  const selectedNode = useMemo(
+    () => (state.selectedNodeId ? (state.nodes.find((node) => node.id === state.selectedNodeId) ?? null) : null),
+    [state.selectedNodeId, state.nodes],
+  )
+
+  const connectorCandidates = useMemo(
+    () => deriveConnectorCandidates(navGraph, selectedNode),
+    [navGraph, selectedNode],
+  )
 
   // Handle building switch — switches building context, loads first floor
   const handleBuildingSwitch = useCallback(
@@ -305,6 +335,71 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
       recordHistory()
     },
     [dispatch, recordHistory],
+  )
+
+  // Handle connector link/unlink updates via the atomic server endpoint
+  const handleConnectorLinkChange = useCallback(
+    async (direction: ConnectorDirection, targetNodeId: string | null) => {
+      if (!selectedNode || !isConnectorNodeType(selectedNode.type)) return
+
+      setConnectorLinkError(null)
+      setIsConnectorLinkPending(true)
+
+      try {
+        const response = await fetch('/api/admin/connectors/link', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sourceNodeId: selectedNode.id,
+            direction,
+            targetNodeId,
+          }),
+        })
+
+        const payload =
+          (await response.json().catch(() => ({}))) as
+            | ConnectorLinkSuccessResponse
+            | ConnectorLinkErrorResponse
+
+        if (!response.ok) {
+          const errorCode =
+            typeof payload.errorCode === 'string' ? payload.errorCode : 'CONNECTOR_LINK_ERROR'
+          const errorMessage =
+            typeof payload.error === 'string' ? payload.error : 'Failed to update connector link'
+          setConnectorLinkError(`${errorCode}: ${errorMessage}`)
+          return
+        }
+
+        if (!('ok' in payload) || payload.ok !== true || !Array.isArray(payload.updatedNodes)) {
+          setConnectorLinkError('INVALID_RESPONSE: Connector update response was malformed')
+          return
+        }
+
+        const successPayload = payload as ConnectorLinkSuccessResponse
+
+        setNavGraph((previousGraph) =>
+          applyConnectorUpdatesToNavGraph(previousGraph, successPayload.updatedNodes),
+        )
+
+        const patchedActiveFloorNodes = applyConnectorUpdatesToFloorNodes(
+          state.nodes,
+          successPayload.updatedNodes,
+        )
+        if (patchedActiveFloorNodes !== state.nodes) {
+          dispatch({
+            type: 'REPLACE_NODES',
+            nodes: patchedActiveFloorNodes,
+            isDirty: state.isDirty,
+          })
+        }
+      } catch {
+        setConnectorLinkError('NETWORK_ERROR: Unable to update floor connector link')
+      } finally {
+        setIsConnectorLinkPending(false)
+      }
+    },
+    [dispatch, selectedNode, state.isDirty, state.nodes],
   )
 
   // Handle save — POST graph to server, context-aware (campus vs floor)
@@ -585,11 +680,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         <div className="pointer-events-none absolute right-0 top-0 h-full">
           <div className="pointer-events-auto h-full">
             <EditorSidePanel
-              selectedNode={
-                state.selectedNodeId
-                  ? (state.nodes.find((n) => n.id === state.selectedNodeId) ?? null)
-                  : null
-              }
+              selectedNode={selectedNode}
               selectedEdge={selectedEdgeWithNames}
               onUpdateNode={(id, changes) => {
                 dispatch({ type: 'UPDATE_NODE', id, changes })
@@ -613,6 +704,10 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
               }}
               isCampusActive={isCampusActive}
               buildings={nonCampusBuildings}
+              connectorCandidates={connectorCandidates}
+              onConnectorLinkChange={handleConnectorLinkChange}
+              connectorLinkError={connectorLinkError}
+              isConnectorLinkPending={isConnectorLinkPending}
             />
           </div>
         </div>

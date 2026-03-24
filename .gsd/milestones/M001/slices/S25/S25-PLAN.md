@@ -44,7 +44,7 @@
   - Do: Implement a transactional connector-linking service for link/relink/unlink (`above`/`below`) with same-building + adjacent-floor direction validation, stale reciprocal cleanup, and structured error codes; wire it into a new JWT-protected `POST /api/admin/connectors/link` route.
   - Verify: `npm test -- src/server/connectorLinking.test.ts`
   - Done when: backend tests cover link, relink, unlink, and invalid-direction failure paths, and the endpoint returns deterministic success/error payloads.
-- [ ] **T02: Wire connector dropdown UX into the admin side panel and editor state** `est:2h`
+- [x] **T02: Wire connector dropdown UX into the admin side panel and editor state** `est:2h`
   - Why: R006 requires usable dropdown-based linking in the editor, and R008 requires an unlink affordance with immediate reciprocal state sync in the UI.
   - Files: `src/client/pages/admin/MapEditorCanvas.tsx`, `src/client/components/admin/EditorSidePanel.tsx`, `src/client/components/admin/connectorLinking.ts`, `src/client/components/admin/connectorLinking.test.ts`, `src/client/components/admin/EditorSidePanel.connector.test.tsx`
   - Do: Add connector candidate derivation helpers (map-based lookups), pass above/below option sets + link handlers from `MapEditorCanvas`, render connector-only Floor Connections dropdowns with unlink option in `EditorSidePanel`, call `/api/admin/connectors/link`, patch returned node updates into active-floor state and `navGraph`, and surface inline validation errors.
