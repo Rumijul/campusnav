@@ -38,7 +38,7 @@
 
 ## Tasks
 
-- [ ] **T01: Add atomic connector link/unlink service and protected admin endpoint** `est:1.5h`
+- [x] **T01: Add atomic connector link/unlink service and protected admin endpoint** `est:1.5h`
   - Why: R007/R008 require a single write path that always updates both sides and exposes explicit failure diagnostics instead of allowing asymmetric connector states.
   - Files: `src/server/index.ts`, `src/server/connectorLinking.ts`, `src/server/connectorLinking.test.ts`
   - Do: Implement a transactional connector-linking service for link/relink/unlink (`above`/`below`) with same-building + adjacent-floor direction validation, stale reciprocal cleanup, and structured error codes; wire it into a new JWT-protected `POST /api/admin/connectors/link` route.

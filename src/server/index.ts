@@ -14,6 +14,7 @@ import { csrf } from 'hono/csrf'
 import { jwt } from 'hono/jwt'
 import { JWT_SECRET } from './auth/credentials'
 import { authRoutes } from './auth/routes'
+import { ConnectorLinkingError, linkConnectorNodesFromPayload } from './connectorLinking'
 import { db } from './db/client'
 import { buildings, edges, floors, nodes } from './db/schema'
 import { seedIfEmpty } from './db/seed'
@@ -202,6 +203,33 @@ app.route('/api/auth', authRoutes)
 app.use('/api/admin/*', jwt({ secret: JWT_SECRET, alg: 'HS256', cookie: 'admin_token' }))
 
 // ── Admin routes (protected) ──────────────────────────────────────────────────
+
+/**
+ * POST /api/admin/connectors/link
+ * Links, relinks, or unlinks connector nodes (`stairs`/`elevator`/`ramp`) atomically.
+ * Request body: { sourceNodeId, direction: "above"|"below", targetNodeId?: string|null }
+ */
+app.post('/api/admin/connectors/link', async (c) => {
+  try {
+    let body: unknown
+
+    try {
+      body = await c.req.json()
+    } catch {
+      return c.json({ errorCode: 'INVALID_REQUEST', error: 'Request body must be valid JSON' }, 400)
+    }
+
+    const result = await linkConnectorNodesFromPayload(body)
+    return c.json(result)
+  } catch (error) {
+    if (error instanceof ConnectorLinkingError) {
+      return c.json({ errorCode: error.code, error: error.message }, error.status)
+    }
+
+    console.error('Connector link update failed:', error)
+    return c.json({ errorCode: 'INTERNAL_ERROR', error: 'Failed to update connector link' }, 500)
+  }
+})
 
 /**
  * POST /api/admin/graph
