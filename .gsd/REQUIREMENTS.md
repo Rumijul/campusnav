@@ -288,4 +288,5 @@ This file is the explicit capability and coverage contract for the project.
 
 - Verified milestone-level status transitions with evidence during M001 closeout.
 - Confirmed `R001-R015` and `R022` remain **validated** with slice-backed proof.
+- Re-ran full regression during closeout (`npm test` → 17 files / 144 tests passed) to confirm requirement proofs still hold end-to-end.
 - No additional requirement status changes were introduced during closeout.

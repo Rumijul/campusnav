@@ -6,9 +6,11 @@ verification_result: needs-attention
 completed_at: 2026-03-25
 integration_branch: master
 code_change_verification:
-  compared_against: origin/master merge-base
+  compared_against: origin/master merge-base (repo has no `main` ref)
+  attempted_command: git diff --stat HEAD $(git merge-base HEAD main) -- ':!.gsd/'
+  attempted_result: "failed: Not a valid object name main"
+  fallback_command: git diff --stat $(git merge-base HEAD origin/master) HEAD -- ':!.gsd/'
   non_gsd_files_changed: 11
-  evidence_command: git diff --stat $(git merge-base HEAD origin/master) HEAD -- ':!.gsd/'
 success_criteria_verdict: pass
 definition_of_done_verdict: needs-attention
 requirement_outcomes:

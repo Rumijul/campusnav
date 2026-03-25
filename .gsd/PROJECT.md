@@ -133,6 +133,7 @@ M001 is closed from a delivery standpoint. Next milestone planning has not start
 
 **Closeout verification status:**
 - Functional verification: ✅ pass (`npm test` → 17 files, 144 tests)
+- Code-change verification: ✅ pass (non-`.gsd/` diff present: 11 implementation files vs `origin/master` merge-base; `main` ref not present in this repo)
 - Auditability verification: ⚠️ needs-attention (missing slice-level summaries `S01-S22`)
 
 ## Previous Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
@@ -141,4 +142,4 @@ Multi-floor, multi-building campus navigation system deployed on Render + Neon +
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-25 during M001 milestone closeout (summary + requirements audit + project-state update)*
+*Last updated: 2026-03-25 during M001 milestone final closeout verification (summary + requirements audit + project-state update)*
