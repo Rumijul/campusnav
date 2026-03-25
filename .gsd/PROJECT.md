@@ -37,9 +37,7 @@ Show any student the quickest route from where they are to where they need to be
 - ✓ Routes spanning buildings show campus outdoor map segment + building floor segments — v1.5
 - ✓ Full deployment to free always-on hosting (Render + Neon PostgreSQL + Backblaze B2) — v1.5
 
-### Active
-
-<!-- v1.6 GPS Integration & UX Refinements -->
+### Completed in v1.6 (Milestone M001)
 
 - [x] Multi-floor directions show floor section dividers and explicit up/down floor-change language
 - [x] Admin can visually link floor-connector nodes across floors without manually entering node IDs
@@ -119,22 +117,28 @@ Shipped v1.5 with ~8,937 LOC TypeScript. Live at https://campusnav-hbm3.onrender
 | Optimistic floor list updates in admin editor | Replace full refetch with local state patch after floor add/delete — eliminates update lag | ✓ Good — instant UI response, confirmed in human verification |
 | Commit-before-research execution order for active slices | Mandatory checkpoint commit before research keeps diffs reversible and traceable in auto-mode loops | ✅ Enforced and validated in S27 via checkpoint artifact + hash resolvability checks (D006, R022) |
 
-## Current Milestone: v1.6 GPS Integration & UX Refinements
+## Current Milestone: none (awaiting next roadmap plan)
 
-**Goal:** Add GPS-based "you are here" positioning and fix mobile gesture focal points, plus improve multi-floor directions clarity and admin floor-connector workflow.
+M001 is closed from a delivery standpoint. Next milestone planning has not started yet.
 
-**Target features:**
-- ✅ Multi-floor directions with floor-change dividers and explicit up/down floor language
-- ✅ Admin visual floor-connector linking (no manual node ID entry)
-- ✅ GPS bounds configuration per floor + campus map (admin)
-- ✅ GPS "you are here" dot + nearest-node snap for students (with confidence-gated rendering + explicit fallback messaging)
-- ✅ Workflow override: active slice work begins with checkpoint commit before research (validated by S27 checkpoint evidence)
-- ✅ Pinch-zoom and rotation fixed to use touch midpoint as focal/pivot point
+## Last Milestone: v1.6 GPS Integration & UX Refinements — CLOSED 2026-03-25
 
-## Last Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
+**Delivered:**
+- Touch gesture fixes (midpoint-stable pinch, midpoint rotation pivot, strict >2° rotation dead-zone)
+- Cross-floor directions with floor-section headers and explicit up/down floor-change language
+- Admin connector dropdown linking with atomic reciprocal link/unlink writes
+- Admin per-floor + campus GPS bounds configuration (schema/API/UI)
+- Student geolocation assist (GPS dot, accuracy ring, nearest-node start, explicit fallback)
+- Checkpoint-before-research governance enforcement for active slices
+
+**Closeout verification status:**
+- Functional verification: ✅ pass (`npm test` → 17 files, 144 tests)
+- Auditability verification: ⚠️ needs-attention (missing slice-level summaries `S01-S22`)
+
+## Previous Milestone: v1.5 General Support Update — SHIPPED 2026-03-08
 
 Multi-floor, multi-building campus navigation system deployed on Render + Neon + Backblaze B2.
 Live URL: https://campusnav-hbm3.onrender.com
 
 ---
-*Last updated: 2026-03-25 after S27 completion (student geolocation assist + checkpoint-governance requirement validated)*
+*Last updated: 2026-03-25 during M001 milestone closeout (summary + requirements audit + project-state update)*

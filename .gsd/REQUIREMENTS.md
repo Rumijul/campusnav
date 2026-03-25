@@ -283,3 +283,9 @@ This file is the explicit capability and coverage contract for the project.
 - Mapped to slices: 0
 - Validated: 16 (R001, R002, R003, R004, R005, R006, R007, R008, R009, R010, R011, R012, R013, R014, R015, R022)
 - Unmapped active requirements: 0
+
+## Milestone Closeout Audit (2026-03-25)
+
+- Verified milestone-level status transitions with evidence during M001 closeout.
+- Confirmed `R001-R015` and `R022` remain **validated** with slice-backed proof.
+- No additional requirement status changes were introduced during closeout.
