@@ -9,7 +9,8 @@
  *   TOUCH-01: focal-point zoom stays at finger midpoint at all rotation angles
  *   TOUCH-02: two-finger rotation pivots around touch midpoint
  *   TOUCH-03: per-frame 2-degree rotation threshold eliminates micro-jitter
- *   TOUCH-04: two-finger midpoint drag pans naturally on phones
+ *   TOUCH-04: angle wrap-around normalization prevents ±π spin jumps
+ *   TOUCH-05: two-finger midpoint drag pans naturally on phones
  */
 
 import Konva from 'konva'
@@ -23,6 +24,7 @@ import {
   applyRotationThreshold,
   computePivotPosition,
   computeTwoTouchFrameTransform,
+  normalizeAngleDiffDeg,
   toStageLocalFromScreen,
 } from './useMapViewport'
 
@@ -262,14 +264,58 @@ describe('TOUCH-03: rotation threshold', () => {
 })
 
 // ---------------------------------------------------------------------------
-// TOUCH-04: two-finger midpoint drag should pan map naturally on phones
+// TOUCH-04: angle wrap-around should not create 300°+ rotation jumps
+// ---------------------------------------------------------------------------
+
+describe('TOUCH-04: angle wrap-around handling', () => {
+  it('Test 9: normalizeAngleDiffDeg maps ±358° to ±2° shortest-path deltas', () => {
+    expect(approx(normalizeAngleDiffDeg(-358), 2)).toBe(true)
+    expect(approx(normalizeAngleDiffDeg(358), -2)).toBe(true)
+  })
+
+  it('Test 10: crossing +179° to -179° keeps rotation stable (delta normalized to +2°)', () => {
+    const stage = mockStage({ x: 0, y: 0, scale: 1, rotationDeg: 30 })
+
+    const frame = computeTwoTouchFrameTransform({
+      stage,
+      previousDistance: 120,
+      currentDistance: 120,
+      previousCenterScreen: { x: 200, y: 220 },
+      currentCenterScreen: { x: 200, y: 220 },
+      previousAngleRad: (179 * Math.PI) / 180,
+      currentAngleRad: (-179 * Math.PI) / 180,
+    })
+
+    // Normalized delta is exactly +2°, and threshold is strict (> 2), so no rotation update.
+    expect(approx(frame.newRotationDeg, 30)).toBe(true)
+  })
+
+  it('Test 11: crossing +179° to -176° applies minimal +5° rotation, not a -355° jump', () => {
+    const stage = mockStage({ x: 0, y: 0, scale: 1, rotationDeg: 30 })
+
+    const frame = computeTwoTouchFrameTransform({
+      stage,
+      previousDistance: 120,
+      currentDistance: 120,
+      previousCenterScreen: { x: 200, y: 220 },
+      currentCenterScreen: { x: 200, y: 220 },
+      previousAngleRad: (179 * Math.PI) / 180,
+      currentAngleRad: (-176 * Math.PI) / 180,
+    })
+
+    expect(approx(frame.newRotationDeg, 35)).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// TOUCH-05: two-finger midpoint drag should pan map naturally on phones
 //
 // Google/Apple maps keep the previously grabbed midpoint anchored while the
 // midpoint moves, so two-finger drag (without scale change) translates the map.
 // ---------------------------------------------------------------------------
 
-describe('TOUCH-04: two-finger midpoint drag', () => {
-  it('Test 9: midpoint translation with constant distance pans by the midpoint delta', () => {
+describe('TOUCH-05: two-finger midpoint drag', () => {
+  it('Test 12: midpoint translation with constant distance pans by the midpoint delta', () => {
     const stage = mockStage({ x: 0, y: 0, scale: 1, rotationDeg: 0 })
 
     const previousCenterScreen = { x: 100, y: 120 }
@@ -291,7 +337,7 @@ describe('TOUCH-04: two-finger midpoint drag', () => {
     expect(approx(frame.newPosition.y, 40)).toBe(true)
   })
 
-  it('Test 10: keeps the prior midpoint anchor under the new midpoint during pinch+drag', () => {
+  it('Test 13: keeps the prior midpoint anchor under the new midpoint during pinch+drag', () => {
     const stage = mockStage({
       x: 50,
       y: 100,

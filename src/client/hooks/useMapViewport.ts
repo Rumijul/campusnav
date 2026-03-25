@@ -93,6 +93,14 @@ export function applyRotationThreshold(angleDiffDeg: number): boolean {
   return Math.abs(angleDiffDeg) > 2
 }
 
+/**
+ * Normalize an angular delta to the shortest signed path in [-180, 180).
+ * Prevents huge frame jumps when atan2 crosses the +π/-π boundary.
+ */
+export function normalizeAngleDiffDeg(angleDiffDeg: number): number {
+  return ((((angleDiffDeg + 180) % 360) + 360) % 360) - 180
+}
+
 export type StageForTwoTouchFrame = StageForGesture & {
   scaleX: () => number
   rotation: () => number
@@ -133,7 +141,9 @@ export function computeTwoTouchFrameTransform({
   const safeDistanceRatio = previousDistance > 0 ? currentDistance / previousDistance : 1
   const newScale = clamp(stage.scaleX() * safeDistanceRatio, MIN_SCALE, MAX_SCALE)
 
-  const angleDiffDeg = (currentAngleRad - (previousAngleRad ?? currentAngleRad)) * (180 / Math.PI)
+  const rawAngleDiffDeg =
+    (currentAngleRad - (previousAngleRad ?? currentAngleRad)) * (180 / Math.PI)
+  const angleDiffDeg = normalizeAngleDiffDeg(rawAngleDiffDeg)
   const newRotationDeg = applyRotationThreshold(angleDiffDeg)
     ? stage.rotation() + angleDiffDeg
     : stage.rotation()
@@ -170,7 +180,7 @@ interface UseMapViewportOptions {
 export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapViewportOptions): {
   handleWheel: (e: Konva.KonvaEventObject<WheelEvent>) => void
   handleTouchMove: (e: Konva.KonvaEventObject<TouchEvent>) => void
-  handleTouchEnd: () => void
+  handleTouchEnd: (e: Konva.KonvaEventObject<TouchEvent>) => void
   handleDragEnd: () => void
   zoomByButton: (direction: 1 | -1) => void
   fitToScreen: (viewportWidth: number, viewportHeight: number, animate?: boolean) => void
@@ -178,6 +188,7 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
   const lastDist = useRef<number>(0)
   const lastCenter = useRef<{ x: number; y: number } | null>(null)
   const lastAngle = useRef<number | null>(null)
+  const dragStoppedByMultiTouch = useRef(false)
   const activeTween = useRef<Konva.Tween | null>(null)
 
   /**
@@ -241,11 +252,21 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
       if (touches.length >= 2) {
         e.evt.preventDefault()
       }
-      if (touches.length < 2) return
+
+      // Hand off from two-finger pinch back to one-finger drag without forcing
+      // users to lift and re-touch the screen.
+      if (touches.length < 2) {
+        if (touches.length === 1 && dragStoppedByMultiTouch.current && !stage.isDragging()) {
+          stage.startDrag()
+          dragStoppedByMultiTouch.current = false
+        }
+        return
+      }
 
       // Hand off from single-finger drag to two-finger pinch
       if (stage.isDragging()) {
         stage.stopDrag()
+        dragStoppedByMultiTouch.current = true
       }
 
       const t0 = touches[0]
@@ -296,11 +317,35 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
   /**
    * Reset touch tracking refs when gesture ends.
    */
-  const handleTouchEnd = useCallback(() => {
-    lastDist.current = 0
-    lastCenter.current = null
-    lastAngle.current = null
-  }, [])
+  const handleTouchEnd = useCallback(
+    (e: Konva.KonvaEventObject<TouchEvent>) => {
+      const stage = stageRef.current
+      const remainingTouches = e.evt.touches.length
+
+      // If one finger remains after a pinch, resume native drag so panning
+      // continues smoothly instead of feeling "stuck" or jumpy.
+      if (
+        remainingTouches === 1 &&
+        dragStoppedByMultiTouch.current &&
+        stage &&
+        !stage.isDragging()
+      ) {
+        stage.startDrag()
+        dragStoppedByMultiTouch.current = false
+      }
+
+      if (remainingTouches < 2) {
+        lastDist.current = 0
+        lastCenter.current = null
+        lastAngle.current = null
+      }
+
+      if (remainingTouches === 0) {
+        dragStoppedByMultiTouch.current = false
+      }
+    },
+    [stageRef],
+  )
 
   /**
    * Elastic snap-back: soft bounds that pull the floor plan back
