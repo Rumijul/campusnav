@@ -249,6 +249,6 @@ export function applyConnectorUpdatesToNavGraph(
 
 export function formatConnectorCandidateLabel(candidate: ConnectorCandidate): string {
   const displayLabel = candidate.label.trim().length > 0 ? candidate.label : candidate.nodeId
-  const nodeTypeLabel = candidate.nodeType[0].toUpperCase() + candidate.nodeType.slice(1)
+  const nodeTypeLabel = candidate.nodeType.charAt(0).toUpperCase() + candidate.nodeType.slice(1)
   return `Floor ${candidate.floorNumber} · ${displayLabel} (${nodeTypeLabel})`
 }

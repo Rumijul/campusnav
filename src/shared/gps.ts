@@ -84,6 +84,7 @@ export function projectLatLngToNormalizedPoint(
   longitude: number,
   bounds: NavFloorGpsBounds | null | undefined,
 ): NormalizedPoint | null {
+  if (!isGpsBoundsCalibrated(bounds)) return null
   if (!isLatLngWithinBounds(latitude, longitude, bounds)) return null
 
   const lngSpan = bounds.maxLng - bounds.minLng

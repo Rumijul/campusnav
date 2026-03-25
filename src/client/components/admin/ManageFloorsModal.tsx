@@ -91,6 +91,19 @@ function isFloorGpsBoundsSaveSuccessResponse(
   )
 }
 
+function isFloorGpsBoundsSaveErrorResponse(
+  value: unknown,
+): value is FloorGpsBoundsSaveErrorResponse {
+  if (!value || typeof value !== 'object') return false
+
+  const maybe = value as Record<string, unknown>
+
+  return (
+    (maybe.errorCode === undefined || typeof maybe.errorCode === 'string')
+    && (maybe.error === undefined || typeof maybe.error === 'string')
+  )
+}
+
 /* ──────────────── Component ──────────────── */
 
 export default function ManageFloorsModal({
@@ -237,10 +250,9 @@ export default function ManageFloorsModal({
           .catch(() => ({}))) as FloorGpsBoundsSaveSuccessResponse | FloorGpsBoundsSaveErrorResponse
 
       if (!response.ok) {
-        const errorCode =
-          typeof payload.errorCode === 'string' ? payload.errorCode : 'GPS_BOUNDS_SAVE_FAILED'
-        const errorMessage =
-          typeof payload.error === 'string' ? payload.error : 'Unable to save GPS bounds.'
+        const errorPayload = isFloorGpsBoundsSaveErrorResponse(payload) ? payload : null
+        const errorCode = errorPayload?.errorCode ?? 'GPS_BOUNDS_SAVE_FAILED'
+        const errorMessage = errorPayload?.error ?? 'Unable to save GPS bounds.'
         setGpsSaveError(floor.id, `${errorCode}: ${errorMessage}`)
         return
       }

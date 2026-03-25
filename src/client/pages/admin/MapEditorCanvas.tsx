@@ -44,6 +44,23 @@ interface ConnectorLinkErrorResponse {
   error?: string
 }
 
+function isConnectorLinkSuccessResponse(value: unknown): value is ConnectorLinkSuccessResponse {
+  if (!value || typeof value !== 'object') return false
+
+  const maybe = value as Record<string, unknown>
+  return maybe.ok === true && Array.isArray(maybe.updatedNodes)
+}
+
+function isConnectorLinkErrorResponse(value: unknown): value is ConnectorLinkErrorResponse {
+  if (!value || typeof value !== 'object') return false
+
+  const maybe = value as Record<string, unknown>
+  return (
+    (maybe.errorCode === undefined || typeof maybe.errorCode === 'string')
+    && (maybe.error === undefined || typeof maybe.error === 'string')
+  )
+}
+
 function applyFloorGpsBoundsPatch(
   floor: NavFloor,
   gpsBounds: NavFloorGpsBounds | null,
@@ -419,20 +436,19 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             | ConnectorLinkErrorResponse
 
         if (!response.ok) {
-          const errorCode =
-            typeof payload.errorCode === 'string' ? payload.errorCode : 'CONNECTOR_LINK_ERROR'
-          const errorMessage =
-            typeof payload.error === 'string' ? payload.error : 'Failed to update connector link'
+          const errorPayload = isConnectorLinkErrorResponse(payload) ? payload : null
+          const errorCode = errorPayload?.errorCode ?? 'CONNECTOR_LINK_ERROR'
+          const errorMessage = errorPayload?.error ?? 'Failed to update connector link'
           setConnectorLinkError(`${errorCode}: ${errorMessage}`)
           return
         }
 
-        if (!('ok' in payload) || payload.ok !== true || !Array.isArray(payload.updatedNodes)) {
+        if (!isConnectorLinkSuccessResponse(payload)) {
           setConnectorLinkError('INVALID_RESPONSE: Connector update response was malformed')
           return
         }
 
-        const successPayload = payload as ConnectorLinkSuccessResponse
+        const successPayload = payload
 
         setNavGraph((previousGraph) =>
           applyConnectorUpdatesToNavGraph(previousGraph, successPayload.updatedNodes),
