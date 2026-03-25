@@ -1,33 +1,28 @@
 /**
- * useMapViewport — gesture math unit tests (RED phase)
+ * useMapViewport — gesture math unit tests
  *
- * Strategy: Test the FORMULAS as pure functions using mock Konva.Stage-like objects.
- * These tests do NOT import useMapViewport — they validate the corrected arithmetic
- * that Plan 02 will implement.
- *
- * Design: Each test calls a formula function that Plan 02 must export from
- * useMapViewport (or a helper file). The tests import those exports by name.
- * Since those exports do NOT yet exist in the production code, all 8 tests fail
- * with "not a function" / "undefined is not a function" style errors, which
- * constitutes a RED state.
+ * Strategy: test pure gesture helpers with lightweight mock Konva.Stage-like
+ * objects. This avoids canvas/runtime setup while still validating the exact
+ * transform arithmetic used by touch interactions.
  *
  * Requirements covered:
  *   TOUCH-01: focal-point zoom stays at finger midpoint at all rotation angles
  *   TOUCH-02: two-finger rotation pivots around touch midpoint
  *   TOUCH-03: per-frame 2-degree rotation threshold eliminates micro-jitter
+ *   TOUCH-04: two-finger midpoint drag pans naturally on phones
  */
 
 import Konva from 'konva'
 import { describe, expect, it } from 'vitest'
 
 // ---------------------------------------------------------------------------
-// Imports from production code that Plan 02 must add.
-// These do NOT exist yet — all tests will fail with import errors until implemented.
+// Gesture helper imports from production code
 // ---------------------------------------------------------------------------
 
 import {
   applyRotationThreshold,
   computePivotPosition,
+  computeTwoTouchFrameTransform,
   toStageLocalFromScreen,
 } from './useMapViewport'
 
@@ -57,7 +52,9 @@ type MockStage = {
   scaleY: () => number
   rotation: () => number
   getAbsoluteTransform: () => {
-    copy: () => { invert: () => { point: (p: { x: number; y: number }) => { x: number; y: number } } }
+    copy: () => {
+      invert: () => { point: (p: { x: number; y: number }) => { x: number; y: number } }
+    }
   }
   container: () => { getBoundingClientRect: () => { left: number; top: number } }
 }
@@ -111,9 +108,9 @@ function mockStage(opts: MockStageOpts = {}): MockStage {
 // ---------------------------------------------------------------------------
 // TOUCH-01: focal-point zoom stays at finger midpoint at all rotation angles
 //
-// Tests call toStageLocalFromScreen(stage, screenPoint) — a helper that Plan 02
-// must export from useMapViewport.ts. This function must use Konva's inverse
-// transform (NOT naive division) so it is correct at any rotation angle.
+// Tests call toStageLocalFromScreen(stage, screenPoint). The helper must use
+// Konva's inverse transform (NOT naive division) so it is correct at any
+// rotation angle.
 // ---------------------------------------------------------------------------
 
 describe('TOUCH-01: focal-point zoom', () => {
@@ -122,9 +119,11 @@ describe('TOUCH-01: focal-point zoom', () => {
     const stage = mockStage({ x: 0, y: 0, scale: 1, rotationDeg: 0 })
     const screenPoint = { x: 200, y: 300 }
 
-    // toStageLocalFromScreen must be exported from useMapViewport — Plan 02 must add this.
     // At 0° with stage at origin: stageLocal = (200, 300) because inverse transform = identity
-    const stageLocal = toStageLocalFromScreen(stage as Parameters<typeof toStageLocalFromScreen>[0], screenPoint)
+    const stageLocal = toStageLocalFromScreen(
+      stage as Parameters<typeof toStageLocalFromScreen>[0],
+      screenPoint,
+    )
 
     // Verify the result matches what the Konva inverse transform produces
     expect(approx(stageLocal.x, 200)).toBe(true)
@@ -140,10 +139,13 @@ describe('TOUCH-01: focal-point zoom', () => {
     // At 45°, screen (100,100) maps to stage-local: rotate by -45°
     // stageLocal.x = 100*cos(-45°) - 100*sin(-45°) = 100*(√2/2) + 100*(√2/2) = 100√2 ≈ 141.42
     // stageLocal.y = 100*sin(-45°) + 100*cos(-45°) = -100*(√2/2) + 100*(√2/2) = 0
-    const expectedStageLocalX = 100 * Math.SQRT2  // ≈ 141.42
+    const expectedStageLocalX = 100 * Math.SQRT2 // ≈ 141.42
     const expectedStageLocalY = 0
 
-    const stageLocal = toStageLocalFromScreen(stage as Parameters<typeof toStageLocalFromScreen>[0], screenPoint)
+    const stageLocal = toStageLocalFromScreen(
+      stage as Parameters<typeof toStageLocalFromScreen>[0],
+      screenPoint,
+    )
 
     // The naive buggy formula would give: (100 - 0) / 1 = 100, (100 - 0) / 1 = 100
     // The correct inverse-transform result must be different
@@ -163,7 +165,10 @@ describe('TOUCH-01: focal-point zoom', () => {
     const expectedStageLocalX = 200
     const expectedStageLocalY = -150
 
-    const stageLocal = toStageLocalFromScreen(stage as Parameters<typeof toStageLocalFromScreen>[0], screenPoint)
+    const stageLocal = toStageLocalFromScreen(
+      stage as Parameters<typeof toStageLocalFromScreen>[0],
+      screenPoint,
+    )
 
     // The naive buggy formula gives: (150 - 0) / 1 = 150, (200 - 0) / 1 = 200 — WRONG
     expect(approx(stageLocal.x, expectedStageLocalX, 1e-4)).toBe(true)
@@ -175,8 +180,7 @@ describe('TOUCH-01: focal-point zoom', () => {
 // TOUCH-02: two-finger rotation pivots around touch midpoint
 //
 // Tests call computePivotPosition(stageLocal, screenCenter, newScale, newRotationDeg)
-// — a helper that Plan 02 must export from useMapViewport.ts. This function
-// computes the stage position that keeps stageLocal fixed under screenCenter
+// to compute the stage position that keeps stageLocal fixed under screenCenter
 // after applying newScale and newRotationDeg.
 // ---------------------------------------------------------------------------
 
@@ -189,7 +193,6 @@ describe('TOUCH-02: rotation pivot at touch midpoint', () => {
     const newScale = 1
     const newRotationDeg = 10
 
-    // computePivotPosition must be exported from useMapViewport — Plan 02 must add this.
     // It computes: rotate(newRotDeg) * scale(newScale) * stageLocal = projected
     //              newPos = screenCenter - projected
     const newPos = computePivotPosition(stageLocal, screenCenter, newScale, newRotationDeg)
@@ -213,7 +216,10 @@ describe('TOUCH-02: rotation pivot at touch midpoint', () => {
     const newRotationDeg = 35 // 30° + 5° additional
 
     // Get stage-local using the CORRECT inverse transform (toStageLocalFromScreen)
-    const stageLocal = toStageLocalFromScreen(stage as Parameters<typeof toStageLocalFromScreen>[0], screenCenter)
+    const stageLocal = toStageLocalFromScreen(
+      stage as Parameters<typeof toStageLocalFromScreen>[0],
+      screenCenter,
+    )
 
     // Compute correcting position
     const newPos = computePivotPosition(stageLocal, screenCenter, newScale, newRotationDeg)
@@ -233,14 +239,13 @@ describe('TOUCH-02: rotation pivot at touch midpoint', () => {
 // ---------------------------------------------------------------------------
 // TOUCH-03: per-frame 2-degree rotation threshold
 //
-// Tests call applyRotationThreshold(angleDiffDeg) — a helper that Plan 02 must
-// export from useMapViewport.ts. This function returns true if the angleDiff
-// should be applied (> 2°), false if it should be discarded (<= 2°).
+// Tests call applyRotationThreshold(angleDiffDeg). This function returns true
+// if the angleDiff should be applied (> 2°), false if it should be discarded
+// (<= 2°).
 // ---------------------------------------------------------------------------
 
 describe('TOUCH-03: rotation threshold', () => {
   it('Test 6: angleDiff of 1° — rotation NOT applied (|1| <= 2)', () => {
-    // applyRotationThreshold must be exported from useMapViewport — Plan 02 must add this.
     // Threshold is STRICT greater-than: |angleDiff| > 2 degrees
     expect(applyRotationThreshold(1)).toBe(false)
   })
@@ -253,5 +258,78 @@ describe('TOUCH-03: rotation threshold', () => {
   it('Test 8: angleDiff of 2.1° — rotation IS applied (|2.1| > 2 is true)', () => {
     // |2.1| > 2 is true — rotation IS applied above threshold
     expect(applyRotationThreshold(2.1)).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// TOUCH-04: two-finger midpoint drag should pan map naturally on phones
+//
+// Google/Apple maps keep the previously grabbed midpoint anchored while the
+// midpoint moves, so two-finger drag (without scale change) translates the map.
+// ---------------------------------------------------------------------------
+
+describe('TOUCH-04: two-finger midpoint drag', () => {
+  it('Test 9: midpoint translation with constant distance pans by the midpoint delta', () => {
+    const stage = mockStage({ x: 0, y: 0, scale: 1, rotationDeg: 0 })
+
+    const previousCenterScreen = { x: 100, y: 120 }
+    const currentCenterScreen = { x: 130, y: 160 }
+
+    const frame = computeTwoTouchFrameTransform({
+      stage,
+      previousDistance: 80,
+      currentDistance: 80,
+      previousCenterScreen,
+      currentCenterScreen,
+      previousAngleRad: 0,
+      currentAngleRad: 0,
+    })
+
+    expect(approx(frame.newScale, 1)).toBe(true)
+    expect(approx(frame.newRotationDeg, 0)).toBe(true)
+    expect(approx(frame.newPosition.x, 30)).toBe(true)
+    expect(approx(frame.newPosition.y, 40)).toBe(true)
+  })
+
+  it('Test 10: keeps the prior midpoint anchor under the new midpoint during pinch+drag', () => {
+    const stage = mockStage({
+      x: 50,
+      y: 100,
+      scale: 1.5,
+      rotationDeg: 30,
+      containerLeft: 20,
+      containerTop: 35,
+    })
+
+    const previousCenterScreen = { x: 240, y: 250 }
+    const currentCenterScreen = { x: 280, y: 305 }
+
+    const frame = computeTwoTouchFrameTransform({
+      stage,
+      previousDistance: 120,
+      currentDistance: 150,
+      previousCenterScreen,
+      currentCenterScreen,
+      previousAngleRad: 0,
+      currentAngleRad: 0,
+    })
+
+    const stageLocalAnchor = toStageLocalFromScreen(
+      stage as Parameters<typeof toStageLocalFromScreen>[0],
+      previousCenterScreen,
+    )
+
+    const t = new Konva.Transform()
+    t.translate(frame.newPosition.x, frame.newPosition.y)
+    t.rotate((frame.newRotationDeg * Math.PI) / 180)
+    t.scale(frame.newScale, frame.newScale)
+    const mapped = t.point(stageLocalAnchor)
+
+    // current midpoint in container-relative coordinates
+    const expectedX = currentCenterScreen.x - 20
+    const expectedY = currentCenterScreen.y - 35
+
+    expect(approx(mapped.x, expectedX, 1e-4)).toBe(true)
+    expect(approx(mapped.y, expectedY, 1e-4)).toBe(true)
   })
 })

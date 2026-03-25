@@ -45,7 +45,9 @@ function getAngle(p1: { x: number; y: number }, p2: { x: number; y: number }): n
  */
 export type StageForGesture = {
   getAbsoluteTransform: () => {
-    copy: () => { invert: () => { point: (p: { x: number; y: number }) => { x: number; y: number } } }
+    copy: () => {
+      invert: () => { point: (p: { x: number; y: number }) => { x: number; y: number } }
+    }
   }
   container: () => { getBoundingClientRect: () => { left: number; top: number } }
 }
@@ -89,6 +91,72 @@ export function computePivotPosition(
  */
 export function applyRotationThreshold(angleDiffDeg: number): boolean {
   return Math.abs(angleDiffDeg) > 2
+}
+
+export type StageForTwoTouchFrame = StageForGesture & {
+  scaleX: () => number
+  rotation: () => number
+}
+
+interface TwoTouchFrameTransformInput {
+  stage: StageForTwoTouchFrame
+  previousDistance: number
+  currentDistance: number
+  previousCenterScreen: { x: number; y: number }
+  currentCenterScreen: { x: number; y: number }
+  previousAngleRad: number | null
+  currentAngleRad: number
+}
+
+/**
+ * Compute one two-finger gesture frame the way mobile map apps behave:
+ * - scale from distance ratio
+ * - optional rotation (thresholded)
+ * - translation anchored to previous midpoint, mapped to current midpoint
+ *
+ * Anchoring to the previous midpoint allows natural two-finger pan while pinching
+ * (the grabbed map point follows the fingers) instead of slipping underneath them.
+ */
+export function computeTwoTouchFrameTransform({
+  stage,
+  previousDistance,
+  currentDistance,
+  previousCenterScreen,
+  currentCenterScreen,
+  previousAngleRad,
+  currentAngleRad,
+}: TwoTouchFrameTransformInput): {
+  newScale: number
+  newRotationDeg: number
+  newPosition: { x: number; y: number }
+} {
+  const safeDistanceRatio = previousDistance > 0 ? currentDistance / previousDistance : 1
+  const newScale = clamp(stage.scaleX() * safeDistanceRatio, MIN_SCALE, MAX_SCALE)
+
+  const angleDiffDeg = (currentAngleRad - (previousAngleRad ?? currentAngleRad)) * (180 / Math.PI)
+  const newRotationDeg = applyRotationThreshold(angleDiffDeg)
+    ? stage.rotation() + angleDiffDeg
+    : stage.rotation()
+
+  const stageAnchor = toStageLocalFromScreen(stage, previousCenterScreen)
+  const rect = stage.container().getBoundingClientRect()
+  const currentCenterContainer = {
+    x: currentCenterScreen.x - rect.left,
+    y: currentCenterScreen.y - rect.top,
+  }
+
+  const newPosition = computePivotPosition(
+    stageAnchor,
+    currentCenterContainer,
+    newScale,
+    newRotationDeg,
+  )
+
+  return {
+    newScale,
+    newRotationDeg,
+    newPosition,
+  }
 }
 
 /* ──────────────── Hook ──────────────── */
@@ -199,30 +267,23 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
         return
       }
 
-      // Step 1: Get container-relative screen center
-      const rect = stage.container().getBoundingClientRect()
-      const screenCenter = { x: center.x - rect.left, y: center.y - rect.top }
+      const previousCenter = lastCenter.current ?? center
 
-      // Step 2: Read stage-local point under finger BEFORE any mutation
-      // (getAbsoluteTransform is live — must capture before scale/rotation changes)
-      const stageLocal = stage.getAbsoluteTransform().copy().invert().point(screenCenter)
+      const { newScale, newRotationDeg, newPosition } = computeTwoTouchFrameTransform({
+        stage,
+        previousDistance: lastDist.current,
+        currentDistance: dist,
+        previousCenterScreen: previousCenter,
+        currentCenterScreen: center,
+        previousAngleRad: lastAngle.current,
+        currentAngleRad: angle,
+      })
 
-      // Step 3: Compute and apply scale mutation, then notify callback
-      const newScale = clamp(stage.scaleX() * (dist / lastDist.current), MIN_SCALE, MAX_SCALE)
       stage.scaleX(newScale)
       stage.scaleY(newScale)
+      stage.rotation(newRotationDeg)
+      stage.position(newPosition)
       onScaleChange?.(newScale)
-
-      // Step 4: Apply rotation only if per-frame delta exceeds 2-degree threshold
-      const angleDiffDeg = (angle - (lastAngle.current ?? angle)) * (180 / Math.PI)
-      if (applyRotationThreshold(angleDiffDeg)) {
-        stage.rotation(stage.rotation() + angleDiffDeg)
-      }
-
-      // Step 5: Recalculate position — keep stageLocal under screenCenter
-      // Forward-projects stageLocal through current (post-mutation) rotation + scale
-      const newPos = computePivotPosition(stageLocal, screenCenter, newScale, stage.rotation())
-      stage.position(newPos)
 
       // Update refs for next frame
       lastDist.current = dist
