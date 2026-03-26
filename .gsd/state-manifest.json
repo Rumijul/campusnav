@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-26T11:44:08.398Z",
+  "exported_at": "2026-03-26T11:55:55.994Z",
   "milestones": [
     {
       "id": "M001",
@@ -266,19 +266,30 @@
       "milestone_id": "M002-a5gn45",
       "slice_id": "S01",
       "id": "T02",
-      "title": "Implement typed map API client and NavGraph normalization boundary",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Implemented typed mobile map/image API contracts with retry-aware diagnostics and NavGraph schema+normalization invariants.",
+      "status": "complete",
+      "one_liner": "Implemented typed mobile map/image API contracts with retry-aware diagnostics and NavGraph schema+normalization invariants.",
+      "narrative": "Implemented the mobile map contract boundary and normalization layer for S01. Added `mapApiClient` endpoints for `/api/map`, `/api/floor-plan/:buildingId/:floorNumber`, and `/api/campus/image` with bounded retry/backoff, timeout/cancellation handling, and typed error metadata (`endpoint`, `status`, `reason`, `attempt`, plus message/details). Added strict `navGraphSchema` validation with issue-path reporting, and `navGraph` normalization/indexing that enforces key invariants (duplicate IDs, node-floor consistency, edge node references) while preserving accessibility semantics through derived effective weights. Added focused tests covering happy paths, malformed payloads, HTTP/network/timeout/abort failures, wrong content-type handling, empty graph boundaries, optional connector fields, and non-accessible edge semantics.",
+      "verification_result": "Task-level verification passed for new implementation (`mapApiClient` + `navGraph` tests and mobile/root typechecks). Slice-level command coverage was executed; expected intermediate-task failures remain for future T03 tests, and the `npx hono request` smoke command still fails in this environment due missing executable resolution.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-03-26T11:55:55.971Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "`npx hono request src/server/index.ts -P /api/map` cannot execute in this environment because `npx` cannot resolve a runnable `hono` binary. Slice-level T03 verification command still fails as expected because T03 test files are not created yet.",
+      "key_files": [
+        "mobile/data/mapApiClient.ts",
+        "mobile/data/mapApiClient.test.ts",
+        "mobile/domain/navGraphSchema.ts",
+        "mobile/domain/navGraph.ts",
+        "mobile/domain/navGraph.test.ts",
+        ".gsd/KNOWLEDGE.md",
+        ".gsd/milestones/M002-a5gn45/slices/S01/tasks/T02-SUMMARY.md"
+      ],
+      "key_decisions": [
+        "Preserve raw backend `accessibleWeight` values while deriving `effectiveAccessibleWeight` as Infinity for non-accessible edges during mobile normalization (D014).",
+        "Model mobile API boundary results as discriminated unions with structured `MapApiError` diagnostics instead of opaque thrown strings."
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S01\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/data/mapApiClient.ts\n  - mobile/data/mapApiClient.test.ts\n  - mobile/domain/navGraphSchema.ts\n  - mobile/domain/navGraph.ts\n  - mobile/domain/navGraph.test.ts\n  - .gsd/KNOWLEDGE.md\n  - .gsd/milestones/M002-a5gn45/slices/S01/tasks/T02-SUMMARY.md\nkey_decisions:\n  - Preserve raw backend `accessibleWeight` values while deriving `effectiveAccessibleWeight` as Infinity for non-accessible edges during mobile normalization (D014).\n  - Model mobile API boundary results as discriminated unions with structured `MapApiError` diagnostics instead of opaque thrown strings.\nduration: \"\"\nverification_result: mixed\ncompleted_at: 2026-03-26T11:55:55.972Z\nblocker_discovered: false\n---\n\n# T02: Implemented typed mobile map/image API contracts with retry-aware diagnostics and NavGraph schema+normalization invariants.\n\n**Implemented typed mobile map/image API contracts with retry-aware diagnostics and NavGraph schema+normalization invariants.**\n\n## What Happened\n\nImplemented the mobile map contract boundary and normalization layer for S01. Added `mapApiClient` endpoints for `/api/map`, `/api/floor-plan/:buildingId/:floorNumber`, and `/api/campus/image` with bounded retry/backoff, timeout/cancellation handling, and typed error metadata (`endpoint`, `status`, `reason`, `attempt`, plus message/details). Added strict `navGraphSchema` validation with issue-path reporting, and `navGraph` normalization/indexing that enforces key invariants (duplicate IDs, node-floor consistency, edge node references) while preserving accessibility semantics through derived effective weights. Added focused tests covering happy paths, malformed payloads, HTTP/network/timeout/abort failures, wrong content-type handling, empty graph boundaries, optional connector fields, and non-accessible edge semantics.\n\n## Verification\n\nTask-level verification passed for new implementation (`mapApiClient` + `navGraph` tests and mobile/root typechecks). Slice-level command coverage was executed; expected intermediate-task failures remain for future T03 tests, and the `npx hono request` smoke command still fails in this environment due missing executable resolution.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm --prefix mobile run typecheck && npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts` | 0 | ✅ pass | 1761ms |\n| 2 | `npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts` | 0 | ✅ pass | 781ms |\n| 3 | `npx hono request src/server/index.ts -P /api/map > /dev/null` | 1 | ❌ fail | 501ms |\n| 4 | `npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts && npm --prefix mobile run typecheck && npm run typecheck` | 1 | ❌ fail | 550ms |\n| 5 | `npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts && npx hono request src/server/index.ts -P /api/map > /dev/null` | 1 | ❌ fail | 1274ms |\n| 6 | `npm --prefix mobile run typecheck` | 0 | ✅ pass | 1138ms |\n| 7 | `npm run typecheck` | 0 | ✅ pass | 2382ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\n`npx hono request src/server/index.ts -P /api/map` cannot execute in this environment because `npx` cannot resolve a runnable `hono` binary. Slice-level T03 verification command still fails as expected because T03 test files are not created yet.\n\n## Files Created/Modified\n\n- `mobile/data/mapApiClient.ts`\n- `mobile/data/mapApiClient.test.ts`\n- `mobile/domain/navGraphSchema.ts`\n- `mobile/domain/navGraph.ts`\n- `mobile/domain/navGraph.test.ts`\n- `.gsd/KNOWLEDGE.md`\n- `.gsd/milestones/M002-a5gn45/slices/S01/tasks/T02-SUMMARY.md`\n",
       "description": "Define the mobile boundary contracts that S02+ will consume by making backend fetch behavior and graph normalization explicit, typed, and test-covered.\n\n## Failure Modes\n\n| Dependency | On error | On timeout | On malformed response |\n|------------|----------|-----------|----------------------|\n| `GET /api/map` | Return structured client error with endpoint/status/reason | Retry with bounded backoff, then return timeout-classified error | Fail schema parse and return contract-validation error |\n| Floor/campus image endpoints | Return explicit image fetch error metadata for bootstrap diagnostics | Abort request and surface timeout classification in bootstrap phase | Reject unexpected content-type and fail with typed contract error |\n\n## Load Profile\n\n- **Shared resources**: backend read endpoints, mobile fetch retry queue, in-memory normalized indexes.\n- **Per-operation cost**: one map payload request plus optional image metadata request per bootstrap; O(nodes + edges) normalization.\n- **10x breakpoint**: repeated retries and large graph payloads can increase bootstrap latency and memory if normalization does not stream/index efficiently.\n\n## Negative Tests\n\n- **Malformed inputs**: invalid JSON map payload, missing `buildings`, wrong floor/node field types.\n- **Error paths**: HTTP 404/500, network timeout, aborted request.\n- **Boundary conditions**: empty buildings list, optional connector fields absent, non-accessible edge weight semantics preserved.\n\n## Steps\n\n1. Implement `mobile/data/mapApiClient.ts` typed contract functions for `/api/map`, floor-plan image URLs, and campus image URL resolution.\n2. Add retry/cancellation behavior and a structured API error object containing endpoint/status/reason/attempt.\n3. Implement `mobile/domain/navGraphSchema.ts` and `mobile/domain/navGraph.ts` to validate/normalize payloads into lookup maps while preserving connector/accessibility semantics.\n4. Add focused tests for success/failure/retry/normalization invariants and backend contract smoke checks.\n\n## Must-Haves\n\n- [ ] Client contract covers all S01 boundary-map endpoints and exposes typed responses/errors.\n- [ ] Normalization preserves `NavGraph` invariants (optional connector fields, floor metadata, accessibility semantics).\n- [ ] Contract and normalization failure paths are explicitly test-covered, not inferred.",
       "estimate": "2h",
       "files": [
@@ -511,6 +522,18 @@
       "revisable": "Yes — if core reliability lands earlier than expected.",
       "made_by": "human",
       "superseded_by": null
+    },
+    {
+      "seq": 61,
+      "id": "D014",
+      "when_context": "M002-a5gn45/S01/T02",
+      "scope": "mobile-domain",
+      "decision": "How mobile NavGraph normalization should represent non-accessible edge weights from backend payloads",
+      "choice": "Preserve raw `accessibleWeight` from `/api/map` payload and add derived `effectiveAccessibleWeight` that is `Infinity` when `accessible=false`.",
+      "rationale": "Backend payloads may serialize non-accessible edges with large finite sentinels (e.g., 1e10) because JSON cannot encode Infinity. Keeping raw values preserves transport fidelity while derived effective weights keep accessibility routing semantics explicit for downstream consumers.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
     }
   ],
   "verification_evidence": [
@@ -579,6 +602,83 @@
       "verdict": "✅ pass",
       "duration_ms": 3231,
       "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 7,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck && npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1761,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 8,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 781,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 9,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx hono request src/server/index.ts -P /api/map > /dev/null",
+      "exit_code": 1,
+      "verdict": "❌ fail",
+      "duration_ms": 501,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 10,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts && npm --prefix mobile run typecheck && npm run typecheck",
+      "exit_code": 1,
+      "verdict": "❌ fail",
+      "duration_ms": 550,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 11,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts && npx hono request src/server/index.ts -P /api/map > /dev/null",
+      "exit_code": 1,
+      "verdict": "❌ fail",
+      "duration_ms": 1274,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 12,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1138,
+      "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 13,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2382,
+      "created_at": "2026-03-26T11:55:55.971Z"
     }
   ]
 }

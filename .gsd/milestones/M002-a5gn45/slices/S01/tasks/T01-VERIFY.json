@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M002-a5gn45/S01/T01",
+  "timestamp": 1774525460512,
+  "passed": true,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npm --prefix mobile run typecheck",
+      "exitCode": 0,
+      "durationMs": 835,
+      "verdict": "pass"
+    },
+    {
+      "command": "npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts",
+      "exitCode": 0,
+      "durationMs": 574,
+      "verdict": "pass"
+    }
+  ]
+}

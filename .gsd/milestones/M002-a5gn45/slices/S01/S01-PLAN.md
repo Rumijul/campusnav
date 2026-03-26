@@ -40,7 +40,7 @@
   - Estimate: 2h
   - Files: mobile/package.json, mobile/app.json, mobile/tsconfig.json, mobile/babel.config.js, mobile/App.tsx, mobile/vitest.config.ts, mobile/bootstrap/appBootstrap.test.ts, mobile/.env.example
   - Verify: npm --prefix mobile run typecheck && npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts
-- [ ] **T02: Implement typed map API client and NavGraph normalization boundary** — Define the mobile boundary contracts that S02+ will consume by making backend fetch behavior and graph normalization explicit, typed, and test-covered.
+- [x] **T02: Implemented typed mobile map/image API contracts with retry-aware diagnostics and NavGraph schema+normalization invariants.** — Define the mobile boundary contracts that S02+ will consume by making backend fetch behavior and graph normalization explicit, typed, and test-covered.
 
 ## Failure Modes
 
