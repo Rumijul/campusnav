@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-26T11:55:55.994Z",
+  "exported_at": "2026-03-26T13:35:07.553Z",
   "milestones": [
     {
       "id": "M001",
@@ -322,19 +322,30 @@
       "milestone_id": "M002-a5gn45",
       "slice_id": "S01",
       "id": "T03",
-      "title": "Wire live bootstrap into MapViewport pan/zoom/rotate primitives",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Shipped live mobile bootstrap wiring into a gesture-capable MapViewport with tested transform invariants and explicit startup phase diagnostics.",
+      "status": "complete",
+      "one_liner": "Shipped live mobile bootstrap wiring into a gesture-capable MapViewport with tested transform invariants and explicit startup phase diagnostics.",
+      "narrative": "Validated and finalized T03 runtime wiring across map transforms, viewport gestures, bootstrap state orchestration, and App integration. The app now boots in no-login visitor mode, executes live map/image bootstrap via runMapBootstrap, renders explicit loading/error phase diagnostics, and surfaces map pan/zoom/rotate behavior through tested transform helpers. During execution I fixed one concrete issue in mobile/map/MapViewport.tsx by stabilizing commitTransform with useCallback and including it in PanResponder memo dependencies to satisfy hook correctness without changing behavior.",
+      "verification_result": "Executed the T03 verification contract and slice mobile verification surface. Focused T03 tests passed (mapTransform + mapBootstrapState), mobile typecheck passed, root typecheck passed, and combined S01 mobile test suite (appBootstrap/mapApiClient/navGraph/mapTransform/mapBootstrapState) passed.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-03-26T13:35:07.531Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Most T03 target files already existed at execution start; execution work centered on validation, verification, and a targeted hook-dependency fix in MapViewport.",
+      "known_issues": "None.",
+      "key_files": [
+        "mobile/App.tsx",
+        "mobile/bootstrap/mapBootstrapState.ts",
+        "mobile/bootstrap/mapBootstrapState.test.ts",
+        "mobile/map/mapTransform.ts",
+        "mobile/map/mapTransform.test.ts",
+        "mobile/map/MapViewport.tsx",
+        ".gsd/milestones/M002-a5gn45/slices/S01/tasks/T03-SUMMARY.md"
+      ],
+      "key_decisions": [
+        "Use explicit phased bootstrap transitions (map then image) and carry failed phase/endpoint metadata into rendered error state for diagnosability.",
+        "Use transform equality guards and malformed-frame rejection to keep gesture state stable under high-frequency event streams."
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S01\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/App.tsx\n  - mobile/bootstrap/mapBootstrapState.ts\n  - mobile/bootstrap/mapBootstrapState.test.ts\n  - mobile/map/mapTransform.ts\n  - mobile/map/mapTransform.test.ts\n  - mobile/map/MapViewport.tsx\n  - .gsd/milestones/M002-a5gn45/slices/S01/tasks/T03-SUMMARY.md\nkey_decisions:\n  - Use explicit phased bootstrap transitions (map then image) and carry failed phase/endpoint metadata into rendered error state for diagnosability.\n  - Use transform equality guards and malformed-frame rejection to keep gesture state stable under high-frequency event streams.\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-26T13:35:07.533Z\nblocker_discovered: false\n---\n\n# T03: Shipped live mobile bootstrap wiring into a gesture-capable MapViewport with tested transform invariants and explicit startup phase diagnostics.\n\n**Shipped live mobile bootstrap wiring into a gesture-capable MapViewport with tested transform invariants and explicit startup phase diagnostics.**\n\n## What Happened\n\nValidated and finalized T03 runtime wiring across map transforms, viewport gestures, bootstrap state orchestration, and App integration. The app now boots in no-login visitor mode, executes live map/image bootstrap via runMapBootstrap, renders explicit loading/error phase diagnostics, and surfaces map pan/zoom/rotate behavior through tested transform helpers. During execution I fixed one concrete issue in mobile/map/MapViewport.tsx by stabilizing commitTransform with useCallback and including it in PanResponder memo dependencies to satisfy hook correctness without changing behavior.\n\n## Verification\n\nExecuted the T03 verification contract and slice mobile verification surface. Focused T03 tests passed (mapTransform + mapBootstrapState), mobile typecheck passed, root typecheck passed, and combined S01 mobile test suite (appBootstrap/mapApiClient/navGraph/mapTransform/mapBootstrapState) passed.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts` | 0 | ✅ pass | 963ms |\n| 2 | `npm --prefix mobile run typecheck` | 0 | ✅ pass | 1300ms |\n| 3 | `npm run typecheck` | 0 | ✅ pass | 2460ms |\n| 4 | `npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts` | 0 | ✅ pass | 802ms |\n\n\n## Deviations\n\nMost T03 target files already existed at execution start; execution work centered on validation, verification, and a targeted hook-dependency fix in MapViewport.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `mobile/App.tsx`\n- `mobile/bootstrap/mapBootstrapState.ts`\n- `mobile/bootstrap/mapBootstrapState.test.ts`\n- `mobile/map/mapTransform.ts`\n- `mobile/map/mapTransform.test.ts`\n- `mobile/map/MapViewport.tsx`\n- `.gsd/milestones/M002-a5gn45/slices/S01/tasks/T03-SUMMARY.md`\n",
       "description": "Complete the slice demo by wiring real backend data into a map viewport that supports baseline map gestures and diagnosable startup failure states.\n\n## Failure Modes\n\n| Dependency | On error | On timeout | On malformed response |\n|------------|----------|-----------|----------------------|\n| `mapApiClient` bootstrap calls | Transition bootstrap state to `error` with failed phase metadata | Stop waiting and expose timeout phase in startup diagnostics | Treat invalid contract result as unrecoverable bootstrap error |\n| Gesture event stream (`pan/pinch/rotate`) | Ignore invalid gesture frame and keep previous stable transform | N/A (event-driven) | Clamp/normalize transform inputs to prevent NaN/drift propagation |\n\n## Load Profile\n\n- **Shared resources**: UI render loop, gesture handler callbacks, bootstrap state transitions.\n- **Per-operation cost**: transform math per gesture frame plus one bootstrap normalization pass per app launch.\n- **10x breakpoint**: high-frequency gesture events can cause jank if transform helpers allocate excessively or trigger redundant state commits.\n\n## Negative Tests\n\n- **Malformed inputs**: NaN/Infinity transform values, invalid rotation deltas, missing viewport dimensions.\n- **Error paths**: bootstrap error phase rendering when map or image contract fetch fails.\n- **Boundary conditions**: rotation wraparound at +/-180, min/max zoom clamp, idempotent restart from error to loading.\n\n## Steps\n\n1. Implement transform helpers in `mobile/map/mapTransform.ts` for stable pan/zoom/rotate coordinate mapping anchored to gesture focal points.\n2. Add unit tests in `mobile/map/mapTransform.test.ts` that protect against focal drift and angle-wrap regressions.\n3. Build `mobile/map/MapViewport.tsx` using transform helpers and composed gesture primitives for pan/pinch/rotate.\n4. Add `mobile/bootstrap/mapBootstrapState.ts` plus tests to orchestrate `mapApiClient` + `navGraph` into explicit `loading/ready/error` startup states.\n5. Wire `mobile/App.tsx` to bootstrap state + `MapViewport` so startup renders live backend-backed map content with visible fallback errors.\n\n## Must-Haves\n\n- [ ] `MapViewport` supports baseline pan/zoom/rotate behavior with tested transform invariants.\n- [ ] Startup flow uses live backend map contracts and does not regress no-login visitor entry.\n- [ ] Startup failure path exposes explicit phase/endpoint diagnostics for future debugging.",
       "estimate": "2.5h",
       "files": [
@@ -679,6 +690,50 @@
       "verdict": "✅ pass",
       "duration_ms": 2382,
       "created_at": "2026-03-26T11:55:55.971Z"
+    },
+    {
+      "id": 14,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 963,
+      "created_at": "2026-03-26T13:35:07.531Z"
+    },
+    {
+      "id": 15,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1300,
+      "created_at": "2026-03-26T13:35:07.531Z"
+    },
+    {
+      "id": 16,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 2460,
+      "created_at": "2026-03-26T13:35:07.531Z"
+    },
+    {
+      "id": 17,
+      "task_id": "T03",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 802,
+      "created_at": "2026-03-26T13:35:07.531Z"
     }
   ]
 }

@@ -76,7 +76,7 @@
   - Estimate: 2h
   - Files: mobile/data/mapApiClient.ts, mobile/data/mapApiClient.test.ts, mobile/domain/navGraphSchema.ts, mobile/domain/navGraph.ts, mobile/domain/navGraph.test.ts
   - Verify: npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts && npx hono request src/server/index.ts -P /api/map > /dev/null
-- [ ] **T03: Wire live bootstrap into MapViewport pan/zoom/rotate primitives** — Complete the slice demo by wiring real backend data into a map viewport that supports baseline map gestures and diagnosable startup failure states.
+- [x] **T03: Shipped live mobile bootstrap wiring into a gesture-capable MapViewport with tested transform invariants and explicit startup phase diagnostics.** — Complete the slice demo by wiring real backend data into a map viewport that supports baseline map gestures and diagnosable startup failure states.
 
 ## Failure Modes
 

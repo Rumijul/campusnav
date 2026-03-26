@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T02",
+  "unitId": "M002-a5gn45/S01/T02",
+  "timestamp": 1774526174421,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts",
+      "exitCode": 0,
+      "durationMs": 649,
+      "verdict": "pass"
+    },
+    {
+      "command": "npx hono request src/server/index.ts -P /api/map > /dev/null",
+      "exitCode": 1,
+      "durationMs": 9,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}
