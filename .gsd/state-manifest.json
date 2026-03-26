@@ -1,0 +1,584 @@
+{
+  "version": 1,
+  "exported_at": "2026-03-26T11:44:08.398Z",
+  "milestones": [
+    {
+      "id": "M001",
+      "title": "",
+      "status": "active",
+      "depends_on": [],
+      "created_at": "2026-03-26T11:08:09.797Z",
+      "completed_at": null,
+      "vision": "",
+      "success_criteria": [],
+      "key_risks": [],
+      "proof_strategy": [],
+      "verification_contract": "",
+      "verification_integration": "",
+      "verification_operational": "",
+      "verification_uat": "",
+      "definition_of_done": [],
+      "requirement_coverage": "",
+      "boundary_map_markdown": ""
+    },
+    {
+      "id": "M002-a5gn45",
+      "title": "Native App Foundation + Foreground Real-Time Guidance",
+      "status": "active",
+      "depends_on": [],
+      "created_at": "2026-03-25T09:01:56.466Z",
+      "completed_at": null,
+      "vision": "Build an app version of CampusNav with visitor-first, maps-like foreground real-time navigation directions across outdoor and indoor routes, while preserving backend graph contracts and no-login student access.",
+      "success_criteria": [
+        "Visitor can install internal app build on iOS/Android and complete a guided trip end-to-end.",
+        "Live foreground guidance updates step progression through outdoor + indoor segments with explicit floor context.",
+        "Off-route events recover via reroute within 5–10 seconds in normal conditions.",
+        "Guidance uses confidence-gated behavior that surfaces explicit fallback prompts when reliability is low.",
+        "Standard and accessible modes both provide real-time guidance behavior with visitor-usable clarity."
+      ],
+      "key_risks": [
+        {
+          "risk": "GPS+sensor-only indoor positioning may produce jitter, drift, or wrong-floor guidance under real campus conditions.",
+          "whyItMatters": "This directly threatens trust in real-time directions and can invalidate the maps-like UX goal."
+        },
+        {
+          "risk": "React Native rendering/gesture stack may not match the interaction fidelity currently achieved by web Konva runtime.",
+          "whyItMatters": "Poor pan/zoom/rotate or unstable heading behavior will feel unlike Google/Apple Maps and fail UX expectations."
+        },
+        {
+          "risk": "Outdoor-to-indoor transitions may desynchronize route progression state and connector/floor semantics.",
+          "whyItMatters": "Cross-boundary trip continuity is central to the visitor loop and a major failure mode if not proven early."
+        }
+      ],
+      "proof_strategy": [
+        {
+          "riskOrUnknown": "Native runtime parity with existing graph + map behaviors",
+          "retireIn": "S01",
+          "whatWillBeProven": "App can load live map graph/image contracts and render usable map interaction on both mobile platforms."
+        },
+        {
+          "riskOrUnknown": "Visitor trip setup and parity with current student-facing capabilities",
+          "retireIn": "S02",
+          "whatWillBeProven": "Visitor can select start/destination and initialize route sessions with floor/campus context preserved."
+        },
+        {
+          "riskOrUnknown": "Position reliability and reroute responsiveness under GPS+sensor-only strategy",
+          "retireIn": "S03",
+          "whatWillBeProven": "Foreground live position stream drives confidence-gated guidance and reroute events within target latency band."
+        },
+        {
+          "riskOrUnknown": "Maps-like visitor guidance clarity and wrong-floor prevention",
+          "retireIn": "S04",
+          "whatWillBeProven": "Heading-aware live UX and floor-safe transitions are clear for visitors in both standard and accessible modes."
+        },
+        {
+          "riskOrUnknown": "Final assembled system readiness for real use and distribution",
+          "retireIn": "S05",
+          "whatWillBeProven": "End-to-end guided trip with off-route recovery succeeds on real devices and internal builds are installable."
+        }
+      ],
+      "verification_contract": "Unit/integration tests cover route-session state transitions, confidence-gate decisions, reroute trigger logic, floor-context progression, and accessible-mode parity.",
+      "verification_integration": "Real-device integration verifies live backend map payload consumption, outdoor+indoor route continuity, and reroute behavior under movement.",
+      "verification_operational": "Internal distribution artifacts (iOS + Android) are produced and installable; app startup and guidance loop run on physical devices in foreground mode.",
+      "verification_uat": "Human walkthrough: first-time visitor starts route, follows live instructions, intentionally deviates once, confirms reroute recovery and floor-transition clarity.",
+      "definition_of_done": [
+        "All slices S01–S05 are complete and roadmap checkboxes are true.",
+        "Native app runs on physical iOS and Android devices using live CampusNav backend graph data.",
+        "Visitor-first foreground guidance works end-to-end across outdoor and indoor segments.",
+        "Low-confidence positioning never silently emits misleading guidance; explicit fallback prompts are shown.",
+        "At least one off-route scenario reroutes within the agreed 5–10 second quality band during acceptance verification.",
+        "Standard and wheelchair-accessible live guidance modes both pass milestone acceptance scenarios.",
+        "Internal distribution artifacts for iOS and Android are produced and installable."
+      ],
+      "requirement_coverage": "Covers: R023, R024, R025, R026, R027, R028, R029, R030, R031, R032, R033, R034. Partially covers: none. Leaves for later: R035, R036, R037. Orphan risks: none (all listed risks mapped to S01–S05 proof steps).",
+      "boundary_map_markdown": "## Boundary Map\n\n### S01 → S02\nProduces:\n- `mobile/data/mapApiClient.ts` → typed fetch contract for `/api/map` + floor-plan/campus image endpoints\n- `mobile/domain/navGraph.ts` → normalized mobile graph shape aligned with existing `NavGraph` invariants\n- `mobile/map/MapViewport.tsx` → device map viewport primitives (pan/zoom/rotate) with stable coordinate mapping\n\nConsumes: nothing (first slice)\n\n### S02 → S03\nProduces:\n- `mobile/guidance/routeSession.ts` → active route session state (start/destination/mode/segment)\n- `mobile/guidance/stepProgression.ts` → deterministic step index progression contract from node traversal\n- `mobile/guidance/floorContext.ts` → floor transition context model (current floor/next floor/connector)\n\nConsumes from S01:\n- `mapApiClient` and `navGraph` contracts for route/session initialization\n\n### S03 → S04\nProduces:\n- `mobile/location/livePositionStream.ts` → foreground position stream with confidence metadata\n- `mobile/location/confidenceGate.ts` → confidence states (`guided`, `fallback-prompted`) and transition rules\n- `mobile/guidance/rerouteEngine.ts` → off-route detection + reroute trigger contract (5–10s target)\n\nConsumes from S02:\n- `routeSession` + `stepProgression` + `floorContext` contracts for live guidance updates\n\n### S04 → S05\nProduces:\n- `mobile/ui/guidanceSheet.tsx` → visitor-first live instruction UI with heading-aware map coupling\n- `mobile/ui/fallbackPrompts.tsx` → explicit low-confidence and floor-correction prompts\n- `mobile/guidance/accessibleParity.ts` → mode parity guards for standard vs accessible live guidance\n\nConsumes from S03:\n- live position stream, confidence gate, and reroute events\n\n### S05 → Milestone Acceptance\nProduces:\n- Internal iOS distribution artifact (TestFlight-ready build)\n- Internal Android distribution artifact (internal install/testing channel build)\n- End-to-end visitor acceptance evidence for one trip with one off-route recovery\n\nConsumes from S01–S04:\n- runtime, route-session, live positioning, reroute, and visitor UX contracts assembled end-to-end"
+    }
+  ],
+  "slices": [
+    {
+      "milestone_id": "M002-a5gn45",
+      "id": "S01",
+      "title": "Native app runtime + backend graph contract bootstrap",
+      "status": "pending",
+      "risk": "high",
+      "depends": [],
+      "demo": "After this: iOS and Android app shells launch on-device, load live CampusNav graph/image data, and support baseline map interaction primitives.",
+      "created_at": "2026-03-25T09:01:56.467Z",
+      "completed_at": null,
+      "full_summary_md": "",
+      "full_uat_md": "",
+      "goal": "Establish the mobile foundation for CampusNav with an Expo-based iOS/Android runtime that launches without sign-in, consumes live backend graph/image contracts, and exposes baseline map pan/zoom/rotate primitives over normalized campus/floor coordinates.",
+      "success_criteria": "- **R023:** A dedicated `mobile/` native runtime package exists with install/run scripts for iOS + Android (`start`, `ios`, `android`) plus local `typecheck`/`test` verification commands.\n- **R024:** App launch remains visitor-first (no auth gate) and enters a no-login bootstrap flow that loads map graph/image data from backend read APIs.\n- `mobile/data/mapApiClient.ts` defines the typed contract for `/api/map`, `/api/floor-plan/:buildingId/:floorNumber`, and `/api/campus/image`, including structured failure metadata.\n- `mobile/domain/navGraph.ts` normalizes backend payloads into lookup-friendly mobile selectors while preserving connector/floor/accessibility invariants.\n- `mobile/map/MapViewport.tsx` provides baseline pan/zoom/rotate interaction primitives with tested transform math and stable coordinate mapping.\n\n### Threat Surface (Q3)\n- **Abuse:** API base URL tampering, oversized payloads, and replayed stale responses must degrade to explicit bootstrap error state instead of silent rendering.\n- **Data exposure:** Student bootstrap is no-login and map data is read-only; diagnostics must not expose secrets or tokens.\n- **Input trust:** Treat `/api/map` JSON and floor/campus image responses as untrusted until schema validation and response guards pass.\n\n### Requirement Impact (Q4)\n- **Requirements touched:** `R023`, `R024`, and support surfaces for `R025`/`R034`.\n- **Re-verify:** Existing `/api/map` and image endpoint contracts remain unchanged for web clients while mobile no-login bootstrap consumes them.\n- **Decisions revisited:** `D009` (native runtime strategy) and `D011` (student-only mobile scope; admin stays web).",
+      "proof_level": "- This slice proves: integration\n- Real runtime required: yes\n- Human/UAT required: no",
+      "integration_closure": "- Upstream surfaces consumed: `src/server/index.ts` read APIs (`/api/map`, `/api/floor-plan/:buildingId/:floorNumber`, `/api/campus/image`) and `src/shared/types.ts` `NavGraph` semantics.\n- New wiring introduced in this slice: `mobile/App.tsx` bootstrap -> `mobile/data/mapApiClient.ts` fetch contracts -> `mobile/domain/navGraph.ts` normalization -> `mobile/map/MapViewport.tsx` interaction layer.\n- What remains before the milestone is truly usable end-to-end: trip setup parity, live foreground progression, confidence gating, reroute engine behavior, and visitor guidance UX polish (S02–S05).",
+      "observability_impact": "- Runtime signals: mobile bootstrap state transitions (`idle`, `loading`, `ready`, `error`), contract fetch phase (`map`, `floor-image`, `campus-image`), and structured API failure metadata (`endpoint`, `status`, `reason`, `attempt`).\n- Inspection surfaces: focused mobile Vitest suites (`appBootstrap`, `mapApiClient`, `navGraph`, `mapTransform`, `mapBootstrapState`) plus app-shell startup state rendering.\n- Failure visibility: startup failures expose the last failed phase/endpoint and user-visible fallback state instead of silent blank-map behavior.\n- Redaction constraints: diagnostics must never expose raw secret values or auth tokens; only endpoint paths/status codes and derived state are logged/tested.",
+      "sequence": 0,
+      "replan_triggered_at": null
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "id": "S02",
+      "title": "Visitor trip setup parity (student scope only)",
+      "status": "pending",
+      "risk": "medium",
+      "depends": [
+        "S01"
+      ],
+      "demo": "After this: visitor can choose start/destination in app and preview route session context (outdoor + floor-aware) without logging in.",
+      "created_at": "2026-03-25T09:01:56.467Z",
+      "completed_at": null,
+      "full_summary_md": "",
+      "full_uat_md": "",
+      "goal": "Port student-facing trip setup loop into mobile app while preserving no-login behavior and current routing semantics.",
+      "success_criteria": "- No-login visitor flow initializes route selection.\n- Start/destination selection works for campus and indoor nodes.\n- Standard and accessible route sessions both initialize successfully.\n- Admin-editing capability remains outside mobile scope with no regression to backend contracts.",
+      "proof_level": "Contract + behavioral",
+      "integration_closure": "Mobile route-session initialization consumes S01 contracts and backend graph to produce route preview state used by guidance.",
+      "observability_impact": "Adds route-session state tracing for start/destination/mode/floor context transitions.",
+      "sequence": 0,
+      "replan_triggered_at": null
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "id": "S03",
+      "title": "Real-time guidance core (confidence + reroute engine)",
+      "status": "pending",
+      "risk": "high",
+      "depends": [
+        "S02"
+      ],
+      "demo": "After this: live foreground positioning advances guidance and triggers reroute when user deviates, with confidence-gated fallback behavior.",
+      "created_at": "2026-03-25T09:01:56.467Z",
+      "completed_at": null,
+      "full_summary_md": "",
+      "full_uat_md": "",
+      "goal": "Implement the core real-time guidance engine (position stream, confidence gate, off-route detection, reroute).",
+      "success_criteria": "- Foreground location stream updates guidance state continuously.\n- Confidence gate switches between guided and fallback-prompted states.\n- Off-route detection triggers reroute within 5–10s target band under normal conditions.\n- Low-confidence states never continue silently as if guidance were reliable.",
+      "proof_level": "Behavioral + integration",
+      "integration_closure": "Live position stream updates route-session progression and reroute engine against real graph state in-app.",
+      "observability_impact": "Adds explicit confidence-state, off-route, and reroute timing telemetry surfaces for debugging reliability.",
+      "sequence": 0,
+      "replan_triggered_at": null
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "id": "S04",
+      "title": "Visitor-first live UX + floor-safe accessible parity",
+      "status": "pending",
+      "risk": "medium",
+      "depends": [
+        "S03"
+      ],
+      "demo": "After this: a first-time visitor can follow clear heading-aware live guidance across outdoor/indoor transitions in both standard and accessible modes.",
+      "created_at": "2026-03-25T09:01:56.467Z",
+      "completed_at": null,
+      "full_summary_md": "",
+      "full_uat_md": "",
+      "goal": "Deliver visitor-first, maps-like live guidance UX with floor-safe transitions and mode parity.",
+      "success_criteria": "- Heading-aware map behavior is stable during live navigation.\n- Guidance copy and transitions stay clear for first-time visitors.\n- Floor transitions remain explicit and prevent wrong-floor advancement.\n- Standard and accessible live guidance remain functionally equivalent.",
+      "proof_level": "Behavioral + UAT-ready",
+      "integration_closure": "UI layer consumes live guidance events and floor context to render step cards, floor transitions, and heading-aware map behavior.",
+      "observability_impact": "Adds user-visible fallback reasons and floor-transition diagnostics for wrong-floor prevention.",
+      "sequence": 0,
+      "replan_triggered_at": null
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "id": "S05",
+      "title": "Integrated acceptance + internal build delivery",
+      "status": "pending",
+      "risk": "medium",
+      "depends": [
+        "S04"
+      ],
+      "demo": "After this: internal iOS and Android builds are installable, and a full visitor journey (with one reroute) is proven end-to-end on device.",
+      "created_at": "2026-03-25T09:01:56.467Z",
+      "completed_at": null,
+      "full_summary_md": "",
+      "full_uat_md": "",
+      "goal": "Assemble and prove the full milestone outcome in real mobile runtime with internal distribution artifacts.",
+      "success_criteria": "- End-to-end visitor trip completes in foreground guidance mode.\n- At least one off-route event reroutes and recovers within target quality bar.\n- iOS TestFlight-ready and Android internal builds are generated and installable.\n- Acceptance evidence is recorded against milestone success criteria.",
+      "proof_level": "Integrated acceptance + operational",
+      "integration_closure": "S01–S04 contracts are exercised together in real-device acceptance paths and packaged for internal distribution.",
+      "observability_impact": "Captures final acceptance evidence and build provenance for downstream milestones.",
+      "sequence": 0,
+      "replan_triggered_at": null
+    }
+  ],
+  "tasks": [
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S01",
+      "id": "T01",
+      "title": "Aligned mobile Vitest root/filter execution and validated the no-login Expo bootstrap harness for deterministic startup states.",
+      "status": "complete",
+      "one_liner": "Aligned mobile Vitest root/filter execution and validated the no-login Expo bootstrap harness for deterministic startup states.",
+      "narrative": "Verified that the T01 mobile scaffold already existed locally (Expo scripts, app metadata, env example, bootstrap shell, and startup tests). Identified and fixed a contract mismatch where planned commands passed `mobile/...` test filters but Vitest was rooted at `mobile/`, causing false 'No test files found' failures. Updated `mobile/package.json` to run Vitest with `--root .. --config mobile/vitest.config.ts` and constrained `mobile/vitest.config.ts` includes to `mobile/**/*.test.ts` to preserve mobile-only isolation. Confirmed bootstrap behaviors remain visitor-first with explicit loading/ready/error state transitions and config validation coverage via existing test suite. Added a non-obvious tooling gotcha entry to `.gsd/KNOWLEDGE.md` for downstream task reliability.",
+      "verification_result": "Ran task-level verification plus slice-level verification commands. Task checks passed: mobile typecheck and focused app bootstrap tests (8 passing). Slice-level typecheck chain also passed. Expected intermediate-task failures remained for checks tied to future task assets (`mapApiClient`/`navGraph`/`mapTransform`/`mapBootstrapState` tests) and for `npx hono request ...` because the installed `hono` package in this repo does not expose a CLI executable in this environment.",
+      "duration": "",
+      "completed_at": "2026-03-26T11:44:08.373Z",
+      "blocker_discovered": false,
+      "deviations": "The expected T01 scaffold files were already present before execution; implementation work was limited to test harness alignment and verification reliability fixes.",
+      "known_issues": "`npx hono request src/server/index.ts ...` fails in this environment with `npm error could not determine executable to run` because no `hono` CLI binary is available from installed dependencies. Targeted slice checks for T02/T03 test files fail as those files are not implemented yet (expected at T01 stage).",
+      "key_files": [
+        "mobile/package.json",
+        "mobile/vitest.config.ts",
+        ".gsd/KNOWLEDGE.md"
+      ],
+      "key_decisions": [
+        "Run mobile Vitest from repository root (`--root ..`) with `mobile/vitest.config.ts` and `mobile/**/*.test.ts` include scope so GSD verification commands using `mobile/...` filters resolve deterministically."
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S01\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/package.json\n  - mobile/vitest.config.ts\n  - .gsd/KNOWLEDGE.md\nkey_decisions:\n  - Run mobile Vitest from repository root (`--root ..`) with `mobile/vitest.config.ts` and `mobile/**/*.test.ts` include scope so GSD verification commands using `mobile/...` filters resolve deterministically.\nduration: \"\"\nverification_result: mixed\ncompleted_at: 2026-03-26T11:44:08.374Z\nblocker_discovered: false\n---\n\n# T01: Aligned mobile Vitest root/filter execution and validated the no-login Expo bootstrap harness for deterministic startup states.\n\n**Aligned mobile Vitest root/filter execution and validated the no-login Expo bootstrap harness for deterministic startup states.**\n\n## What Happened\n\nVerified that the T01 mobile scaffold already existed locally (Expo scripts, app metadata, env example, bootstrap shell, and startup tests). Identified and fixed a contract mismatch where planned commands passed `mobile/...` test filters but Vitest was rooted at `mobile/`, causing false 'No test files found' failures. Updated `mobile/package.json` to run Vitest with `--root .. --config mobile/vitest.config.ts` and constrained `mobile/vitest.config.ts` includes to `mobile/**/*.test.ts` to preserve mobile-only isolation. Confirmed bootstrap behaviors remain visitor-first with explicit loading/ready/error state transitions and config validation coverage via existing test suite. Added a non-obvious tooling gotcha entry to `.gsd/KNOWLEDGE.md` for downstream task reliability.\n\n## Verification\n\nRan task-level verification plus slice-level verification commands. Task checks passed: mobile typecheck and focused app bootstrap tests (8 passing). Slice-level typecheck chain also passed. Expected intermediate-task failures remained for checks tied to future task assets (`mapApiClient`/`navGraph`/`mapTransform`/`mapBootstrapState` tests) and for `npx hono request ...` because the installed `hono` package in this repo does not expose a CLI executable in this environment.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm --prefix mobile run typecheck` | 0 | ✅ pass | 963ms |\n| 2 | `npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts` | 0 | ✅ pass | 1055ms |\n| 3 | `npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts` | 0 | ✅ pass | 708ms |\n| 4 | `npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts -t \"returns endpoint and status when map request fails\"` | 1 | ❌ fail | 539ms |\n| 5 | `npx hono request src/server/index.ts -P /api/map > /dev/null && npx hono request src/server/index.ts -P /api/campus/image > /dev/null` | 1 | ❌ fail | 502ms |\n| 6 | `npm --prefix mobile run typecheck && npm run typecheck` | 0 | ✅ pass | 3231ms |\n\n\n## Deviations\n\nThe expected T01 scaffold files were already present before execution; implementation work was limited to test harness alignment and verification reliability fixes.\n\n## Known Issues\n\n`npx hono request src/server/index.ts ...` fails in this environment with `npm error could not determine executable to run` because no `hono` CLI binary is available from installed dependencies. Targeted slice checks for T02/T03 test files fail as those files are not implemented yet (expected at T01 stage).\n\n## Files Created/Modified\n\n- `mobile/package.json`\n- `mobile/vitest.config.ts`\n- `.gsd/KNOWLEDGE.md`\n",
+      "description": "Create the native runtime baseline so later tasks can implement contracts and interactions on top of a real, testable app shell.\n\n## Failure Modes\n\n| Dependency | On error | On timeout | On malformed response |\n|------------|----------|-----------|----------------------|\n| Expo/Metro startup tooling | Surface deterministic startup error state and stop bootstrap | Fail startup check after bounded wait and show retry prompt | Treat invalid config shape as startup configuration failure |\n| `EXPO_PUBLIC_API_BASE_URL` configuration | Render missing-config diagnostic state; never attempt relative API URLs | N/A (static config read) | Reject invalid URL format and mark bootstrap as blocked |\n\n## Load Profile\n\n- **Shared resources**: Metro bundler process, JS runtime initialization, startup state reducer.\n- **Per-operation cost**: single bootstrap state computation per launch; no network calls yet.\n- **10x breakpoint**: hot-reload/startup loops could mask deterministic state transitions if initialization is not idempotent.\n\n## Negative Tests\n\n- **Malformed inputs**: missing `EXPO_PUBLIC_API_BASE_URL`, non-URL base value.\n- **Error paths**: startup state transitions to `error` when config validation fails.\n- **Boundary conditions**: repeated bootstrap invocation remains idempotent and does not regress to auth-required state.\n\n## Steps\n\n1. Create an Expo TypeScript package in `mobile/` with scripts for `start`, `ios`, `android`, `typecheck`, and `test`.\n2. Add runtime env wiring for `EXPO_PUBLIC_API_BASE_URL` and document it in `mobile/.env.example`.\n3. Implement `mobile/App.tsx` as a no-login visitor bootstrap shell with explicit loading/error placeholders and no authentication guard.\n4. Configure mobile-local Vitest and add deterministic bootstrap tests.\n\n## Must-Haves\n\n- [ ] Native runtime scripts exist and execute from `mobile/package.json` without touching root web runtime scripts.\n- [ ] App bootstrap path contains no authentication gate and exposes deterministic startup states (`loading`, `ready`, `error`).\n- [ ] Mobile-local tests run in isolation and become the base verification surface for subsequent S01 tasks.",
+      "estimate": "2h",
+      "files": [
+        "mobile/package.json",
+        "mobile/app.json",
+        "mobile/tsconfig.json",
+        "mobile/babel.config.js",
+        "mobile/App.tsx",
+        "mobile/vitest.config.ts",
+        "mobile/bootstrap/appBootstrap.test.ts",
+        "mobile/.env.example"
+      ],
+      "verify": "npm --prefix mobile run typecheck && npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts",
+      "inputs": [
+        ".gsd/REQUIREMENTS.md",
+        ".gsd/DECISIONS.md",
+        ".gsd/milestones/M002-a5gn45/slices/S01/S01-RESEARCH.md",
+        "package.json",
+        ".gitignore"
+      ],
+      "expected_output": [
+        "mobile/package.json",
+        "mobile/app.json",
+        "mobile/tsconfig.json",
+        "mobile/babel.config.js",
+        "mobile/App.tsx",
+        "mobile/vitest.config.ts",
+        "mobile/bootstrap/appBootstrap.test.ts",
+        "mobile/.env.example"
+      ],
+      "observability_impact": "- Signals added/changed: bootstrap phase state (`idle/loading/ready/error`) and config-missing error classification.\n- How a future agent inspects this: run `npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts` and inspect startup state rendering in `mobile/App.tsx`.\n- Failure state exposed: startup failures are surfaced as explicit UI status, preventing silent blank-screen startup.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S01",
+      "id": "T02",
+      "title": "Implement typed map API client and NavGraph normalization boundary",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Define the mobile boundary contracts that S02+ will consume by making backend fetch behavior and graph normalization explicit, typed, and test-covered.\n\n## Failure Modes\n\n| Dependency | On error | On timeout | On malformed response |\n|------------|----------|-----------|----------------------|\n| `GET /api/map` | Return structured client error with endpoint/status/reason | Retry with bounded backoff, then return timeout-classified error | Fail schema parse and return contract-validation error |\n| Floor/campus image endpoints | Return explicit image fetch error metadata for bootstrap diagnostics | Abort request and surface timeout classification in bootstrap phase | Reject unexpected content-type and fail with typed contract error |\n\n## Load Profile\n\n- **Shared resources**: backend read endpoints, mobile fetch retry queue, in-memory normalized indexes.\n- **Per-operation cost**: one map payload request plus optional image metadata request per bootstrap; O(nodes + edges) normalization.\n- **10x breakpoint**: repeated retries and large graph payloads can increase bootstrap latency and memory if normalization does not stream/index efficiently.\n\n## Negative Tests\n\n- **Malformed inputs**: invalid JSON map payload, missing `buildings`, wrong floor/node field types.\n- **Error paths**: HTTP 404/500, network timeout, aborted request.\n- **Boundary conditions**: empty buildings list, optional connector fields absent, non-accessible edge weight semantics preserved.\n\n## Steps\n\n1. Implement `mobile/data/mapApiClient.ts` typed contract functions for `/api/map`, floor-plan image URLs, and campus image URL resolution.\n2. Add retry/cancellation behavior and a structured API error object containing endpoint/status/reason/attempt.\n3. Implement `mobile/domain/navGraphSchema.ts` and `mobile/domain/navGraph.ts` to validate/normalize payloads into lookup maps while preserving connector/accessibility semantics.\n4. Add focused tests for success/failure/retry/normalization invariants and backend contract smoke checks.\n\n## Must-Haves\n\n- [ ] Client contract covers all S01 boundary-map endpoints and exposes typed responses/errors.\n- [ ] Normalization preserves `NavGraph` invariants (optional connector fields, floor metadata, accessibility semantics).\n- [ ] Contract and normalization failure paths are explicitly test-covered, not inferred.",
+      "estimate": "2h",
+      "files": [
+        "mobile/data/mapApiClient.ts",
+        "mobile/data/mapApiClient.test.ts",
+        "mobile/domain/navGraphSchema.ts",
+        "mobile/domain/navGraph.ts",
+        "mobile/domain/navGraph.test.ts"
+      ],
+      "verify": "npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts && npx hono request src/server/index.ts -P /api/map > /dev/null",
+      "inputs": [
+        "mobile/package.json",
+        "mobile/vitest.config.ts",
+        "src/server/index.ts",
+        "src/shared/types.ts",
+        "src/shared/pathfinding/graph-builder.ts"
+      ],
+      "expected_output": [
+        "mobile/data/mapApiClient.ts",
+        "mobile/data/mapApiClient.test.ts",
+        "mobile/domain/navGraphSchema.ts",
+        "mobile/domain/navGraph.ts",
+        "mobile/domain/navGraph.test.ts"
+      ],
+      "observability_impact": "- Signals added/changed: typed API error payload (`endpoint`, `status`, `reason`, `attempt`) and schema-normalization failure reason.\n- How a future agent inspects this: focused suites `mobile/data/mapApiClient.test.ts` and `mobile/domain/navGraph.test.ts`.\n- Failure state exposed: endpoint or schema regressions return explicit diagnosable error objects consumable by app bootstrap UI.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S01",
+      "id": "T03",
+      "title": "Wire live bootstrap into MapViewport pan/zoom/rotate primitives",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Complete the slice demo by wiring real backend data into a map viewport that supports baseline map gestures and diagnosable startup failure states.\n\n## Failure Modes\n\n| Dependency | On error | On timeout | On malformed response |\n|------------|----------|-----------|----------------------|\n| `mapApiClient` bootstrap calls | Transition bootstrap state to `error` with failed phase metadata | Stop waiting and expose timeout phase in startup diagnostics | Treat invalid contract result as unrecoverable bootstrap error |\n| Gesture event stream (`pan/pinch/rotate`) | Ignore invalid gesture frame and keep previous stable transform | N/A (event-driven) | Clamp/normalize transform inputs to prevent NaN/drift propagation |\n\n## Load Profile\n\n- **Shared resources**: UI render loop, gesture handler callbacks, bootstrap state transitions.\n- **Per-operation cost**: transform math per gesture frame plus one bootstrap normalization pass per app launch.\n- **10x breakpoint**: high-frequency gesture events can cause jank if transform helpers allocate excessively or trigger redundant state commits.\n\n## Negative Tests\n\n- **Malformed inputs**: NaN/Infinity transform values, invalid rotation deltas, missing viewport dimensions.\n- **Error paths**: bootstrap error phase rendering when map or image contract fetch fails.\n- **Boundary conditions**: rotation wraparound at +/-180, min/max zoom clamp, idempotent restart from error to loading.\n\n## Steps\n\n1. Implement transform helpers in `mobile/map/mapTransform.ts` for stable pan/zoom/rotate coordinate mapping anchored to gesture focal points.\n2. Add unit tests in `mobile/map/mapTransform.test.ts` that protect against focal drift and angle-wrap regressions.\n3. Build `mobile/map/MapViewport.tsx` using transform helpers and composed gesture primitives for pan/pinch/rotate.\n4. Add `mobile/bootstrap/mapBootstrapState.ts` plus tests to orchestrate `mapApiClient` + `navGraph` into explicit `loading/ready/error` startup states.\n5. Wire `mobile/App.tsx` to bootstrap state + `MapViewport` so startup renders live backend-backed map content with visible fallback errors.\n\n## Must-Haves\n\n- [ ] `MapViewport` supports baseline pan/zoom/rotate behavior with tested transform invariants.\n- [ ] Startup flow uses live backend map contracts and does not regress no-login visitor entry.\n- [ ] Startup failure path exposes explicit phase/endpoint diagnostics for future debugging.",
+      "estimate": "2.5h",
+      "files": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/mapTransform.test.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/bootstrap/mapBootstrapState.ts",
+        "mobile/bootstrap/mapBootstrapState.test.ts",
+        "mobile/App.tsx"
+      ],
+      "verify": "npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts && npm --prefix mobile run typecheck && npm run typecheck",
+      "inputs": [
+        "mobile/data/mapApiClient.ts",
+        "mobile/domain/navGraph.ts",
+        "mobile/App.tsx",
+        "src/client/hooks/useMapViewport.ts",
+        "src/client/hooks/useMapViewport.test.ts"
+      ],
+      "expected_output": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/mapTransform.test.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/bootstrap/mapBootstrapState.ts",
+        "mobile/bootstrap/mapBootstrapState.test.ts",
+        "mobile/App.tsx"
+      ],
+      "observability_impact": "- Signals added/changed: bootstrap fetch phase (`map`, `image`) and viewport transform state (`scale`, `rotation`, `translation`).\n- How a future agent inspects this: `mobile/bootstrap/mapBootstrapState.test.ts`, `mobile/map/mapTransform.test.ts`, and rendered startup status in `mobile/App.tsx`.\n- Failure state exposed: startup state carries last failed phase/endpoint so data-load issues localize quickly.",
+      "full_plan_md": "",
+      "sequence": 0
+    }
+  ],
+  "decisions": [
+    {
+      "seq": 48,
+      "id": "D001",
+      "when_context": "M001/S24 planning",
+      "scope": "routing-ui",
+      "decision": "Cross-floor direction semantics and UI floor section contract",
+      "choice": "Determine up/down transitions from resolved floor numbers (falling back to floorId only when floor metadata is missing) and include floorId/floorNumber on each DirectionStep for section rendering.",
+      "rationale": "Database floor IDs are identifiers, not reliable vertical ordering. Using floor numbers avoids incorrect up/down language, and carrying floor metadata on steps lets the sheet render deterministic floor sections without extra graph lookups.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 49,
+      "id": "D002",
+      "when_context": "M001/S25 planning",
+      "scope": "integration",
+      "decision": "Atomic persistence strategy for admin floor-connector linking",
+      "choice": "Implement a dedicated protected endpoint (`POST /api/admin/connectors/link`) that validates source/target compatibility and writes reciprocal connector fields for both nodes in one DB transaction, including relink/unlink cleanup.",
+      "rationale": "The existing save flow serializes the active floor separately from off-floor data; a dedicated endpoint guarantees bilateral consistency at write time and provides explicit failure diagnostics, preventing one-sided cross-floor links.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 50,
+      "id": "D003",
+      "when_context": "M001/S25 execution",
+      "scope": "state-management",
+      "decision": "How admin editor applies connector link/unlink updates returned from `/api/admin/connectors/link`",
+      "choice": "Treat connector updates as server-authoritative and apply full-node replacements (`REPLACE_NODES`) rather than partial merges so unlink responses can truly clear optional connector fields.",
+      "rationale": "`NavNode` connector fields are optional; merge-based updates can leave stale `connectsTo*` values after unlink operations. Replacing full node entries from backend `updatedNodes` keeps active-floor and cached graph state consistent with atomic server writes.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 51,
+      "id": "D004",
+      "when_context": "M001/S26 planning",
+      "scope": "integration",
+      "decision": "Admin GPS bounds persistence contract and client synchronization model",
+      "choice": "Add a dedicated protected floor-scoped endpoint (`PUT /api/admin/floors/:id/gps-bounds`) that accepts only complete set/clear tuples and treat the response as server-authoritative when patching floor metadata in editor state.",
+      "rationale": "GPS calibration is floor metadata consumed across admin and student flows. A floor-scoped write path with deterministic validation diagnostics prevents partial tuple drift and keeps `GET /api/map` contract data trustworthy for downstream geolocation projection.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 52,
+      "id": "D005",
+      "when_context": "M001/S26 execution",
+      "scope": "frontend-validation",
+      "decision": "How admin GPS bounds form computes validity, payload shape, and save readiness across rows",
+      "choice": "Centralize GPS bounds parsing/validation/payload derivation in pure helpers (`gpsBoundsForm.ts`) and derive per-row save gating from helper output (`deriveGpsBoundsRowUiState`) instead of ad hoc component-level checks.",
+      "rationale": "A shared pure ruleset keeps inline error messaging, save-button disabling, and request payload generation deterministic and testable. This avoids drift between UI and API expectations (complete tuple or full clear tuple, strict min/max ordering) and gives S27 a stable floor-metadata contract.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 53,
+      "id": "D006",
+      "when_context": "M001/S27 override 2026-03-24T12:13:48.431Z",
+      "scope": "workflow",
+      "decision": "Execution order for active milestone work before research begins",
+      "choice": "Create a checkpoint commit for current changes before any research or deep-dive analysis in active slices; this supersedes the prior implicit workflow where research could start before a commit checkpoint.",
+      "rationale": "User override requires commit-first sequencing to preserve rollback safety, keep research deltas traceable, and avoid mixing exploratory edits with uncheckpointed work.",
+      "revisable": "Yes",
+      "made_by": "human",
+      "superseded_by": null
+    },
+    {
+      "seq": 54,
+      "id": "D007",
+      "when_context": "M001/S27/T03",
+      "scope": "student-gps-ui-state",
+      "decision": "How to derive “Use my location” readiness and fallback messaging in student mode",
+      "choice": "Centralize derivation in `deriveStudentGpsState`, keyed by floor calibration, geolocation status, confidence threshold (50m), and nearest-node availability; expose only derived UI state to `SearchOverlay`.",
+      "rationale": "A single pure derivation layer keeps fallback reason/action enablement deterministic, testable, and redaction-safe while allowing `FloorPlanCanvas` to focus on snap wiring (`setStart`) rather than duplicating UI-state branching.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 55,
+      "id": "D008",
+      "when_context": "M001/S27/T02",
+      "scope": "student-gps-runtime",
+      "decision": "How browser geolocation watch lifecycle and marker rendering gates are structured in student map mode",
+      "choice": "Use a pure `startGeolocationWatch` lifecycle helper wrapped by `useGeolocation`, and only enable/render GPS marker state on floors with calibrated `gpsBounds` plus confident fixes (<=50m) using shared projection/confidence helpers.",
+      "rationale": "Centralizing watch subscribe/error/teardown behavior in a pure helper keeps status mapping deterministic and testable without DOM harnesses. Restricting marker derivation to calibrated floors + confident fixes prevents misleading dots/rings and enforces the same confidence contract across hook, canvas, and overlay state.",
+      "revisable": "Yes",
+      "made_by": "agent",
+      "superseded_by": null
+    },
+    {
+      "seq": 56,
+      "id": "D009",
+      "when_context": "M002-a5gn45 discuss",
+      "scope": "architecture",
+      "decision": "Mobile runtime implementation strategy for CampusNav app version",
+      "choice": "Build a full native React Native app runtime (iOS + Android) instead of wrapping the existing web app in Capacitor.",
+      "rationale": "User explicitly selected a full native rebuild to reach maps-like interaction quality and avoid web-wrapper constraints.",
+      "revisable": "Yes — if execution evidence shows parity is achievable with lower-risk architecture.",
+      "made_by": "human",
+      "superseded_by": null
+    },
+    {
+      "seq": 57,
+      "id": "D010",
+      "when_context": "M002-a5gn45 discuss",
+      "scope": "integration",
+      "decision": "Positioning and reliability contract for real-time guidance",
+      "choice": "Use GPS + device sensors only for positioning in this initiative, with confidence-gated guidance and explicit fallback prompts when confidence is low.",
+      "rationale": "User selected GPS+sensor-only strategy and accepted confidence-gated behavior as the trust-preserving mechanism.",
+      "revisable": "Yes — if on-device evidence shows unacceptable reliability and infrastructure options become viable.",
+      "made_by": "human",
+      "superseded_by": null
+    },
+    {
+      "seq": 58,
+      "id": "D011",
+      "when_context": "M002-a5gn45 discuss",
+      "scope": "scope",
+      "decision": "M002 feature-boundary for admin capabilities",
+      "choice": "Mobile app scope is student navigation only; admin editing remains in the existing web admin panel.",
+      "rationale": "User selected 'Student app + web admin' to keep milestone focused on visitor navigation outcomes.",
+      "revisable": "Yes — if a later milestone needs mobile admin support.",
+      "made_by": "human",
+      "superseded_by": null
+    },
+    {
+      "seq": 59,
+      "id": "D012",
+      "when_context": "M002-a5gn45 discuss",
+      "scope": "operability",
+      "decision": "Runtime mode for first real-time guidance release",
+      "choice": "M002 real-time guidance runs in foreground mode; full background/lock-screen continuity is deferred.",
+      "rationale": "User chose foreground-first delivery to reduce complexity while proving core live guidance loop.",
+      "revisable": "Yes — revisit after foreground reliability is proven.",
+      "made_by": "human",
+      "superseded_by": null
+    },
+    {
+      "seq": 60,
+      "id": "D013",
+      "when_context": "M002-a5gn45 discuss",
+      "scope": "pattern",
+      "decision": "Phasing of guidance experience enhancements",
+      "choice": "Voice prompts and haptic cues are mandatory for the full vision but deferred to a later milestone after core reliability is stable.",
+      "rationale": "User marked voice+haptics as non-negotiable overall but agreed to defer from M002 to protect core delivery risk.",
+      "revisable": "Yes — if core reliability lands earlier than expected.",
+      "made_by": "human",
+      "superseded_by": null
+    }
+  ],
+  "verification_evidence": [
+    {
+      "id": 1,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 963,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 2,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1055,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 3,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 708,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 4,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts -t \"returns endpoint and status when map request fails\"",
+      "exit_code": 1,
+      "verdict": "❌ fail",
+      "duration_ms": 539,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 5,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx hono request src/server/index.ts -P /api/map > /dev/null && npx hono request src/server/index.ts -P /api/campus/image > /dev/null",
+      "exit_code": 1,
+      "verdict": "❌ fail",
+      "duration_ms": 502,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    },
+    {
+      "id": 6,
+      "task_id": "T01",
+      "slice_id": "S01",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck && npm run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 3231,
+      "created_at": "2026-03-26T11:44:08.373Z"
+    }
+  ]
+}

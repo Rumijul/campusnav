@@ -29,3 +29,10 @@ vendor/
 coverage/
 .cache/
 tmp/
+
+# Expo mobile runtime artifacts
+mobile/node_modules/
+mobile/.expo/
+mobile/.expo-shared/
+mobile/android/
+mobile/ios/

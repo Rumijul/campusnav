@@ -2,253 +2,444 @@
 
 This file is the explicit capability and coverage contract for the project.
 
+Use it to track what is actively in scope, what has been validated by completed work, what is intentionally deferred, and what is explicitly out of scope.
+
+## Active
+
+### R023 — Native CampusNav app runs on iOS and Android using a React Native runtime.
+- Class: core-capability
+- Status: active
+- Description: The product ships as installable iOS and Android apps, not only as a browser session.
+- Why it matters: The project goal is an app version of CampusNav.
+- Source: user
+- Primary owning slice: M002-a5gn45/S01
+- Supporting slices: M002-a5gn45/S05
+- Validation: mapped
+- Notes: Architecture direction locked to React Native rebuild path.
+
+### R024 — Student navigation remains no-login in the mobile app.
+- Class: primary-user-loop
+- Status: active
+- Description: Users can open the app and start routing without account creation/sign-in.
+- Why it matters: Keeps onboarding friction low for visitors.
+- Source: user
+- Primary owning slice: M002-a5gn45/S01
+- Supporting slices: M002-a5gn45/S04
+- Validation: mapped
+- Notes: Mirrors current web behavior.
+
+### R025 — Mobile app supports current student-side CampusNav capabilities.
+- Class: primary-user-loop
+- Status: active
+- Description: App can load map graph data, choose start/destination, and render route + steps across existing campus/building/floor model.
+- Why it matters: “App version” implies continuity with what already works.
+- Source: user
+- Primary owning slice: M002-a5gn45/S02
+- Supporting slices: M002-a5gn45/S04
+- Validation: mapped
+- Notes: Admin editing remains web-based (R034).
+
+### R026 — Foreground real-time guidance works across outdoor and indoor route segments.
+- Class: primary-user-loop
+- Status: active
+- Description: While app is open, guidance updates continuously through campus outdoor and indoor floor transitions in one journey.
+- Why it matters: Core modernization target from static to live navigation.
+- Source: user
+- Primary owning slice: M002-a5gn45/S03
+- Supporting slices: M002-a5gn45/S04
+- Validation: mapped
+- Notes: Background/lock-screen continuity is deferred in this milestone.
+
+### R027 — Live guidance is confidence-gated with explicit fallback behavior.
+- Class: continuity
+- Status: active
+- Description: App only auto-guides when position confidence is acceptable; otherwise it surfaces clear correction prompts instead of misleading motion.
+- Why it matters: Preserves trust despite GPS+sensor indoor limits.
+- Source: user
+- Primary owning slice: M002-a5gn45/S03
+- Supporting slices: M002-a5gn45/S04
+- Validation: mapped
+- Notes: Chosen accuracy contract.
+
+### R028 — Off-route recovery reroutes within 5–10 seconds in normal foreground use.
+- Class: quality-attribute
+- Status: active
+- Description: Drift from planned route is detected and guidance recovers on the stated SLA.
+- Why it matters: Prevents dead-end user experiences during live navigation.
+- Source: user
+- Primary owning slice: M002-a5gn45/S03
+- Supporting slices: M002-a5gn45/S05
+- Validation: mapped
+- Notes: SLA is a practical bar, not a hard real-time guarantee.
+
+### R029 — Heading-aware map behavior is available during live guidance.
+- Class: quality-attribute
+- Status: active
+- Description: Map orientation behavior reflects movement heading in guidance mode.
+- Why it matters: Supports maps-like spatial orientation expectations.
+- Source: user
+- Primary owning slice: M002-a5gn45/S03
+- Supporting slices: M002-a5gn45/S04
+- Validation: mapped
+- Notes: Includes anti-jitter constraints from prior web learnings.
+
+### R030 — Floor transition guidance avoids wrong-floor instructions.
+- Class: failure-visibility
+- Status: active
+- Description: Guidance handles floor changes with explicit, correct floor context and prevents silent floor mismatch.
+- Why it matters: Wrong-floor directions are a hard trust failure.
+- Source: user
+- Primary owning slice: M002-a5gn45/S04
+- Supporting slices: M002-a5gn45/S03
+- Validation: mapped
+- Notes: Uses confidence/floor-state checks before advancing step state.
+
+### R031 — Real-time guidance parity exists for standard and wheelchair-accessible modes.
+- Class: primary-user-loop
+- Status: active
+- Description: Both routing modes receive live progression and reroute behavior.
+- Why it matters: Accessibility mode cannot be second-class.
+- Source: user
+- Primary owning slice: M002-a5gn45/S04
+- Supporting slices: M002-a5gn45/S05
+- Validation: mapped
+- Notes: Must preserve existing accessibility semantics.
+
+### R032 — Internal iOS and Android distributable builds are produced.
+- Class: launchability
+- Status: active
+- Description: Milestone outputs installable internal builds (TestFlight/internal Android distribution channel).
+- Why it matters: User explicitly wants app runtime proof but cannot do public store launch yet.
+- Source: user
+- Primary owning slice: M002-a5gn45/S05
+- Supporting slices: none
+- Validation: mapped
+- Notes: Public store submission deferred.
+
+### R033 — Visitor can complete one end-to-end guided trip including an off-route recovery.
+- Class: primary-user-loop
+- Status: active
+- Description: A first-time visitor can reach destination using live guidance through one reroute event.
+- Why it matters: This is the agreed “done” bar.
+- Source: user
+- Primary owning slice: M002-a5gn45/S05
+- Supporting slices: M002-a5gn45/S03, M002-a5gn45/S04
+- Validation: mapped
+- Notes: Must be proven on real device runtime.
+
+### R034 — Admin map editing remains web-based for this app initiative.
+- Class: admin/support
+- Status: active
+- Description: Mobile milestone does not port full admin editor; backend/admin web remains source of truth.
+- Why it matters: Controls scope and keeps app work focused on visitor/student guidance loop.
+- Source: user
+- Primary owning slice: M002-a5gn45/S02
+- Supporting slices: none
+- Validation: mapped
+- Notes: Explicit user decision (“student app + web admin”).
+
 ## Validated
 
-### R001 — Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
+### R001 — Pinch-to-zoom targets touch midpoint at all map rotation angles.
 - Class: quality-attribute
 - Status: validated
-- Description: Pinch-to-zoom targets the midpoint between touches at all map rotation angles.
-- Why it matters: Prevents map jump/drift on mobile gestures.
+- Description: Pinch zoom focal point remains stable at touch midpoint.
+- Why it matters: Prevents map drift/jump.
 - Source: user
 - Primary owning slice: M001/S23
 - Supporting slices: none
 - Validation: validated
-- Notes: Migrated from TOUCH-01 (completed in Phase 21 / S23).
+- Notes: Proved by gesture tests and full suite in M001.
 
-### R002 — Two-finger rotation pivots around the touch midpoint rather than stage origin.
+### R002 — Two-finger rotation pivots around touch midpoint.
 - Class: quality-attribute
 - Status: validated
-- Description: Two-finger rotation pivots around the touch midpoint rather than stage origin.
-- Why it matters: Makes map rotation predictable and usable.
+- Description: Rotation uses midpoint pivot rather than stage origin.
+- Why it matters: Predictable rotation behavior.
 - Source: user
 - Primary owning slice: M001/S23
 - Supporting slices: none
 - Validation: validated
-- Notes: Migrated from TOUCH-02 (completed in Phase 21 / S23).
+- Notes: Proved by gesture tests and full suite in M001.
 
-### R003 — Two-finger gesture applies a 2-degree per-frame threshold to suppress micro-rotation jitter.
+### R003 — Two-finger rotation applies jitter threshold.
 - Class: quality-attribute
 - Status: validated
-- Description: Two-finger gesture applies a 2-degree per-frame threshold to suppress micro-rotation jitter.
-- Why it matters: Prevents accidental rotation during pure pinch gestures.
+- Description: Micro-rotation noise is suppressed with thresholding.
+- Why it matters: Avoids accidental rotation during pinch.
 - Source: user
 - Primary owning slice: M001/S23
 - Supporting slices: none
 - Validation: validated
-- Notes: Migrated from TOUCH-03 (completed in Phase 21 / S23).
+- Notes: Proved in M001 test suite.
 
-### R004 — Multi-floor route directions display a floor-section header between steps on different floors.
+### R004 — Cross-floor directions show section headers between floors.
 - Class: primary-user-loop
 - Status: validated
-- Description: Multi-floor route directions display a floor-section header between steps on different floors.
-- Why it matters: Students can follow cross-floor routes without losing context between floors.
+- Description: Multi-floor instruction output is grouped with floor sections.
+- Why it matters: Improves cross-floor readability.
 - Source: user
 - Primary owning slice: M001/S24
 - Supporting slices: none
-- Validation: Validated in S24 by contiguous floor-section grouping + conditional headers in DirectionsSheet; proven by passing `npm test -- src/client/components/directionSections.test.ts` and full suite `npm test`.
-- Notes: Migrated from DIR-01.
+- Validation: validated
+- Notes: Proved in direction section tests.
 
-### R005 — Floor-change direction steps include clear up/down directional language (e.g., “up to Floor 3”).
+### R005 — Floor-change steps use explicit up/down phrasing.
 - Class: primary-user-loop
 - Status: validated
-- Description: Floor-change direction steps include clear up/down directional language (e.g., “up to Floor 3”).
-- Why it matters: Students need explicit movement guidance at connector transitions.
+- Description: Transition steps include clear vertical direction language.
+- Why it matters: Removes ambiguity at connectors.
 - Source: user
 - Primary owning slice: M001/S24
 - Supporting slices: none
-- Validation: Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`.
-- Notes: Migrated from DIR-02.
+- Validation: validated
+- Notes: Proved in route-direction tests.
 
-### R006 — Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
+### R006 — Admin can link connector nodes visually (no manual IDs).
 - Class: admin/support
 - Status: validated
-- Description: Admin can link a floor-connector node to corresponding nodes above/below using dropdown UI (no manual node-ID entry).
-- Why it matters: Reduces admin errors and speeds map maintenance.
+- Description: Connector linking is done via constrained dropdown UX.
+- Why it matters: Reduces operator error.
 - Source: user
 - Primary owning slice: M001/S25
 - Supporting slices: none
-- Validation: Validated in S25 by connector-only Above/Below dropdown controls in `EditorSidePanel` and candidate filtering in `deriveConnectorCandidates` (same building + adjacent floor + connector type, no manual node-ID entry). Proven by passing `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from CONN-01.
+- Validation: validated
+- Notes: Proved in connector UI tests.
 
-### R007 — Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
+### R007 — Connector linking writes both sides atomically.
 - Class: integration
 - Status: validated
-- Description: Saving a connector link writes both sides atomically to avoid one-sided cross-floor links.
-- Why it matters: Prevents asymmetric routing failures.
+- Description: Reciprocal connector state is persisted transactionally.
+- Why it matters: Prevents one-sided links.
 - Source: user
 - Primary owning slice: M001/S25
 - Supporting slices: none
-- Validation: Validated in S25 by transactional `linkConnectorNodes` write path and protected `POST /api/admin/connectors/link` endpoint that atomically writes source + reciprocal counterpart updates and stale-link cleanup. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, targeted invalid-direction check `npm test -- src/server/connectorLinking.test.ts -t "returns LINK_VALIDATION_ERROR when direction/floor pairing is invalid"`, and full suite `npm test`.
-- Notes: Migrated from CONN-02.
+- Validation: validated
+- Notes: Proved by server transaction tests.
 
-### R008 — Admin can remove existing connector links between nodes.
+### R008 — Admin can unlink existing connector relationships.
 - Class: admin/support
 - Status: validated
-- Description: Admin can remove existing connector links between nodes.
-- Why it matters: Supports correction workflows and map evolution.
+- Description: Link removal clears reciprocal connector references.
+- Why it matters: Maintains graph correctness during edits.
 - Source: user
 - Primary owning slice: M001/S25
 - Supporting slices: none
-- Validation: Validated in S25 by unlink flows that clear both sides (`above/below` node/floor fields) and client patch application that reflects server `updatedNodes` without one-sided drift. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from CONN-03.
+- Validation: validated
+- Notes: Proved in server/client unlink tests.
 
-### R009 — Admin can configure min/max latitude and longitude bounds per floor and for campus map.
+### R009 — Admin can configure GPS bounds per floor and campus map.
 - Class: admin/support
 - Status: validated
-- Description: Admin can configure min/max latitude and longitude bounds per floor and for campus map.
-- Why it matters: Required to transform GPS coordinates into map positions.
+- Description: Floor and campus calibration bounds are persisted and editable.
+- Why it matters: Enables lat/lng projection to map space.
 - Source: user
 - Primary owning slice: M001/S26
 - Supporting slices: none
-- Validation: Validated in S26 by floor-level GPS bounds persistence columns (`gpsMinLat/gpsMaxLat/gpsMinLng/gpsMaxLng`), protected mutation endpoint `PUT /api/admin/floors/:id/gps-bounds`, and admin Manage Floors row controls available in both building and campus mode. Proven by passing `test -f drizzle/0003_floor_gps_bounds.sql`, `npm test -- src/server/floorGpsBounds.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`, and `npm test`.
-- Notes: S26 completed 2026-03-24; includes complete-only `GET /api/map` `gpsBounds` serialization contract for downstream student GPS projection in S27.
+- Validation: validated
+- Notes: Proved by API/UI tests and migration artifacts.
 
-### R010 — Admin GPS bounds form enforces minLat < maxLat and minLng < maxLng with inline errors.
+### R010 — GPS bounds enforce valid min/max ordering.
 - Class: quality-attribute
 - Status: validated
-- Description: Admin GPS bounds form enforces minLat < maxLat and minLng < maxLng with inline errors.
-- Why it matters: Prevents invalid calibration data from breaking map projection.
+- Description: Invalid or incomplete bounds are rejected with inline error feedback.
+- Why it matters: Prevents broken projection state.
 - Source: user
 - Primary owning slice: M001/S26
 - Supporting slices: none
-- Validation: Validated in S26 by pure GPS bounds form validation (`deriveGpsBoundsFormState`) and row-level UI gating (`deriveGpsBoundsRowUiState`) enforcing complete tuple + strict ordering (`minLat < maxLat`, `minLng < maxLng`) with inline errors and blocked saves. Proven by passing `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx -t "renders inline validation error and blocks save for partial gps tuple"`, server range guard check `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`, and full suite `npm test`.
-- Notes: S26 completed 2026-03-24; validation is enforced in both pure helper logic and modal row UX before network mutation.
+- Validation: validated
+- Notes: Proved by form validation + API tests.
 
-### R011 — Student sees a “you are here” GPS dot on map when valid bounds are configured.
+### R011 — Student can see GPS “you are here” marker when calibrated.
 - Class: primary-user-loop
 - Status: validated
-- Description: Student sees a “you are here” GPS dot on map when valid bounds are configured.
-- Why it matters: Improves start-point awareness and navigation confidence.
+- Description: GPS marker renders for valid floor calibration and confident fixes.
+- Why it matters: Helps orient start position.
 - Source: user
 - Primary owning slice: M001/S27
 - Supporting slices: none
-- Validation: Validated in S27 by calibrated-floor geolocation projection wiring in `FloorPlanCanvas` + dedicated Konva marker layer rendering in `GpsLocationLayer`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/hooks/useGeolocation.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from GPS-03.
+- Validation: validated
+- Notes: Proved by GPS layer/hook tests.
 
-### R012 — GPS dot displays an accuracy ring proportional to reported uncertainty.
+### R012 — GPS marker includes confidence ring.
 - Class: quality-attribute
 - Status: validated
-- Description: GPS dot displays an accuracy ring proportional to reported uncertainty.
-- Why it matters: Communicates confidence level of location estimate.
+- Description: Accuracy ring scales with reported uncertainty.
+- Why it matters: Communicates confidence.
 - Source: user
 - Primary owning slice: M001/S27
 - Supporting slices: none
-- Validation: Validated in S27 by `accuracyMetersToMapPixelRadius` scaling and `GpsLocationLayer` accuracy-ring rendering (ring shown when radius > 0); proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from GPS-04.
+- Validation: validated
+- Notes: Proved in shared GPS math + UI tests.
 
-### R013 — GPS dot is hidden when reported accuracy exceeds 50 meters.
+### R013 — Low-confidence GPS fixes are hidden.
 - Class: quality-attribute
 - Status: validated
-- Description: GPS dot is hidden when reported accuracy exceeds 50 meters.
-- Why it matters: Avoids showing misleading location in poor-signal conditions.
+- Description: Marker is suppressed above confidence threshold.
+- Why it matters: Avoids false certainty.
 - Source: user
 - Primary owning slice: M001/S27
 - Supporting slices: none
-- Validation: Validated in S27 by confidence gate `isGpsFixConfident` (<=50m) and marker suppression in `FloorPlanCanvas`/`deriveStudentGpsState`; proven by passing `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`, `npm test -- src/client/gps/studentGpsState.test.ts`, and full suite `npm test`.
-- Notes: Migrated from GPS-05.
+- Validation: validated
+- Notes: Proved in confidence-gate tests.
 
-### R014 — Student can use current location as route start by snapping to nearest walkable node.
+### R014 — User can snap start to nearest walkable node from current location.
 - Class: primary-user-loop
 - Status: validated
-- Description: Student can use current location as route start by snapping to nearest walkable node.
-- Why it matters: Reduces friction for route setup and keeps routing graph-consistent.
+- Description: “Use my location” chooses nearest graph-valid walkable node.
+- Why it matters: Reduces setup friction while preserving graph integrity.
 - Source: user
 - Primary owning slice: M001/S27
 - Supporting slices: none
-- Validation: Validated in S27 by nearest walkable-node snap helper `snapLatLngToNearestWalkableNode` and `FloorPlanCanvas` `handleUseMyLocation -> routeSelection.setStart(...)` wiring through `SearchOverlay`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from GPS-06.
+- Validation: validated
+- Notes: Proved by snap behavior tests.
 
-### R015 — If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
+### R015 — Clear GPS fallback messaging with manual continuity.
 - Class: continuity
 - Status: validated
-- Description: If GPS is unavailable or denied, app shows clear fallback messaging and manual start selection remains fully functional.
-- Why it matters: Core navigation remains usable for all users/devices.
+- Description: Permission denied/unavailable/unsupported states preserve manual route setup.
+- Why it matters: Navigation remains usable under degraded GPS.
 - Source: user
 - Primary owning slice: M001/S27
 - Supporting slices: none
-- Validation: Validated in S27 by explicit fallback-state derivation (`deriveStudentGpsState`) for unsupported/permission-denied/unavailable/low-confidence/no-nearest cases and SearchOverlay manual-control continuity; proven by passing `npm test -- src/client/hooks/useGeolocation.test.ts -t "maps permission denied geolocation errors to explicit status"`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`.
-- Notes: Migrated from GPS-07.
+- Validation: validated
+- Notes: Proved by geolocation-state and overlay tests.
 
-### R022 — For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
-- Class: process-governance
+### R022 — Active slices checkpoint before deep-dive research.
+- Class: operability
 - Status: validated
-- Description: For active milestone execution, create a checkpoint commit before any research/deep-dive activity begins.
-- Why it matters: Preserves rollback safety, keeps exploratory diffs traceable, and prevents mixing uncheckpointed edits with research outcomes.
-- Source: user override
+- Description: Active milestone execution requires checkpoint commit before research/deep dives.
+- Why it matters: Preserves rollback traceability.
+- Source: user
 - Primary owning slice: M001/S27
-- Supporting slices: M001 (all remaining active slices)
-- Validation: Validated in S27 by checkpoint artifact presence and resolvable commit hash prior to implementation deep-dive; proven by passing `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md` and `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print \$2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`.
-- Notes: Added from override 2026-03-24; implemented via decision D006.
+- Supporting slices: M001
+- Validation: validated
+- Notes: Proved by checkpoint artifact + commit hash resolvability.
 
 ## Deferred
 
-### R016 — GPS bounds can be configured using map-click calibration helper instead of text input only.
+### R016 — Map-click calibration helper for GPS bounds.
 - Class: admin/support
 - Status: deferred
-- Description: GPS bounds can be configured using map-click calibration helper instead of text input only.
-- Why it matters: Would improve admin usability for calibration.
+- Description: Bounds can be set via visual calibration UX.
+- Why it matters: Improves admin calibration speed.
 - Source: user
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Migrated from GPS-V2-01.
+- Notes: Deferred from M001.
 
-### R017 — System infers current floor from sensor signals (e.g., altitude/barometric data).
+### R017 — Automatic floor inference from sensor signals.
 - Class: differentiator
 - Status: deferred
-- Description: System infers current floor from sensor signals (e.g., altitude/barometric data).
-- Why it matters: Reduces manual floor selection friction.
+- Description: System infers active floor via sensor model.
+- Why it matters: Reduces manual correction burden.
 - Source: user
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Migrated from GPS-V2-02.
+- Notes: Deferred from M001.
 
-### R018 — Device orientation can auto-rotate map to match heading.
+### R018 — Device-orientation auto-map rotation mode.
 - Class: differentiator
 - Status: deferred
-- Description: Device orientation can auto-rotate map to match heading.
-- Why it matters: Could improve wayfinding orientation for some users.
+- Description: Map can auto-rotate with heading beyond manual rotation gestures.
+- Why it matters: Potentially better movement orientation.
 - Source: user
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Migrated from GPS-V2-03.
+- Notes: Deferred from M001.
 
-### R019 — Floor-transition instruction names specific connector landmark (e.g., “Take Staircase A to Floor 2”).
+### R019 — Floor transition step names specific connector landmark.
 - Class: primary-user-loop
 - Status: deferred
-- Description: Floor-transition instruction names specific connector landmark (e.g., “Take Staircase A to Floor 2”).
-- Why it matters: Increases clarity in buildings with multiple connectors.
+- Description: Transition copy includes connector name (e.g., Staircase A).
+- Why it matters: Improves precision in complex buildings.
 - Source: user
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: unmapped
-- Notes: Migrated from DIR-V2-01.
+- Notes: Deferred from M001.
+
+### R035 — Voice turn prompts in real-time guidance.
+- Class: differentiator
+- Status: deferred
+- Description: Spoken prompts deliver turn guidance hands-free.
+- Why it matters: Needed for maps-like guidance completeness.
+- Source: user
+- Primary owning slice: M004 (provisional)
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Explicitly deferred from M002.
+
+### R036 — Haptic guidance cues in real-time navigation.
+- Class: differentiator
+- Status: deferred
+- Description: Haptic pulses reinforce navigation events.
+- Why it matters: Improves feedback without visual focus.
+- Source: user
+- Primary owning slice: M004 (provisional)
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Explicitly deferred from M002.
+
+### R037 — Full offline maps + route packs.
+- Class: launchability
+- Status: deferred
+- Description: App works without network using synced offline packs.
+- Why it matters: Improves resiliency and field usability.
+- Source: inferred
+- Primary owning slice: M005 (provisional)
+- Supporting slices: none
+- Validation: unmapped
+- Notes: Deferred to avoid destabilizing initial live-guidance scope.
 
 ## Out of Scope
 
-### R020 — Continuous high-confidence indoor live tracking.
+### R020 — Continuous high-confidence indoor tracking with current browser GPS assumptions.
 - Class: anti-feature
 - Status: out-of-scope
-- Description: Continuous high-confidence indoor live tracking.
-- Why it matters: Prevents overpromising with unreliable indoor GPS accuracy.
+- Description: Product does not promise always-high-confidence indoor tracking from commodity sensors alone.
+- Why it matters: Prevents overclaiming reliability.
 - Source: user
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: n/a
-- Notes: Explicitly excluded in legacy requirements.
+- Notes: Legacy scope guard remains valid.
 
-### R021 — Integrating class schedules with route planning.
+### R021 — Class schedule integration into route planning.
 - Class: anti-feature
 - Status: out-of-scope
-- Description: Integrating class schedules with route planning.
-- Why it matters: Keeps milestone scope focused on wayfinding core.
+- Description: Navigation is not coupled with timetable/schedule planning.
+- Why it matters: Avoids unrelated domain expansion.
 - Source: inferred
 - Primary owning slice: none
 - Supporting slices: none
 - Validation: n/a
-- Notes: Explicitly excluded in project scope history.
+- Notes: Legacy scope guard remains valid.
+
+### R038 — BLE/UWB/Wi-Fi RTT infrastructure rollout.
+- Class: constraint
+- Status: out-of-scope
+- Description: This initiative does not include hardware/infrastructure deployment for indoor RTLS.
+- Why it matters: User selected GPS+sensor-only path.
+- Source: user
+- Primary owning slice: none
+- Supporting slices: none
+- Validation: n/a
+- Notes: May be revisited in future infrastructure milestone.
+
+### R039 — Public App Store and Play Store launch in M002.
+- Class: constraint
+- Status: out-of-scope
+- Description: M002 only requires internal distributable builds.
+- Why it matters: User cannot perform store launch now.
+- Source: user
+- Primary owning slice: none
+- Supporting slices: none
+- Validation: n/a
+- Notes: Public launch can be planned after internal validation.
 
 ## Traceability
 
@@ -257,36 +448,46 @@ This file is the explicit capability and coverage contract for the project.
 | R001 | quality-attribute | validated | M001/S23 | none | validated |
 | R002 | quality-attribute | validated | M001/S23 | none | validated |
 | R003 | quality-attribute | validated | M001/S23 | none | validated |
-| R004 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by contiguous floor-section grouping + conditional headers in DirectionsSheet; proven by passing `npm test -- src/client/components/directionSections.test.ts` and full suite `npm test`. |
-| R005 | primary-user-loop | validated | M001/S24 | none | Validated in S24 by explicit up/down connector phrasing derived from resolved floor numbers; proven by passing `npm test -- src/client/hooks/useRouteDirections.test.ts`, diagnostic fallback test, and full suite `npm test`. |
-| R006 | admin/support | validated | M001/S25 | none | Validated in S25 by connector-only Above/Below dropdown controls in `EditorSidePanel` and candidate filtering in `deriveConnectorCandidates` (same building + adjacent floor + connector type, no manual node-ID entry). Proven by passing `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`. |
-| R007 | integration | validated | M001/S25 | none | Validated in S25 by transactional `linkConnectorNodes` write path and protected `POST /api/admin/connectors/link` endpoint that atomically writes source + reciprocal counterpart updates and stale-link cleanup. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, targeted invalid-direction check `npm test -- src/server/connectorLinking.test.ts -t "returns LINK_VALIDATION_ERROR when direction/floor pairing is invalid"`, and full suite `npm test`. |
-| R008 | admin/support | validated | M001/S25 | none | Validated in S25 by unlink flows that clear both sides (`above/below` node/floor fields) and client patch application that reflects server `updatedNodes` without one-sided drift. Proven by passing `npm test -- src/server/connectorLinking.test.ts`, `npm test -- src/client/components/admin/connectorLinking.test.ts`, `npm test -- src/client/components/admin/EditorSidePanel.connector.test.tsx`, and full suite `npm test`. |
-| R009 | admin/support | validated | M001/S26 | none | Validated in S26 by floor-level GPS bounds persistence columns (`gpsMinLat/gpsMaxLat/gpsMinLng/gpsMaxLng`), protected mutation endpoint `PUT /api/admin/floors/:id/gps-bounds`, and admin Manage Floors row controls available in both building and campus mode. Proven by passing `test -f drizzle/0003_floor_gps_bounds.sql`, `npm test -- src/server/floorGpsBounds.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx`, and `npm test`. |
-| R010 | quality-attribute | validated | M001/S26 | none | Validated in S26 by pure GPS bounds form validation (`deriveGpsBoundsFormState`) and row-level UI gating (`deriveGpsBoundsRowUiState`) enforcing complete tuple + strict ordering (`minLat < maxLat`, `minLng < maxLng`) with inline errors and blocked saves. Proven by passing `npm test -- src/client/components/admin/gpsBoundsForm.test.ts`, `npm test -- src/client/components/admin/ManageFloorsModal.gps.test.tsx -t "renders inline validation error and blocks save for partial gps tuple"`, server range guard check `npm test -- src/server/floorGpsBounds.test.ts -t "returns BOUNDS_RANGE_INVALID when min/max ordering is invalid"`, and full suite `npm test`. |
-| R011 | primary-user-loop | validated | M001/S27 | none | Validated in S27 by calibrated-floor geolocation projection wiring in `FloorPlanCanvas` + dedicated Konva marker layer rendering in `GpsLocationLayer`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/hooks/useGeolocation.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`. |
-| R012 | quality-attribute | validated | M001/S27 | none | Validated in S27 by `accuracyMetersToMapPixelRadius` scaling and `GpsLocationLayer` accuracy-ring rendering (ring shown when radius > 0); proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/components/GpsLocationLayer.test.tsx`, and full suite `npm test`. |
-| R013 | quality-attribute | validated | M001/S27 | none | Validated in S27 by confidence gate `isGpsFixConfident` (<=50m) and marker suppression in `FloorPlanCanvas`/`deriveStudentGpsState`; proven by passing `npm test -- src/shared/gps.test.ts -t "hides low-confidence fixes above 50m"`, `npm test -- src/client/gps/studentGpsState.test.ts`, and full suite `npm test`. |
-| R014 | primary-user-loop | validated | M001/S27 | none | Validated in S27 by nearest walkable-node snap helper `snapLatLngToNearestWalkableNode` and `FloorPlanCanvas` `handleUseMyLocation -> routeSelection.setStart(...)` wiring through `SearchOverlay`; proven by passing `npm test -- src/shared/gps.test.ts`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`. |
-| R015 | continuity | validated | M001/S27 | none | Validated in S27 by explicit fallback-state derivation (`deriveStudentGpsState`) for unsupported/permission-denied/unavailable/low-confidence/no-nearest cases and SearchOverlay manual-control continuity; proven by passing `npm test -- src/client/hooks/useGeolocation.test.ts -t "maps permission denied geolocation errors to explicit status"`, `npm test -- src/client/gps/studentGpsState.test.ts`, `npm test -- src/client/components/SearchOverlay.gps.test.tsx`, and full suite `npm test`. |
+| R004 | primary-user-loop | validated | M001/S24 | none | validated |
+| R005 | primary-user-loop | validated | M001/S24 | none | validated |
+| R006 | admin/support | validated | M001/S25 | none | validated |
+| R007 | integration | validated | M001/S25 | none | validated |
+| R008 | admin/support | validated | M001/S25 | none | validated |
+| R009 | admin/support | validated | M001/S26 | none | validated |
+| R010 | quality-attribute | validated | M001/S26 | none | validated |
+| R011 | primary-user-loop | validated | M001/S27 | none | validated |
+| R012 | quality-attribute | validated | M001/S27 | none | validated |
+| R013 | quality-attribute | validated | M001/S27 | none | validated |
+| R014 | primary-user-loop | validated | M001/S27 | none | validated |
+| R015 | continuity | validated | M001/S27 | none | validated |
 | R016 | admin/support | deferred | none | none | unmapped |
 | R017 | differentiator | deferred | none | none | unmapped |
 | R018 | differentiator | deferred | none | none | unmapped |
 | R019 | primary-user-loop | deferred | none | none | unmapped |
 | R020 | anti-feature | out-of-scope | none | none | n/a |
 | R021 | anti-feature | out-of-scope | none | none | n/a |
-| R022 | process-governance | validated | M001/S27 | M001 (all remaining active slices) | Validated in S27 by checkpoint artifact presence and resolvable commit hash prior to implementation deep-dive; proven by passing `test -f .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md` and `bash -lc 'hash=$(awk "/^checkpoint_commit:/ { print \$2 }" .gsd/milestones/M001/slices/S27/S27-CHECKPOINT.md); test -n "$hash" && git cat-file -e "${hash}^{commit}"'`. |
+| R022 | operability | validated | M001/S27 | M001 | validated |
+| R023 | core-capability | active | M002-a5gn45/S01 | M002-a5gn45/S05 | mapped |
+| R024 | primary-user-loop | active | M002-a5gn45/S01 | M002-a5gn45/S04 | mapped |
+| R025 | primary-user-loop | active | M002-a5gn45/S02 | M002-a5gn45/S04 | mapped |
+| R026 | primary-user-loop | active | M002-a5gn45/S03 | M002-a5gn45/S04 | mapped |
+| R027 | continuity | active | M002-a5gn45/S03 | M002-a5gn45/S04 | mapped |
+| R028 | quality-attribute | active | M002-a5gn45/S03 | M002-a5gn45/S05 | mapped |
+| R029 | quality-attribute | active | M002-a5gn45/S03 | M002-a5gn45/S04 | mapped |
+| R030 | failure-visibility | active | M002-a5gn45/S04 | M002-a5gn45/S03 | mapped |
+| R031 | primary-user-loop | active | M002-a5gn45/S04 | M002-a5gn45/S05 | mapped |
+| R032 | launchability | active | M002-a5gn45/S05 | none | mapped |
+| R033 | primary-user-loop | active | M002-a5gn45/S05 | M002-a5gn45/S03, M002-a5gn45/S04 | mapped |
+| R034 | admin/support | active | M002-a5gn45/S02 | none | mapped |
+| R035 | differentiator | deferred | M004 (provisional) | none | unmapped |
+| R036 | differentiator | deferred | M004 (provisional) | none | unmapped |
+| R037 | launchability | deferred | M005 (provisional) | none | unmapped |
+| R038 | constraint | out-of-scope | none | none | n/a |
+| R039 | constraint | out-of-scope | none | none | n/a |
 
 ## Coverage Summary
 
-- Active requirements: 0
-- Mapped to slices: 0
-- Validated: 16 (R001, R002, R003, R004, R005, R006, R007, R008, R009, R010, R011, R012, R013, R014, R015, R022)
+- Active requirements: 12
+- Mapped to slices: 12
+- Validated: 16
 - Unmapped active requirements: 0
-
-## Milestone Closeout Audit (2026-03-25)
-
-- Verified milestone-level status transitions with evidence during M001 closeout.
-- Confirmed `R001-R015` and `R022` remain **validated** with slice-backed proof.
-- Re-ran full regression during closeout (`npm test` → 17 files / 144 tests passed) to confirm requirement proofs still hold end-to-end.
-- No additional requirement status changes were introduced during closeout.
