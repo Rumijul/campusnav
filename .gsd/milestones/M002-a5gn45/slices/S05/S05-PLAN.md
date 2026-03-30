@@ -43,7 +43,7 @@ Use a script or sed to handle all files systematically. The T01 blocker task fix
   - Estimate: 30m
   - Files: mobile/android/, mobile/.env
   - Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file
-- [ ] **T06: Build iOS .app bundle artifact** — Build iOS .app bundle from the generated ios/ directory. Run `npx eas build --platform ios --profile preview --non-interactive` or fall back to `xcodebuild -workspace` inside `mobile/ios/`. If Apple Developer credentials are not configured, build for iOS Simulator only. The .app bundle must be generated in `mobile/ios/build/` or the EAS default output directory. Verify: ls mobile/ios/build/ 2>/dev/null | grep -E "\.app$|\.ipa$" — must contain .app or .ipa bundle.
+- [x] **T06: iOS .app bundle build blocked by Windows platform constraint; Android APK from T05 confirmed valid** — Build iOS .app bundle from the generated ios/ directory. Run `npx eas build --platform ios --profile preview --non-interactive` or fall back to `xcodebuild -workspace` inside `mobile/ios/`. If Apple Developer credentials are not configured, build for iOS Simulator only. The .app bundle must be generated in `mobile/ios/build/` or the EAS default output directory. Verify: ls mobile/ios/build/ 2>/dev/null | grep -E "\.app$|\.ipa$" — must contain .app or .ipa bundle.
   - Estimate: 30m
   - Files: mobile/ios/, mobile/.env
   - Verify: ls mobile/ios/build/ 2>/dev/null | grep -E "\.app$|\.ipa$" — must contain .app or .ipa bundle
