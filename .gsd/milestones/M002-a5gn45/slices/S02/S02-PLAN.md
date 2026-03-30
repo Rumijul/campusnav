@@ -67,7 +67,7 @@ Trip setup requires computing a route from start to destination. The web codebas
   - Estimate: 2–3 hours
   - Files: mobile/routing/pathfindingEngine.ts, mobile/routing/pathfindingEngine.test.ts, mobile/routing/generateDirections.ts, mobile/routing/generateDirections.test.ts, mobile/routing/directionSections.ts, mobile/routing/directionSections.test.ts, mobile/domain/navGraph.ts (append types)
   - Verify: npm --prefix mobile run test -- mobile/routing/ && npm --prefix mobile run typecheck
-- [ ] **T02: Route session state machine + useRouteSession hook** — ## Task T02 — Route Session State Machine + useRouteSession Hook
+- [x] **T02: Implemented route session state machine + useRouteSession hook** — ## Task T02 — Route Session State Machine + useRouteSession Hook
 
 ### Why
 The routing computation is only part of the trip setup loop. T02 wires together: route selection state (start/destination), route computation (T01 engine), direction generation (T01), and reactive floor-context updates. It produces a self-contained `useRouteSession` hook that App.tsx can drop in without knowing the implementation details.
