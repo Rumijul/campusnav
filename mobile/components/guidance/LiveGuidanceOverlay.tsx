@@ -70,6 +70,8 @@ export interface LiveGuidanceOverlayProps {
   floorId?: number | null;
   /** Floor lookup map for display labels. */
   floorMap?: Map<number, NormalizedFloorRecord>;
+  /** When true, applies accessible mode styling to elevator/ramp steps. */
+  accessibleMode?: boolean;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -119,11 +121,13 @@ function GuidingCard({
   onStopGuidance,
   floorId,
   floorMap,
+  accessibleMode,
 }: {
   state: GuidanceState;
   onStopGuidance: () => void;
   floorId?: number | null;
   floorMap?: Map<number, NormalizedFloorRecord>;
+  accessibleMode?: boolean;
 }) {
   const activeStep = getActiveStep(state);
   const { route, currentStepIndex, positionConfidence } = state;
@@ -134,15 +138,22 @@ function GuidingCard({
   const progressLabel = `Step ${currentStepIndex + 1} of ${totalSteps}`;
   const remaining = remainingDistance(state);
 
-  const instruction = activeStep?.instruction ?? 'Navigating...';
+  const isAccessibleStep = activeStep?.icon === 'elevator' || activeStep?.icon === 'ramp';
+  const highlightAccessible = accessibleMode && isAccessibleStep;
+
+  let instruction = activeStep?.instruction ?? 'Navigating...';
+  if (highlightAccessible) {
+    instruction = `${instruction} (accessible)`;
+  }
+
   const icon = activeStep ? stepIcon(activeStep) : '→';
 
   return (
     <View style={styles.guidingCard} testID="guiding-card">
       {/* Top row: step icon + instruction */}
       <View style={styles.stepRow}>
-        <View style={styles.stepIconContainer}>
-          <Text style={styles.stepIcon}>{icon}</Text>
+        <View style={[styles.stepIconContainer, highlightAccessible && styles.stepIconContainerAccessible]}>
+          <Text style={[styles.stepIcon, highlightAccessible && styles.stepIconAccessible]}>{icon}</Text>
         </View>
         <Text style={styles.instructionText} numberOfLines={2}>
           {instruction}
@@ -220,14 +231,16 @@ function FloorTransitionBanner({
   const [visible, setVisible] = useState(false);
   const [displayFloorId, setDisplayFloorId] = useState<number | null>(null);
 
-  if (floorId !== prevFloorIdRef.current && floorId !== null && prevFloorIdRef.current !== null) {
-    prevFloorIdRef.current = floorId;
-    const label = floorMap?.get(floorId)?.floor.floorNumber ?? floorId;
-    setDisplayFloorId(floorId);
+  const safeFloorId: number | null = floorId ?? null;
+
+  if (safeFloorId !== null && safeFloorId !== prevFloorIdRef.current && prevFloorIdRef.current !== null) {
+    prevFloorIdRef.current = safeFloorId;
+    const label = floorMap?.get(safeFloorId)?.floor.floorNumber ?? safeFloorId;
+    setDisplayFloorId(safeFloorId);
     setVisible(true);
     setTimeout(() => setVisible(false), 2500);
-  } else if (floorId !== null) {
-    prevFloorIdRef.current = floorId;
+  } else if (safeFloorId !== null) {
+    prevFloorIdRef.current = safeFloorId;
   }
 
   if (!visible || displayFloorId === null) return null;
@@ -249,6 +262,7 @@ export function LiveGuidanceOverlay({
   onStopGuidance,
   floorId,
   floorMap,
+  accessibleMode,
 }: LiveGuidanceOverlayProps) {
   const { phase } = guidanceState;
 
@@ -275,6 +289,7 @@ export function LiveGuidanceOverlay({
         onStopGuidance={onStopGuidance}
         floorId={floorId}
         floorMap={floorMap}
+        accessibleMode={accessibleMode}
       />
     </>
   );
@@ -358,10 +373,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  stepIconContainerAccessible: {
+    backgroundColor: '#facc15',
+  },
   stepIcon: {
     fontSize: 18,
     color: '#38bdf8',
     fontWeight: '700',
+  },
+  stepIconAccessible: {
+    color: '#1e3a5f',
   },
   instructionText: {
     flex: 1,

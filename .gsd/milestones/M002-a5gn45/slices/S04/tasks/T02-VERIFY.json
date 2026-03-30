@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T02",
+  "unitId": "M002-a5gn45/S04/T02",
+  "timestamp": 1774876722645,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 2356,
+      "verdict": "pass"
+    },
+    {
+      "command": "npx vitest run",
+      "exitCode": 1,
+      "durationMs": 2461,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

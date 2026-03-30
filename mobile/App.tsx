@@ -64,6 +64,32 @@ function formatMetric(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '0';
 }
 
+/**
+ * Find the nearest node on a given floor to a reference position.
+ * Used when floor changes to snap user to nearest accessible node.
+ */
+export function findNearestNodeOnFloor(
+  graph: NormalizedNavGraph,
+  floorId: number,
+  fromPosition: { x: number; y: number },
+): string | null {
+  let nearestId: string | null = null;
+  let nearestDist = Infinity;
+
+  for (const [nodeId, record] of graph.nodeById) {
+    if (record.floorId !== floorId) continue;
+    const dx = record.node.x - fromPosition.x;
+    const dy = record.node.y - fromPosition.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearestId = nodeId;
+    }
+  }
+
+  return nearestId;
+}
+
 /* ─── Floor target from normalized graph ─── */
 
 function buildFloorTargets(graph: NormalizedNavGraph): FloorPlanTarget[] {
@@ -299,6 +325,7 @@ export default function App() {
             onStopGuidance={stopGuidance}
             floorId={guidanceState.currentFloorId}
             floorMap={graph!.floorById}
+            accessibleMode={accessibleMode}
           />
         </View>
       )}
@@ -364,7 +391,14 @@ export default function App() {
             routePath={routePath}
             onFloorChange={(target) => {
               setActiveFloorTarget(target);
-              if (graph) setActiveFloorId(getFloorId(target, graph));
+              if (graph) {
+                setActiveFloorId(getFloorId(target, graph));
+                // Snap to nearest node on the new floor using snapped position
+                const newFloorId = getFloorId(target, graph);
+                const snappedPos = guidanceState.snappedPosition;
+                const nearestNodeId = findNearestNodeOnFloor(graph, newFloorId, snappedPos);
+                if (nearestNodeId) confirmPosition(nearestNodeId);
+              }
             }}
             showRouteOverlay={sessionState?.phase === 'ready'}
             showFloorSelector={floorTargets.length > 1}

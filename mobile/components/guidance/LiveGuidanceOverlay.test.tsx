@@ -86,6 +86,7 @@ function makeState(
     offRouteDetectedAt: null,
     offRouteFixCount: 0,
     rerouteResult: null,
+    currentFloorId: 1,
   };
 }
 

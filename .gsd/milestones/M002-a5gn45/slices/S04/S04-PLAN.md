@@ -32,7 +32,7 @@ Steps:
   - Estimate: 1.5h
   - Files: mobile/routing/guidanceState.ts, mobile/hooks/useGuidanceSession.ts, mobile/components/guidance/LiveGuidanceOverlay.tsx, mobile/routing/guidanceState.test.ts
   - Verify: npx tsc --noEmit && npx vitest run
-- [ ] **T03: Accessible mode parity + App.tsx integration** — Add accessibleMode boolean prop to LiveGuidanceOverlay, wire all props from App.tsx, and add findNearestNodeOnFloor helper.
+- [x] **T03: Accessible mode wired into LiveGuidanceOverlay with amber highlighting; findNearestNodeOnFloor helper added and floor snap integrated in App.tsx onFloorChange.** — Add accessibleMode boolean prop to LiveGuidanceOverlay, wire all props from App.tsx, and add findNearestNodeOnFloor helper.
 
 Steps:
 1. Read mobile/components/guidance/LiveGuidanceOverlay.tsx — add accessibleMode: boolean to LiveGuidanceOverlayProps. In GuidingCard, when accessibleMode === true:
