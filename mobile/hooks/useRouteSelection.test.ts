@@ -9,7 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-native';
 import { useRouteSelection } from './useRouteSelection';
 import { NavNode } from '../../src/shared/types';
 

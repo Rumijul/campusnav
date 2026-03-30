@@ -20,7 +20,7 @@ import { NormalizedPoint } from '../../src/shared/gps';
  * Used by `deriveConfidence` to determine how aggressively
  * the guidance engine trusts the current position fix.
  */
-export ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
+export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
 
 /**
  * Phase of the guidance state machine.
@@ -32,7 +32,7 @@ export ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
  * - `rerouting`     → Off-route detected, computing new path
  * - `arrived`        → User has reached the destination
  */
-export GuidancePhase =
+export type GuidancePhase =
   | 'idle'
   | 'low-confidence'
   | 'guiding'

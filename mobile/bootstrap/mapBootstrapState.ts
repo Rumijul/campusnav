@@ -9,16 +9,16 @@ import {
 } from '../data/mapApiClient';
 import { validateApiBaseUrl } from './appBootstrap';
 
-export MapBootstrapFetchPhase = 'map' | 'image';
+export type MapBootstrapFetchPhase = 'map' | 'image';
 
-export MapBootstrapErrorReason =
+export type MapBootstrapErrorReason =
   | 'missing-api-base-url'
   | 'invalid-api-base-url'
   | MapApiErrorReason
   | 'normalization-failure'
   | 'empty-graph';
 
-export MapBootstrapState =
+export type MapBootstrapState =
   | {
       phase: 'idle';
       authRequired: false;

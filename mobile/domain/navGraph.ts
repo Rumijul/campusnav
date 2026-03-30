@@ -19,7 +19,7 @@ export { PathResult, PathSegment, RouteMode };
  * Icon types for direction step visualization.
  * Maps to icons in the mobile UI icon set.
  */
-export StepIcon =
+export type StepIcon =
   | 'straight'
   | 'turn-left'
   | 'turn-right'
@@ -103,7 +103,7 @@ export interface NormalizedNavGraph {
   outgoingEdgesByNodeId: Map<string, NormalizedEdgeRecord[]>;
 }
 
-export NavGraphNormalizationErrorCode =
+export type NavGraphNormalizationErrorCode =
   | 'duplicate-building-id'
   | 'duplicate-floor-id'
   | 'duplicate-floor-number-per-building'
@@ -118,11 +118,11 @@ export interface NavGraphNormalizationError {
   message: string;
 }
 
-export NavGraphNormalizationResult =
+export type NavGraphNormalizationResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphNormalizationError };
 
-export NavGraphParseAndNormalizeResult =
+export type NavGraphParseAndNormalizeResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphContractValidationError | NavGraphNormalizationError };
 

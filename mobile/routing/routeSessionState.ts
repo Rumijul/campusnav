@@ -19,7 +19,7 @@ import { generateDirections } from './generateDirections';
 // Phase types
 // ============================================================
 
-export RouteSessionPhase =
+export type RouteSessionPhase =
   | 'idle'
   | 'computing'
   | 'ready'
@@ -92,7 +92,7 @@ export interface RouteSessionErrorState {
  * - `no-route`: Start & dest selected but no path exists
  * - `error`:  Node not present in graph or other error
  */
-export RouteSessionState =
+export type RouteSessionState =
   | RouteSessionIdleState
   | RouteSessionComputingState
   | RouteSessionReadyState

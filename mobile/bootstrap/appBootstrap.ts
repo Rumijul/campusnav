@@ -1,15 +1,15 @@
 export const STARTUP_TIMEOUT_MS = 3_000;
 
-export BootstrapPhase = 'idle' | 'loading' | 'ready' | 'error';
+export type BootstrapPhase = 'idle' | 'loading' | 'ready' | 'error';
 
-export BootstrapErrorReason =
+export type BootstrapErrorReason =
   | 'missing-api-base-url'
   | 'invalid-api-base-url'
   | 'startup-timeout'
   | 'startup-tooling-error'
   | 'invalid-startup-config';
 
-export BootstrapState =
+export type BootstrapState =
   | {
       phase: 'idle';
       authRequired: false;

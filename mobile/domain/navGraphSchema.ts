@@ -88,7 +88,7 @@ export const navGraphContractSchema = z
   })
   .strict();
 
-export NavGraphContract = z.output<typeof navGraphContractSchema>;
+export type NavGraphContract = z.output<typeof navGraphContractSchema>;
 
 export interface NavGraphContractValidationError {
   reason: 'contract-validation-error';
@@ -96,7 +96,7 @@ export interface NavGraphContractValidationError {
   issues: string[];
 }
 
-export NavGraphValidationResult =
+export type NavGraphValidationResult =
   | { ok: true; data: NavGraph }
   | { ok: false; error: NavGraphContractValidationError };
 

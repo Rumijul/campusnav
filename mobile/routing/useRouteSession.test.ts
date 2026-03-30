@@ -10,7 +10,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-native';
 import { NavGraph } from '../../src/shared/types';
 import { useRouteSession } from './useRouteSession';
 import { normalizeNavGraph, NormalizedNavGraph } from '../domain/navGraph';

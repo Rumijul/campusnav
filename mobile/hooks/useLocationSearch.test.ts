@@ -2,7 +2,7 @@
  * Tests for useLocationSearch hook.
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-native';
 import { useLocationSearch } from './useLocationSearch';
 import { normalizeNavGraph } from '../domain/navGraph';
 import { NavBuilding, NavFloor, NavGraph } from '../../src/shared/types';
