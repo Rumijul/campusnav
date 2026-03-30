@@ -4,9 +4,13 @@
  * @testing-library/react-native needs these exports to exist and be
  * proper React component types so it can render and query them.
  * We use @testing-library/react's DOM primitives mapped to HTML elements.
+ *
+ * Also exports jsx/jsxs from react/jsx-runtime so that esbuild's
+ * jsx: 'automatic' transform works in vitest (without needing @vitejs/plugin-react).
  */
 'use strict';
 const React = require('react');
+const { jsx: _jsx, jsxs: _jsxs, Fragment: _Fragment } = require('react/jsx-runtime');
 
 function View({ children, style, testID, ...props }) {
   return React.createElement('div', { 'data-testid': testID, style, ...props }, children);

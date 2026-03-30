@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { DestinationPicker } from './DestinationPicker';
 import { normalizeNavGraph } from '../../domain/navGraph';
-import type { NavBuilding, NavFloor, NavGraph } from '../../../src/shared/types';
+import { NavBuilding, NavFloor, NavGraph } from '../../../src/shared/types';
 
 function createTestGraph(): NavGraph {
   return {
@@ -69,7 +69,7 @@ function makeGraph() {
 
 function makeSelection() {
   return {
-    start: null as ReturnType<typeof vi.fn> extends ((...args: never[]) => infer R) ? R : never,
+    start: null as ReturnType<typeof vi.fn>,
     destination: null,
     activeField: 'start' as const,
     bothSelected: false,
@@ -85,7 +85,7 @@ function makeSelection() {
 }
 
 // Minimal route selection mock that works with the component
-import type { NavNode } from '../../../src/shared/types';
+import { NavNode } from '../../../src/shared/types';
 
 function createMockSelection(overrides?: Partial<{
   start: NavNode | null;

@@ -15,9 +15,9 @@ import {
 } from 'react-native';
 
 import { useLocationSearch } from '../../hooks/useLocationSearch';
-import type { NormalizedNavGraph } from '../../domain/navGraph';
-import type { NavNode } from '../../../src/shared/types';
-import type { RouteSelection } from '../../hooks/useRouteSelection';
+import { NormalizedNavGraph } from '../../domain/navGraph';
+import { NavNode } from '../../../src/shared/types';
+import { RouteSelection } from '../../hooks/useRouteSelection';
 
 const DEBOUNCE_MS = 300;
 

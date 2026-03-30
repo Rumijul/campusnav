@@ -21,10 +21,10 @@ import {
 } from 'react-native';
 
 import { MapViewport } from './MapViewport';
-import { RoutePathOverlay, type RoutePathPoint } from '../components/route/RoutePathOverlay';
-import type { FloorPlanTarget } from '../data/mapApiClient';
-import type { MapTransform } from './mapTransform';
-import type { ViewportDimensions } from './mapTransform';
+import { RoutePathOverlay, RoutePathPoint } from '../components/route/RoutePathOverlay';
+import { FloorPlanTarget } from '../data/mapApiClient';
+import { MapTransform } from './mapTransform';
+import { ViewportDimensions } from './mapTransform';
 
 /* ─── Props ─── */
 

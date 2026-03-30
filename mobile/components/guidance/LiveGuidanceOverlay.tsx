@@ -12,9 +12,9 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRef, useState } from 'react';
 
-import { getActiveStep, type GuidanceState } from '../../routing/guidanceState';
-import type { DirectionStep, NormalizedFloorRecord } from '../../domain/navGraph';
-import { ConfidenceIndicator, type ConfidenceLevel } from './ConfidenceIndicator';
+import { getActiveStep, GuidanceState } from '../../routing/guidanceState';
+import { DirectionStep, NormalizedFloorRecord } from '../../domain/navGraph';
+import { ConfidenceIndicator, ConfidenceLevel } from './ConfidenceIndicator';
 
 // ─── Step icon helpers (mirrors RoutePreview) ────────────────────────────────
 

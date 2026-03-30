@@ -1,4 +1,5 @@
-import { findNearestNodeOnFloor } from '../App';
+import { describe, it, expect } from 'vitest';
+import { findNearestNodeOnFloor } from './findNearestNodeOnFloor';
 import { normalizeNavGraph } from '../domain/navGraph';
 import type { NavGraph } from '../../src/shared/types';
 

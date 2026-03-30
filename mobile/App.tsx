@@ -40,6 +40,7 @@ import { useRouteSelection } from './hooks/useRouteSelection';
 import { useRouteSession } from './routing/useRouteSession';
 import { useGuidanceSession } from './hooks/useGuidanceSession';
 import { useCurrentPosition } from './hooks/useCurrentPosition';
+import { findNearestNodeOnFloor } from './hooks/findNearestNodeOnFloor';
 import { LiveGuidanceOverlay } from './components/guidance/LiveGuidanceOverlay';
 import { ConfidenceIndicator } from './components/guidance/ConfidenceIndicator';
 import type { NavNode } from '@shared/types';
@@ -64,31 +65,7 @@ function formatMetric(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '0';
 }
 
-/**
- * Find the nearest node on a given floor to a reference position.
- * Used when floor changes to snap user to nearest accessible node.
- */
-export function findNearestNodeOnFloor(
-  graph: NormalizedNavGraph,
-  floorId: number,
-  fromPosition: { x: number; y: number },
-): string | null {
-  let nearestId: string | null = null;
-  let nearestDist = Infinity;
 
-  for (const [nodeId, record] of graph.nodeById) {
-    if (record.floorId !== floorId) continue;
-    const dx = record.node.x - fromPosition.x;
-    const dy = record.node.y - fromPosition.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < nearestDist) {
-      nearestDist = dist;
-      nearestId = nodeId;
-    }
-  }
-
-  return nearestId;
-}
 
 /* ─── Floor target from normalized graph ─── */
 

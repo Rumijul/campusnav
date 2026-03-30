@@ -8,11 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
 import { render, screen } from '@testing-library/react-native';
 import { LiveGuidanceOverlay } from './LiveGuidanceOverlay';
-import type {
-  ConfidenceLevel,
-  GuidancePhase,
-  GuidanceState,
-} from '../../routing/guidanceState';
+import { ConfidenceLevel, GuidancePhase, GuidanceState } from '../../routing/guidanceState';
 
 const h = React.createElement;
 
@@ -42,7 +38,7 @@ function makeStep(instruction: string, distanceM = 10) {
   };
 }
 
-function makeRoute(overrides?: { destinationLabel?: string; steps?: ReturnType<typeof makeStep>[] }) {
+function makeRoute(overrides?: { destinationLabel?: string; steps?: { instruction: string; icon: string; distanceM: number; durationSec: number; isAccessibleSegment: boolean; floorId: number; floorNumber: number }[] }) {
   const dest = makeNode('dest', overrides?.destinationLabel ?? 'Engineering Lab');
   const steps = overrides?.steps ?? [
     makeStep('Walk straight to the elevators', 8),

@@ -9,9 +9,9 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { ConfidenceLevel } from '../../routing/guidanceState';
+import { ConfidenceLevel } from '../../routing/guidanceState';
 
-export { type ConfidenceLevel } from '../../routing/guidanceState';
+export { ConfidenceLevel } from '../../routing/guidanceState';
 
 // ─── Color map ────────────────────────────────────────────────────────────────
 
