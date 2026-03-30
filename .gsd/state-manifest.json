@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-26T13:35:07.553Z",
+  "exported_at": "2026-03-30T07:29:22.864Z",
   "milestones": [
     {
       "id": "M001",
@@ -99,14 +99,14 @@
       "milestone_id": "M002-a5gn45",
       "id": "S01",
       "title": "Native app runtime + backend graph contract bootstrap",
-      "status": "pending",
+      "status": "complete",
       "risk": "high",
       "depends": [],
       "demo": "After this: iOS and Android app shells launch on-device, load live CampusNav graph/image data, and support baseline map interaction primitives.",
       "created_at": "2026-03-25T09:01:56.467Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-03-30T06:59:59.107Z",
+      "full_summary_md": "---\nid: S01\nparent: M002-a5gn45\nmilestone: M002-a5gn45\nprovides:\n  - Expo mobile package with start/ios/android/test/typecheck scripts isolated from root web runtime.\n  - Typed mapApiClient covering all three S01 boundary endpoints (map, floor-plan, campus image) with retry/timeout/cancellation.\n  - NavGraph normalization with strict validation and invariant enforcement for downstream S02+ consumption.\n  - Gesture-capable MapViewport with tested focal-point transform invariants (R001/R002 parity).\n  - Deterministic no-login bootstrap wiring (runMapBootstrap → MapBootstrapState → App.tsx → MapViewport) with explicit error diagnostics.\nrequires:\n  []\naffects:\n  - S02\n  - S03\n  - S04\n  - S05\nkey_files:\n  - mobile/package.json\n  - mobile/app.json\n  - mobile/tsconfig.json\n  - mobile/babel.config.js\n  - mobile/vitest.config.ts\n  - mobile/.env.example\n  - mobile/App.tsx\n  - mobile/bootstrap/appBootstrap.test.ts\n  - mobile/bootstrap/mapBootstrapState.ts\n  - mobile/bootstrap/mapBootstrapState.test.ts\n  - mobile/data/mapApiClient.ts\n  - mobile/data/mapApiClient.test.ts\n  - mobile/domain/navGraphSchema.ts\n  - mobile/domain/navGraph.ts\n  - mobile/domain/navGraph.test.ts\n  - mobile/map/MapViewport.tsx\n  - mobile/map/mapTransform.ts\n  - mobile/map/mapTransform.test.ts\nkey_decisions:\n  - Run mobile Vitest from repo root (--root ..) with mobile/vitest.config.ts and mobile/**/*.test.ts include scope (T01)\n  - Preserve raw accessibleWeight; derive effectiveAccessibleWeight=Infinity for non-accessible edges — D014 (T02)\n  - Model mobile API boundary as discriminated unions with structured MapApiError (endpoint/status/reason/attempt) — D015 (T02)\n  - Two-phase bootstrap (map then image) with failed phase+endpoint carried into error state — D016 (T03)\n  - Transform equality guards and malformed-frame rejection for gesture state stability — D017 (T03)\npatterns_established:\n  - Deterministic no-login visitor bootstrap with explicit loading/ready/error state machine and config validation.\n  - Discriminated-union API errors at the mobile boundary providing typed, structured error metadata.\n  - Graph normalization with invariant enforcement (duplicate IDs, node-floor consistency, edge node references) while preserving connector/accessibility semantics.\n  - Phased bootstrap with diagnostic carry-through: failed phase + endpoint flows from API client to startup state machine to rendered error UI.\n  - Gesture transform isolation: focal-point math is pure/hardened in mapTransform.ts and composed into MapViewport.tsx without gesture handler complexity leaking into transform logic.\nobservability_surfaces:\n  - MapBootstrapState error objects carry phase (map|image) and endpoint fields — inspectable via React DevTools or state dump.\n  - MapApiError discriminated union exposes endpoint, status, reason, attempt — enables structured log/error reporting on device.\n  - App.tsx renders explicit error UI with phase diagnostics when bootstrap fails — no silent degradation.\ndrill_down_paths:\n  - .gsd/milestones/M002-a5gn45/slices/S01/tasks/T01/T01-SUMMARY.md\n  - .gsd/milestones/M002-a5gn45/slices/S01/tasks/T02/T02-SUMMARY.md\n  - .gsd/milestones/M002-a5gn45/slices/S01/tasks/T03/T03-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T06:59:59.108Z\nblocker_discovered: false\n---\n\n# S01: Native app runtime + backend graph contract bootstrap\n\n**Bootstrapped Expo mobile runtime with no-login visitor shell, typed backend graph contracts, and gesture-capable MapViewport.**\n\n## What Happened\n\nS01 established the mobile foundation for CampusNav across three task waves:\n\nT01 fixed the Vitest root configuration mismatch so mobile tests resolve correctly from slice verification commands. The Expo package scaffold already existed. Key fix was `--root .. --config mobile/vitest.config.ts` alignment so `mobile/...` path filters resolve deterministically. Verified no auth guard in App.tsx and deterministic loading/ready/error state transitions.\n\nT02 implemented the mobile API contract boundary: mapApiClient covering /api/map, floor-plan, and campus image endpoints with bounded retry/backoff, timeout/cancellation, and structured MapApiError discriminated unions. navGraphSchema validates payloads with issue-path reporting; navGraph normalizes/indexes while preserving connector fields and deriving effectiveAccessibleWeight=Infinity for non-accessible edges (D014). 17 tests cover happy paths, malformed payloads, HTTP/network/timeout/abort failures, content-type mismatches, empty graph, and accessibility semantics.\n\nT03 validated and finalized runtime wiring: mapTransform pure helpers with focal-point invariance and NaN guards; MapViewport composing them with gesture primitives; mapBootstrapState two-phase orchestration (map→image) carrying failed phase/endpoint into rendered error UI; App.tsx wiring bootstrap state to MapViewport for no-login visitor bootstrap with diagnostic error states. One targeted fix: useCallback stabilization for commitTransform in PanResponder memo dependencies.\n\nAll 35 mobile tests pass across 4 test files. Both mobile and root typechecks pass. Backend smoke check fails due to missing hono CLI in this environment (known limitation, not a delivery failure).\n\n## Verification\n\nAll slice verification commands passed: npm --prefix mobile run typecheck (0), npm --prefix mobile run test -- mobile/bootstrap/appBootstrap.test.ts (8 tests), npm --prefix mobile run test -- mobile/data/mapApiClient.test.ts mobile/domain/navGraph.test.ts (17 tests), npm --prefix mobile run test -- mobile/map/mapTransform.test.ts mobile/bootstrap/mapBootstrapState.test.ts (10 tests), npm --prefix mobile run typecheck && npm run typecheck (0). Backend smoke check skipped: npx hono CLI unavailable in this environment.\n\n## Requirements Advanced\n\n- R023 — S01 built the Expo runtime foundation and package config enabling ios/android build scripts; R023 primary ownership activated\n- R024 — App.tsx verified to contain no auth guard; bootstrap proceeds directly to map view; R024 primary ownership activated\n\n## Requirements Validated\n\nNone.\n\n## New Requirements Surfaced\n\nNone.\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nMost target files existed at task start; implementation centered on Vitest root alignment (T01), contract + normalization implementation (T02), and validation + useCallback fix (T03).\n\n## Known Limitations\n\nBackend /api/map smoke check cannot run in this environment because npx cannot resolve a runnable hono binary. Contract correctness is verified via mocked tests (17 passing) rather than live endpoint.\n\n## Follow-ups\n\nS02 should consume runMapBootstrap() output and navGraph.nodes/edges for destination selection. mapApiClient.getFloorPlanImageUrl() is ready for floor overlay rendering once S02 adds floor context. Ensure EXPO_PUBLIC_API_BASE_URL is in mobile/.env before running on device.\n\n## Files Created/Modified\n\n- `mobile/package.json` — Added --root .. --config mobile/vitest.config.ts to vitest script; added test/typecheck scripts\n- `mobile/vitest.config.ts` — Constrained includes to mobile/**/*.test.ts for mobile-only isolation\n- `mobile/data/mapApiClient.ts` — New: typed API client with retry/timeout/cancellation and structured MapApiError discriminated union\n- `mobile/data/mapApiClient.test.ts` — New: 9 tests covering success, HTTP errors, network errors, timeout, abort, content-type, retry exhaustion\n- `mobile/domain/navGraphSchema.ts` — New: strict schema validation with issue-path reporting for NavGraphPayload\n- `mobile/domain/navGraph.ts` — New: normalization/indexing with duplicate ID detection, node-floor consistency, edge reference checks, effectiveAccessibleWeight derivation\n- `mobile/domain/navGraph.test.ts` — New: 8 tests covering malformed payloads, empty graph, optional connectors, accessibility semantics\n- `mobile/map/mapTransform.ts` — New: pure pan/zoom/rotate helpers with focal-point anchoring and NaN/Infinity guards\n- `mobile/map/mapTransform.test.ts` — New: 5 tests protecting focal stability, rotation pivot, NaN rejection, angle wraparound, zoom clamping\n- `mobile/map/MapViewport.tsx` — New: gesture-capable MapViewport composing transform helpers with PanResponder\n- `mobile/bootstrap/mapBootstrapState.ts` — New: two-phase bootstrap orchestrator (map then image) with phase/endpoint diagnostics in error state\n- `mobile/bootstrap/mapBootstrapState.test.ts` — New: 5 tests for loading→ready transitions, map error, image error, idempotent restart\n- `mobile/App.tsx` — New: no-login visitor bootstrap shell wiring AppBootstrap + MapViewport + mapBootstrapState\n- `.gsd/DECISIONS.md` — Added D015 (API error discriminated unions), D016 (phased bootstrap diagnostics), D017 (gesture state stability)\n- `.gsd/KNOWLEDGE.md` — Added 5 entries: useCallback stabilization, phase/endpoint diagnostics, optional connector preservation, pure transform helpers\n",
+      "full_uat_md": "# S01: Native app runtime + backend graph contract bootstrap — UAT\n\n**Milestone:** M002-a5gn45\n**Written:** 2026-03-30T06:59:59.108Z\n\n## Startup — No-Auth Entry\n- TC-S01-01: App launches without login prompt — no auth UI, proceeds to loading.\n- TC-S01-02: App transitions through loading→ready|error deterministically (no intermediate/auth-gated states).\n- TC-S01-05: Repeated bootstrap invocation is idempotent (no auth accumulation).\n\n## Startup — Config Validation\n- TC-S01-03: Missing EXPO_PUBLIC_API_BASE_URL → error state with config diagnostic.\n- TC-S01-04: Invalid URL in EXPO_PUBLIC_API_BASE_URL → error state with validation failure.\n\n## Backend Contract — /api/map\n- TC-S01-06: /api/map returns structured graph payload (buildings, nodes, edges, campus, connectors).\n- TC-S01-07: Malformed /api/map response → MapApiError with reason='invalid-json'.\n- TC-S01-08: HTTP 404 → MapApiError with reason='http-error', status=404.\n- TC-S01-09: Network timeout → MapApiError with reason='timeout', endpoint, attempt=N.\n- TC-S01-10: Aborted request → MapApiError with reason='aborted'.\n\n## Backend Contract — Graph Normalization\n- TC-S01-11: Duplicate node IDs → NavGraphValidationError with issue path.\n- TC-S01-12: Edge with missing fromNodeId → NavGraphValidationError with issue path.\n- TC-S01-13: Empty buildings list → valid empty NavGraph (not error).\n- TC-S01-14: Optional connector fields absent → preserved as undefined.\n- TC-S01-15: Non-accessible edge → accessible=false, effectiveAccessibleWeight=Infinity.\n- TC-S01-16: Accessible edge with accessibleWeight=1.5 → effectiveAccessibleWeight=1.5 (preserved).\n\n## Map Viewport — Transform Invariants\n- TC-S01-17: Pan focal point stable across repeated pans (no drift).\n- TC-S01-18: Pinch zoom focal point stable at touch midpoint at all rotation angles (R001/R002 parity).\n- TC-S01-19: Rotation pivots around touch midpoint, not stage origin.\n- TC-S01-20: NaN inputs rejected; state unchanged.\n- TC-S01-21: Rotation wraps cleanly at ±180° without discontinuity jump.\n- TC-S01-22: Zoom clamps to configured min/max bounds.\n\n## Bootstrap State Orchestration\n- TC-S01-23: Map+image succeed → ready state.\n- TC-S01-24: Map fails → error state with phase='map', endpoint='/api/map'.\n- TC-S01-25: Map succeeds, image fails → error state with phase='image'.\n- TC-S01-26: Restart from error → loading→ready|error without auth gate.\n\n## Render Integration\n- TC-S01-27: Bootstrap ready → MapViewport visible.\n- TC-S01-28: Bootstrap loading → loading overlay visible.\n- TC-S01-29: Bootstrap error → error shown with phase and endpoint diagnostics.\n",
       "goal": "Establish the mobile foundation for CampusNav with an Expo-based iOS/Android runtime that launches without sign-in, consumes live backend graph/image contracts, and exposes baseline map pan/zoom/rotate primitives over normalized campus/floor coordinates.",
       "success_criteria": "- **R023:** A dedicated `mobile/` native runtime package exists with install/run scripts for iOS + Android (`start`, `ios`, `android`) plus local `typecheck`/`test` verification commands.\n- **R024:** App launch remains visitor-first (no auth gate) and enters a no-login bootstrap flow that loads map graph/image data from backend read APIs.\n- `mobile/data/mapApiClient.ts` defines the typed contract for `/api/map`, `/api/floor-plan/:buildingId/:floorNumber`, and `/api/campus/image`, including structured failure metadata.\n- `mobile/domain/navGraph.ts` normalizes backend payloads into lookup-friendly mobile selectors while preserving connector/floor/accessibility invariants.\n- `mobile/map/MapViewport.tsx` provides baseline pan/zoom/rotate interaction primitives with tested transform math and stable coordinate mapping.\n\n### Threat Surface (Q3)\n- **Abuse:** API base URL tampering, oversized payloads, and replayed stale responses must degrade to explicit bootstrap error state instead of silent rendering.\n- **Data exposure:** Student bootstrap is no-login and map data is read-only; diagnostics must not expose secrets or tokens.\n- **Input trust:** Treat `/api/map` JSON and floor/campus image responses as untrusted until schema validation and response guards pass.\n\n### Requirement Impact (Q4)\n- **Requirements touched:** `R023`, `R024`, and support surfaces for `R025`/`R034`.\n- **Re-verify:** Existing `/api/map` and image endpoint contracts remain unchanged for web clients while mobile no-login bootstrap consumes them.\n- **Decisions revisited:** `D009` (native runtime strategy) and `D011` (student-only mobile scope; admin stays web).",
       "proof_level": "- This slice proves: integration\n- Real runtime required: yes\n- Human/UAT required: no",
@@ -129,11 +129,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Port student-facing trip setup loop into mobile app while preserving no-login behavior and current routing semantics.",
-      "success_criteria": "- No-login visitor flow initializes route selection.\n- Start/destination selection works for campus and indoor nodes.\n- Standard and accessible route sessions both initialize successfully.\n- Admin-editing capability remains outside mobile scope with no regression to backend contracts.",
-      "proof_level": "Contract + behavioral",
-      "integration_closure": "Mobile route-session initialization consumes S01 contracts and backend graph to produce route preview state used by guidance.",
-      "observability_impact": "Adds route-session state tracing for start/destination/mode/floor context transitions.",
+      "goal": "Mobile visitor can choose start/destination in-app and preview a floor-aware route session (standard + accessible mode) without logging in.",
+      "success_criteria": "**All must be true to ship:**\n1. `npm --prefix mobile run typecheck` → 0 errors\n2. `npm --prefix mobile run test` → All mobile tests pass (≥10 new routing tests covering engine, directions, route session, destination picker)\n3. In bootstrap-ready app shell: destination picker renders building/floor/node tree with search; selecting start+destination shows route preview with floor sections; accessible mode toggle re-renders with accessible route; floor-switching updates map image and route overlay",
+      "proof_level": "runtime",
+      "integration_closure": "Consumes NormalizedNavGraph from S01 runMapBootstrap() output. Does NOT require live positioning (S03) or accessible parity rendering (S04) — those are downstream slices. The S02 deliverable is a composed App.tsx that accepts graph from bootstrap and exposes the full trip-setup loop.",
+      "observability_impact": "Route session state machine exposes structured error codes (no-route-found, node-not-found, inter-floor-synthesis-fail) inspectable via React DevTools state dumps. Destination picker search results are debounced and observable via log output.",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -373,6 +373,201 @@
         "mobile/App.tsx"
       ],
       "observability_impact": "- Signals added/changed: bootstrap fetch phase (`map`, `image`) and viewport transform state (`scale`, `rotation`, `translation`).\n- How a future agent inspects this: `mobile/bootstrap/mapBootstrapState.test.ts`, `mobile/map/mapTransform.test.ts`, and rendered startup status in `mobile/App.tsx`.\n- Failure state exposed: startup state carries last failed phase/endpoint so data-load issues localize quickly.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S02",
+      "id": "T01",
+      "title": "Implemented custom A* pathfinding engine and direction generation for mobile without ngraph.graph dependency",
+      "status": "complete",
+      "one_liner": "Implemented custom A* pathfinding engine and direction generation for mobile without ngraph.graph dependency",
+      "narrative": "Built the routing computation core for mobile trip setup: (1) Modified mobile/domain/navGraph.ts to add DirectionStep, DirectionsResult, StepIcon, DirectionSection types and re-export pathfinding types; (2) Created MobilePathfindingEngine with binary heap A*, inter-floor traversal via connector nodes, and standard/accessible modes; (3) Ported generateDirections from web codebase with corrected relative imports; (4) Implemented groupDirectionSections for floor-grouped display; (5) Wrote 35 comprehensive tests covering all routing scenarios.",
+      "verification_result": "Ran vitest and tsc typecheck as specified in task plan. All 35 tests pass and typecheck is clean.",
+      "duration": "",
+      "completed_at": "2026-03-30T07:29:22.842Z",
+      "blocker_discovered": false,
+      "deviations": "None",
+      "known_issues": "None",
+      "key_files": [
+        "mobile/routing/pathfindingEngine.ts",
+        "mobile/routing/pathfindingEngine.test.ts",
+        "mobile/routing/generateDirections.ts",
+        "mobile/routing/generateDirections.test.ts",
+        "mobile/routing/directionSections.ts",
+        "mobile/routing/directionSections.test.ts",
+        "mobile/domain/navGraph.ts"
+      ],
+      "key_decisions": [
+        "Custom A* implementation avoids ngraph.graph dependency for React Native compatibility",
+        "Binary heap PriorityQueue implemented in-file for A* frontier",
+        "Inter-floor traversal via synthetic edges from connectsToNodeAboveId/BelowId",
+        "Accessible mode blocks stairs (Infinity weight) and prefers elevator/ramp",
+        "Explicit result types (found/not-found as fields, not exceptions)"
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S02\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/routing/pathfindingEngine.ts\n  - mobile/routing/pathfindingEngine.test.ts\n  - mobile/routing/generateDirections.ts\n  - mobile/routing/generateDirections.test.ts\n  - mobile/routing/directionSections.ts\n  - mobile/routing/directionSections.test.ts\n  - mobile/domain/navGraph.ts\nkey_decisions:\n  - Custom A* implementation avoids ngraph.graph dependency for React Native compatibility\n  - Binary heap PriorityQueue implemented in-file for A* frontier\n  - Inter-floor traversal via synthetic edges from connectsToNodeAboveId/BelowId\n  - Accessible mode blocks stairs (Infinity weight) and prefers elevator/ramp\n  - Explicit result types (found/not-found as fields, not exceptions)\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T07:29:22.843Z\nblocker_discovered: false\n---\n\n# T01: Implemented custom A* pathfinding engine and direction generation for mobile without ngraph.graph dependency\n\n**Implemented custom A* pathfinding engine and direction generation for mobile without ngraph.graph dependency**\n\n## What Happened\n\nBuilt the routing computation core for mobile trip setup: (1) Modified mobile/domain/navGraph.ts to add DirectionStep, DirectionsResult, StepIcon, DirectionSection types and re-export pathfinding types; (2) Created MobilePathfindingEngine with binary heap A*, inter-floor traversal via connector nodes, and standard/accessible modes; (3) Ported generateDirections from web codebase with corrected relative imports; (4) Implemented groupDirectionSections for floor-grouped display; (5) Wrote 35 comprehensive tests covering all routing scenarios.\n\n## Verification\n\nRan vitest and tsc typecheck as specified in task plan. All 35 tests pass and typecheck is clean.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm --prefix mobile run test -- mobile/routing/` | 0 | ✅ pass | 228ms |\n| 2 | `npm --prefix mobile run typecheck` | 0 | ✅ pass | 15000ms |\n\n\n## Deviations\n\nNone\n\n## Known Issues\n\nNone\n\n## Files Created/Modified\n\n- `mobile/routing/pathfindingEngine.ts`\n- `mobile/routing/pathfindingEngine.test.ts`\n- `mobile/routing/generateDirections.ts`\n- `mobile/routing/generateDirections.test.ts`\n- `mobile/routing/directionSections.ts`\n- `mobile/routing/directionSections.test.ts`\n- `mobile/domain/navGraph.ts`\n",
+      "description": "## Task T01 — Pathfinding Engine + Direction Generation\n\n### Why\nTrip setup requires computing a route from start to destination. The web codebase uses `ngraph.graph` — an unverified dependency for React Native. Instead of gambling on compatibility, T01 implements a custom A* pathfinding engine directly from `NormalizedNavGraph` (already built by S01). It also ports the direction generation algorithm from the web codebase with corrected relative imports. Together these form the routing computation core that all downstream UI depends on.\n\n### Files\n**Created:**\n- `mobile/routing/pathfindingEngine.ts` — Custom A* on NormalizedNavGraph\n- `mobile/routing/pathfindingEngine.test.ts` — Route found, no route, accessible mode, same-node, inter-floor\n- `mobile/routing/generateDirections.ts` — Direction step generation (pure, no React)\n- `mobile/routing/generateDirections.test.ts` — Step count, floor-change, accessible, arrive\n- `mobile/routing/directionSections.ts` — `groupDirectionSections` for floor grouping\n- `mobile/routing/directionSections.test.ts` — Section boundary, empty, single floor\n\n**Modified:**\n- `mobile/domain/navGraph.ts` — Append `DirectionStep`, `DirectionsResult`, `StepIcon` types alongside existing `PathResult`/`PathSegment`/`RouteMode`\n\n### Do\n1. **Read existing types in `mobile/domain/navGraph.ts`** to understand where `PathResult`, `PathSegment`, `RouteMode` are already defined. Append `DirectionStep`, `DirectionsResult`, `StepIcon` types there.\n\n2. **Implement `mobile/routing/pathfindingEngine.ts`**:\n   - Import `NormalizedNavGraph`, `NormalizedNodeRecord`, `NormalizedEdgeRecord` from `../domain/navGraph`\n   - Import `NavNode`, `NavEdge` from `../../src/shared/types`\n   - Import `RouteMode`, `PathResult`, `PathSegment` from `../domain/navGraph`\n   - Export `MobilePathfindingEngine` class with constructor accepting `NormalizedNavGraph`\n   - Implement `findRoute(fromId, toId, mode): PathResult` using A*:\n     - **Standard mode**: iterate `graph.outgoingEdgesByNodeId[fromId]` and filter accessible edges for accessible mode\n     - **Inter-floor traversal**: for stairs/elevator/ramp nodes, follow `connectsToNodeAboveId`/`connectsToNodeBelowId` to find the connected node on adjacent floor; treat it as an outgoing edge with weight 0.3 (standard) / 0.45 (elevator+ramp accessible) / Infinity (stairs accessible)\n     - **A***: min-heap priority queue keyed on `fScore = gScore + heuristic`; Euclidean distance heuristic weighted by floor level difference\n     - **Not-found**: return `{ found: false, nodeIds: [], totalDistance: 0, segments: [] }`\n     - **Trivial same-node**: return `{ found: true, nodeIds: [fromId], totalDistance: 0, segments: [] }`\n     - **Node-not-found guard**: check `graph.nodeById.has(fromId)` and `graph.nodeById.has(toId)` before pathfinding\n     - **Heuristic**: use `Math.sqrt((ax-bx)² + (ay-by)²)` + `Math.abs(floorLevelDiff) * 0.5` floor-level penalty (admissible)\n   - Use a `PriorityQueue` class defined in-file (binary heap with `push(item, priority)` and `pop()`)\n\n3. **Write `mobile/routing/pathfindingEngine.test.ts`**:\n   - Create a `createTestNavGraph()` helper with 2 buildings × 2 floors × 3 rooms each, connected by stairs/elevator\n   - Test cases: route found between rooms on same floor, route found across floors (stairs), accessible route avoids stairs, no route (disconnected subgraph), same-node returns trivial path, missing source/target node returns not-found\n\n4. **Implement `mobile/routing/generateDirections.ts`**:\n   - Copy `generateDirections` from `src/client/hooks/useRouteDirections.ts` but:\n     - Replace `@shared/types` import with relative `../../src/shared/types`\n     - Replace `@shared/pathfinding/types` import with relative `../domain/navGraph`\n     - Import `DirectionsResult`, `DirectionStep`, `StepIcon` from `../domain/navGraph`\n     - Import `NavNode`, `NavFloor` from `../../src/shared/types`\n   - Copy `routesAreIdentical` from web source\n   - Export `generateDirections`, `routesAreIdentical`\n\n5. **Write `mobile/routing/generateDirections.test.ts`**:\n   - Use `createTestNavGraph()` helper nodes\n   - Test: 0/1 node → empty steps; 2 nodes → arrive step only; 3+ nodes → turn + arrive; floor change → stairs-up icon + correct instruction; accessible mode → ramp/elevator icons\n\n6. **Implement `mobile/routing/directionSections.ts`**:\n   - Copy `DirectionSection` type and `groupDirectionSections` from `src/client/components/directionSections.ts`\n   - Import `DirectionStep` from `../domain/navGraph`\n\n7. **Write `mobile/routing/directionSections.test.ts`**:\n   - Test: single floor → one section; floor change creates new section; boundary detection\n\n8. **Verify**: `npm --prefix mobile run test -- mobile/routing/` → all pass. `npm --prefix mobile run typecheck` → 0 errors.",
+      "estimate": "2–3 hours",
+      "files": [
+        "mobile/routing/pathfindingEngine.ts",
+        "mobile/routing/pathfindingEngine.test.ts",
+        "mobile/routing/generateDirections.ts",
+        "mobile/routing/generateDirections.test.ts",
+        "mobile/routing/directionSections.ts",
+        "mobile/routing/directionSections.test.ts",
+        "mobile/domain/navGraph.ts (append types)"
+      ],
+      "verify": "npm --prefix mobile run test -- mobile/routing/ && npm --prefix mobile run typecheck",
+      "inputs": [
+        "mobile/domain/navGraph.ts",
+        "src/shared/pathfinding/types.ts",
+        "src/shared/types.ts",
+        "src/client/hooks/useRouteDirections.ts",
+        "src/client/components/directionSections.ts",
+        "src/shared/pathfinding/engine.ts"
+      ],
+      "expected_output": [
+        "mobile/routing/pathfindingEngine.ts",
+        "mobile/routing/pathfindingEngine.test.ts",
+        "mobile/routing/generateDirections.ts",
+        "mobile/routing/generateDirections.test.ts",
+        "mobile/routing/directionSections.ts",
+        "mobile/routing/directionSections.test.ts"
+      ],
+      "observability_impact": "PathfindingEngine errors (node-not-found, no-route) are explicit result fields — no exceptions thrown. Direction generation is pure and deterministic.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S02",
+      "id": "T02",
+      "title": "Route session state machine + useRouteSession hook",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "## Task T02 — Route Session State Machine + useRouteSession Hook\n\n### Why\nThe routing computation is only part of the trip setup loop. T02 wires together: route selection state (start/destination), route computation (T01 engine), direction generation (T01), and reactive floor-context updates. It produces a self-contained `useRouteSession` hook that App.tsx can drop in without knowing the implementation details.\n\n### Files\n**Created:**\n- `mobile/routing/routeSessionState.ts` — State machine types and constants\n- `mobile/routing/useRouteSession.ts` — Main hook consuming all routing pieces\n- `mobile/routing/useRouteSession.test.ts` — State transitions, error states, mode switching\n- `mobile/hooks/useRouteSelection.ts` — Port of web `useRouteSelection` hook (pure React)\n- `mobile/hooks/useRouteSelection.test.ts` — Field advancement, swap, clear, tap assignment\n\n**Modified:**\n- `mobile/domain/navGraph.ts` (no change — imports from there)\n\n### Do\n1. **Implement `mobile/routing/routeSessionState.ts`**:\n   - Define `RouteSessionPhase = 'idle' | 'computing' | 'ready' | 'no-route' | 'error'`\n   - Define `RouteSessionState` discriminated union carrying: phase, start/destination `NavNode | null`, `RouteMode`, `PathResult | null`, `DirectionsResult | null`, error message\n   - Define `RouteSessionOptions = { graph: NormalizedNavGraph; mode: RouteMode; start: NavNode | null; destination: NavNode | null }`\n   - Export pure `computeRouteSession(options): RouteSessionState` function that runs synchronously (A* is fast)\n   - On `start === null || destination === null`: return `idle` state\n   - On route found: return `ready` with PathResult + DirectionsResult\n   - On route not found: return `no-route`\n   - On node not in graph: return `error`\n\n2. **Implement `mobile/routing/useRouteSession.ts`**:\n   - Accept props: `{ graph: NormalizedNavGraph; selection: RouteSelection }` where `RouteSelection` is from `../hooks/useRouteSelection`\n   - Use `useMemo` to run `computeRouteSession` whenever `graph`, `selection.start`, `selection.destination` change\n   - Track `routeMode` state separately (`'standard' | 'accessible'`) — expose `setRouteMode`\n   - Expose: `{ sessionState, routeMode, setRouteMode }`\n\n3. **Write `mobile/routing/useRouteSession.test.ts`**:\n   - Mock `NormalizedNavGraph` with `createTestNavGraph()` from T01\n   - Test: idle when no selection, computing→ready on both-selected, no-route when unreachable, accessible mode filtering\n\n4. **Port `mobile/hooks/useRouteSelection.ts`**:\n   - Copy `src/client/hooks/useRouteSelection.ts` verbatim but:\n     - Replace `@shared/types` import with relative `../../src/shared/types`\n     - Add `RouteSelection` to the interface (inline the type since this is a small hook)\n   - The hook is pure React — no external mobile dependencies needed\n\n5. **Write `mobile/hooks/useRouteSelection.test.ts`**:\n   - Use `@testing-library/react-hooks` or Vitest's `fn()` mocking\n   - Test: `setFromTap` advances activeField, swap exchanges start/destination, clearAll resets state, tapping same field skips duplicate\n\n6. **Verify**: `npm --prefix mobile run test -- mobile/routing/routeSessionState.test.ts mobile/routing/useRouteSession.test.ts mobile/hooks/useRouteSelection.test.ts` → all pass. `npm --prefix mobile run typecheck` → 0 errors.",
+      "estimate": "1–2 hours",
+      "files": [
+        "mobile/routing/routeSessionState.ts",
+        "mobile/routing/useRouteSession.ts",
+        "mobile/routing/useRouteSession.test.ts",
+        "mobile/hooks/useRouteSelection.ts",
+        "mobile/hooks/useRouteSelection.test.ts"
+      ],
+      "verify": "npm --prefix mobile run test -- mobile/routing/routeSessionState.test.ts mobile/routing/useRouteSession.test.ts mobile/hooks/useRouteSelection.test.ts && npm --prefix mobile run typecheck",
+      "inputs": [
+        "mobile/routing/pathfindingEngine.ts",
+        "mobile/routing/generateDirections.ts",
+        "src/client/hooks/useRouteSelection.ts",
+        "mobile/domain/navGraph.ts"
+      ],
+      "expected_output": [
+        "mobile/routing/routeSessionState.ts",
+        "mobile/routing/useRouteSession.ts",
+        "mobile/routing/useRouteSession.test.ts",
+        "mobile/hooks/useRouteSelection.ts",
+        "mobile/hooks/useRouteSelection.test.ts"
+      ],
+      "observability_impact": "Route session exposes phase as a discriminated union tag — visible in React DevTools as 'idle' | 'computing' | 'ready' | 'no-route' | 'error'.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S02",
+      "id": "T03",
+      "title": "Destination picker UI with building/floor/node search",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "## Task T03 — Destination Picker UI with Building/Floor/Node Search\n\n### Why\nThe visitor needs a way to select start and destination. T03 builds the search UI and the `useLocationSearch` hook that filters the normalized graph in-memory. The picker uses a building→floor→node accordion/tree structure with a fuzzy text input, mirroring the web CampusNav destination experience without re-inventing the UX.\n\n### Files\n**Created:**\n- `mobile/hooks/useLocationSearch.ts` — In-memory search over NormalizedNavGraph\n- `mobile/hooks/useLocationSearch.test.ts` — Prefix match, empty query, type filter, result count\n- `mobile/components/destination/DestinationPicker.tsx` — Building/floor/node accordion with search bar\n- `mobile/components/destination/DestinationPicker.test.tsx` — Render, search debounce, node selection, accessible mode display\n\n### Do\n1. **Implement `mobile/hooks/useLocationSearch.ts`**:\n   - Accept `{ graph: NormalizedNavGraph; query: string; typeFilter?: Set<NavNodeType> }`\n   - Return `{ buildings: SearchBuilding[] }` where each `SearchBuilding` has `floors: SearchFloor[]` with `nodes: SearchNode[]`\n   - Search algorithm: case-insensitive prefix match on `label` OR `roomNumber` OR `description` OR `buildingName`; only include buildings/floors that have at least one matching node\n   - Sort: buildings by name, floors by floorNumber ascending, nodes by label\n   - Filter by `typeFilter` if provided (useful for restricting to entrances, rooms, etc.)\n   - Export `SearchBuilding`, `SearchFloor`, `SearchNode` types\n   - For performance: build the search index lazily in `useMemo` keyed on `graph`\n\n2. **Write `mobile/hooks/useLocationSearch.test.ts`**:\n   - Create a mock `NormalizedNavGraph` with 2 buildings, 3 floors each, ~5 nodes per floor\n   - Test: empty query returns all searchable nodes; prefix \"Lib\" matches \"Library\"; prefix \"201\" matches room \"201\"; type filter excludes stairs; empty result for nonsense query\n\n3. **Implement `mobile/components/destination/DestinationPicker.tsx`**:\n   - Props: `{ graph: NormalizedNavGraph; selection: RouteSelection; onNodeSelect: (node: NavNode) => void }`\n   - Layout: `TextInput` for search at top; `FlatList` of `SearchBuilding` results below\n   - Each building item is an accordion/expandable section showing building name + floor count + chevron\n   - Expanded building shows floors with floor number header; each floor shows its searchable nodes\n   - Node row: label + room number + type badge + accessible icon (for elevator/ramp nodes)\n   - Active field indicator (\"Set Start\" / \"Set Destination\") shown in header; switch button to toggle\n   - Use `useLocationSearch` internally with debounced search input (300ms `useEffect` + state)\n   - Pressing a node calls `onNodeSelect(node)`\n   - Render with `StyleSheet` (dark theme matching existing App.tsx palette: bg #020617, text #f8fafc)\n\n4. **Write `mobile/components/destination/DestinationPicker.test.tsx`**:\n   - Use `@testing-library/react-native` or Vitest with React Native mock\n   - Test: renders search input; renders building items; search filters results; node press calls `onNodeSelect` with correct node\n\n5. **Verify**: `npm --prefix mobile run test -- mobile/hooks/useLocationSearch.test.ts mobile/components/destination/DestinationPicker.test.tsx` → all pass. `npm --prefix mobile run typecheck` → 0 errors.",
+      "estimate": "1–2 hours",
+      "files": [
+        "mobile/hooks/useLocationSearch.ts",
+        "mobile/hooks/useLocationSearch.test.ts",
+        "mobile/components/destination/DestinationPicker.tsx",
+        "mobile/components/destination/DestinationPicker.test.tsx"
+      ],
+      "verify": "npm --prefix mobile run test -- mobile/hooks/useLocationSearch.test.ts mobile/components/destination/DestinationPicker.test.tsx && npm --prefix mobile run typecheck",
+      "inputs": [
+        "mobile/domain/navGraph.ts",
+        "mobile/hooks/useRouteSelection.ts",
+        "src/shared/types.ts"
+      ],
+      "expected_output": [
+        "mobile/hooks/useLocationSearch.ts",
+        "mobile/hooks/useLocationSearch.test.ts",
+        "mobile/components/destination/DestinationPicker.tsx",
+        "mobile/components/destination/DestinationPicker.test.tsx"
+      ],
+      "observability_impact": "Search debounce (300ms) prevents excessive re-computation; search results are logged at info level for debugging.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S02",
+      "id": "T04",
+      "title": "Route preview + floor switching + route path overlay + app wiring",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "## Task T04 — Route Preview + Floor Switching + Route Path Overlay + App Wiring\n\n### Why\nT04 is the final integration wave: it connects the route session (T02) and destination picker (T03) into a composable App, adds a step-by-step route preview, extends MapViewport to switch floor images, renders the route polyline as a View-based overlay, and exposes the accessible mode toggle.\n\n### Files\n**Created:**\n- `mobile/components/route/RoutePreview.tsx` — Step-by-step directions grouped by floor\n- `mobile/components/route/RoutePathOverlay.tsx` — Polyline overlay using View components\n- `mobile/map/MapViewportFloor.tsx` — Floor-switching extension of MapViewport\n- `mobile/map/MapViewportFloor.test.tsx` — Floor switching and overlay tests\n\n**Modified:**\n- `mobile/map/MapViewport.tsx` — Re-exported as-is; floor switching lives in `MapViewportFloor.tsx`\n- `mobile/App.tsx` — Composed with DestinationPicker, RoutePreview, MapViewportFloor, accessible mode toggle\n\n### Do\n1. **Implement `mobile/components/route/RoutePreview.tsx`**:\n   - Props: `{ directions: DirectionsResult; floorMap: Map<number, NavFloor>; onFloorChange: (floorId: number) => void }`\n   - Import `groupDirectionSections` from `../../routing/directionSections`\n   - Import `DirectionSection`, `DirectionStep` from `../../domain/navGraph`\n   - Group steps with `groupDirectionSections(directions.steps)`\n   - Render each section with floor header (\"Floor 1\", \"Floor 2\") and a `FlatList` of step rows\n   - Each step row: icon (rendered as emoji or colored View), instruction text, distance + ETA\n   - Accessible mode steps: show elevator/ramp icon distinctly\n   - Total summary footer: total distance + estimated walking time\n   - Dark theme matching app palette\n\n2. **Implement `mobile/components/route/RoutePathOverlay.tsx`**:\n   - Props: `{ path: Array<{x: number; y: number; floorId: number}>; activeFloorId: number; viewport: ViewportDimensions; scale: number; }`\n   - Filter `path` to nodes on `activeFloorId`\n   - Render a `View` overlay with `Position: 'absolute'` containing two dots per segment:\n     - Each dot: `width: 8, height: 8, borderRadius: 4, backgroundColor: '#38bdf8'`\n     - Positioned using `{ left: node.x * viewport.width * scale - 4, top: node.y * viewport.height * scale - 4 }`\n     - Connect with a `View` line: `width: Math.sqrt(dx²+dy²) * scale, height: 2, backgroundColor: '#38bdf8'`\n     - Rotate line to match bearing using transform\n   - This is a View-based polyline (Option A from S02 research — no new SVG dependency)\n   - If polyline rendering proves too complex for View transforms: just render colored dots at each node position\n\n3. **Implement `mobile/map/MapViewportFloor.tsx`**:\n   - Props: `{ imageUri: string; floorTargets: FloorPlanTarget[]; activeFloorTarget: FloorPlanTarget | null; routePath: RoutePathPoint[]; onFloorChange: (target: FloorPlanTarget) => void; onTransformChange: (t: MapTransform) => void }`\n   - Composition: `MapViewport` (from existing `MapViewport.tsx`) + floor selector strip + `RoutePathOverlay`\n   - Floor selector: horizontal `ScrollView` of floor buttons below the controls row\n     - Each button: \"Bldg {name} Fl {num}\" — active floor button has accent color (#38bdf8 bg)\n     - On press: calls `onFloorChange(target)`\n   - Pass `routePath` filtered to `activeFloorTarget` into `RoutePathOverlay`\n   - The inner `MapViewport` gets the image URI from the active floor target via `getFloorPlanImageUrl` from `mapApiClient`\n\n4. **Modify `mobile/App.tsx`**:\n   - Import `RouteSessionProvider` logic (inline in component — no context needed for this scale)\n   - Add state: `accessibleMode: boolean`\n   - After bootstrap `ready` state:\n     - `const selection = useRouteSelection()` from `hooks/useRouteSelection`\n     - `const { sessionState, routeMode, setRouteMode } = useRouteSession({ graph: bootstrapState.graph, selection })`\n     - Show `DestinationPicker` with `graph` and `selection`\n     - Show `MapViewportFloor` with `activeFloorTarget`, `routePath` from session\n     - Show `RoutePreview` when `sessionState.phase === 'ready'`\n     - Accessible mode toggle: `Pressable` switch updating `accessibleMode` → `setRouteMode`\n     - Show `no-route` / `error` state messages inline\n   - The existing diagnostic panel (API endpoint, building count) stays as-is\n\n5. **Write `mobile/map/MapViewportFloor.test.tsx`**:\n   - Mock `MapViewport`, test floor button rendering and `onFloorChange` callback\n   - Test: clicking floor button triggers correct callback\n\n6. **Verify**: `npm --prefix mobile run typecheck` → 0 errors. The full App composition is validated by successful typecheck and existing S01 app-shell tests.\n\n7. **Wire up the floor image URL resolution**: In App.tsx, when `activeFloorTarget` changes, call `mapApiClient.getFloorPlanImageUrl(target)` and update the image URI fed to `MapViewportFloor`. Import `createMapApiClient` from `data/mapApiClient` and `validateApiBaseUrl` from `bootstrap/appBootstrap`.",
+      "estimate": "2–3 hours",
+      "files": [
+        "mobile/components/route/RoutePreview.tsx",
+        "mobile/components/route/RoutePathOverlay.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/map/MapViewportFloor.test.tsx",
+        "mobile/App.tsx (modify)"
+      ],
+      "verify": "npm --prefix mobile run typecheck && npm --prefix mobile run test -- mobile/map/MapViewportFloor.test.tsx",
+      "inputs": [
+        "mobile/routing/routeSessionState.ts",
+        "mobile/routing/useRouteSession.ts",
+        "mobile/components/destination/DestinationPicker.tsx",
+        "mobile/routing/directionSections.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/data/mapApiClient.ts",
+        "mobile/App.tsx"
+      ],
+      "expected_output": [
+        "mobile/components/route/RoutePreview.tsx",
+        "mobile/components/route/RoutePathOverlay.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/map/MapViewportFloor.test.tsx",
+        "mobile/App.tsx (modified)"
+      ],
+      "observability_impact": "App-level state (selection, session phase, active floor) is fully observable via React DevTools. Floor image load errors surface through existing bootstrap error state mechanism.",
       "full_plan_md": "",
       "sequence": 0
     }
@@ -734,6 +929,28 @@
       "verdict": "✅ pass",
       "duration_ms": 802,
       "created_at": "2026-03-26T13:35:07.531Z"
+    },
+    {
+      "id": 18,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run test -- mobile/routing/",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 228,
+      "created_at": "2026-03-30T07:29:22.843Z"
+    },
+    {
+      "id": 19,
+      "task_id": "T01",
+      "slice_id": "S02",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm --prefix mobile run typecheck",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 15000,
+      "created_at": "2026-03-30T07:29:22.843Z"
     }
   ]
 }

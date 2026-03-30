@@ -3,6 +3,74 @@ import {
   type NavGraphContractValidationError,
   validateNavGraphPayload,
 } from './navGraphSchema';
+import type { PathResult, PathSegment, RouteMode } from '../../src/shared/pathfinding/types';
+
+// Re-export pathfinding types so routing module can import everything from domain/navGraph
+export type { PathResult, PathSegment, RouteMode };
+
+/**
+ * Direction generation types — turn-by-turn step generation.
+ *
+ * Used by mobile/routing/generateDirections.ts to convert computed paths
+ * into human-readable walking instructions.
+ */
+
+/**
+ * Icon types for direction step visualization.
+ * Maps to icons in the mobile UI icon set.
+ */
+export type StepIcon =
+  | 'straight'
+  | 'turn-left'
+  | 'turn-right'
+  | 'sharp-left'
+  | 'sharp-right'
+  | 'arrive'
+  | 'accessible'
+  | 'stairs-up'
+  | 'stairs-down'
+  | 'elevator'
+  | 'ramp';
+
+/**
+ * A single turn-by-turn direction instruction.
+ */
+export interface DirectionStep {
+  /** Human-readable instruction, e.g. "Turn left at the cafeteria" */
+  instruction: string;
+  icon: StepIcon;
+  /** Segment distance in normalized units (0–1 coordinate space) */
+  distanceM: number;
+  /** Estimated seconds for this segment */
+  durationSec: number;
+  /** True if this segment passes through a ramp or elevator node */
+  isAccessibleSegment: boolean;
+  /** Floor ID where this instruction is presented */
+  floorId: number;
+  /** Resolved floor number for display/grouping; falls back to floorId when metadata is missing */
+  floorNumber: number;
+}
+
+/**
+ * Complete result of direction generation.
+ */
+export interface DirectionsResult {
+  steps: DirectionStep[];
+  /** Sum of all segment distances in normalized units */
+  totalDistanceNorm: number;
+  /** Sum of all step durations in seconds */
+  totalDurationSec: number;
+}
+
+/**
+ * A section of directions on a single floor.
+ * Used by mobile/routing/directionSections.ts for floor-grouped display.
+ */
+export interface DirectionSection {
+  floorId: number;
+  floorNumber: number;
+  steps: DirectionStep[];
+}
 
 export interface NormalizedFloorRecord {
   buildingId: number;

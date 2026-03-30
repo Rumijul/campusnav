@@ -29,7 +29,8 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 ## Milestone Sequence
 
 - [x] M001: CampusNav v1.6 GPS Integration & UX Refinements — shipped web gesture, connector, and GPS calibration improvements.
-- [ ] M002-a5gn45: Native App Foundation + Foreground Real-Time Guidance — ship internal iOS/Android builds with visitor-first live guidance loop.
+- [x] M002-a5gn45/S01: Native App Foundation — Expo mobile runtime, typed backend graph contracts, no-login bootstrap, gesture-capable MapViewport.
+- [ ] M002-a5gn45/S02–S05: Native App Foundation + Foreground Real-Time Guidance — visitor-first live guidance loop through internal iOS/Android builds.
 - [ ] M003: Reliability and Guidance Intelligence — strengthen confidence gating, floor correctness, and reroute robustness under real movement.
 - [ ] M004: Maps-Like Experience Expansion — add voice prompts and haptic cues with polished turn guidance behavior.
 - [ ] M005: Offline and Launch Hardening — add offline capability and release-level operational hardening.
