@@ -309,7 +309,7 @@ Steps:
   - Estimate: 45m
   - Files: mobile/components/guidance/ConfidenceIndicator.tsx, mobile/components/guidance/LiveGuidanceOverlay.tsx, mobile/components/guidance/ConfidenceIndicator.test.tsx, mobile/components/guidance/LiveGuidanceOverlay.test.tsx
   - Verify: `npm test -- --run mobile/components/guidance/` passes with 0 TypeScript errors
-- [ ] **T06: Wire guidance into App and verify TypeScript clean** — Wire the guidance components into App.tsx and add a guidance start/stop UI. Also export bearing from navGraph.ts and ensure all S03 exports are re-exported from a single entry point.
+- [x] **T06: Wired guidance into App.tsx with overlay and Start button; created routing/hooks entry points; 0 TS errors, 108 S03 tests passing** — Wire the guidance components into App.tsx and add a guidance start/stop UI. Also export bearing from navGraph.ts and ensure all S03 exports are re-exported from a single entry point.
 
 Steps:
 1. In `mobile/App.tsx`:

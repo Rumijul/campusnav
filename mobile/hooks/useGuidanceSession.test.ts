@@ -30,10 +30,8 @@ import {
   shouldAdvanceStep,
 } from '../routing/guidanceState';
 import type { RouteSessionReadyState } from '../routing/routeSessionState';
-import type {
-  HeadingData,
-  PositionFix as HookPositionFix,
-} from './useGuidanceSession';
+import type { PositionFix as HookPositionFix } from './useCurrentPosition';
+import type { HeadingData } from './useCurrentPosition';
 import {
   hookFixToStateFix,
   hookHeadingToStateHeading,

@@ -38,6 +38,10 @@ import { RoutePreview } from './components/route/RoutePreview';
 import { RoutePathOverlay, type RoutePathPoint } from './components/route/RoutePathOverlay';
 import { useRouteSelection } from './hooks/useRouteSelection';
 import { useRouteSession } from './routing/useRouteSession';
+import { useGuidanceSession } from './hooks/useGuidanceSession';
+import { useCurrentPosition } from './hooks/useCurrentPosition';
+import { LiveGuidanceOverlay } from './components/guidance/LiveGuidanceOverlay';
+import { ConfidenceIndicator } from './components/guidance/ConfidenceIndicator';
 import type { NavNode } from '@shared/types';
 
 /* ─── Helpers ─── */
@@ -82,8 +86,6 @@ function getFloorId(target: FloorPlanTarget, graph: NormalizedNavGraph): number 
 /* ─── Route path from session ready state ─── */
 
 function buildRoutePath(sessionPhase: 'ready', graph: NormalizedNavGraph): RoutePathPoint[] {
-  // The path result from MobilePathfindingEngine contains nodeIds
-  // We map each to normalized coordinates from the graph
   if (!sessionPhase || sessionPhase !== 'ready') return [];
   return [];
 }
@@ -201,7 +203,6 @@ export default function App() {
 
   const onNodeSelect = useCallback((node: NavNode) => {
     selection.setFromTap(node);
-    // After selection, set the active floor to the node's floor
     if (graph) {
       const record = graph.nodeById.get(node.id);
       if (record) {
@@ -225,6 +226,17 @@ export default function App() {
   const onRetryPress = useCallback(() => {
     void executeBootstrap(nextAttemptFromState(bootstrapState));
   }, [executeBootstrap, bootstrapState]);
+
+  /* ─── Guidance session (active only when route is ready) ─── */
+
+  const isRouteReady = sessionState?.phase === 'ready' && graph !== null;
+  const { position } = useCurrentPosition();
+  const { guidanceState, startGuidance, stopGuidance, confirmPosition } = isRouteReady
+    ? useGuidanceSession({ graph, route: sessionState!, updateIntervalMs: 2000 })
+    : { guidanceState: { phase: 'idle' } as ReturnType<typeof useGuidanceSession>['guidanceState'], startGuidance: () => {}, stopGuidance: () => {}, confirmPosition: (_nodeId: string) => {} };
+
+  const showStartGuidance = sessionState?.phase === 'ready' && guidanceState.phase === 'idle';
+  const showGuidanceOverlay = guidanceState.phase !== 'idle';
 
   /* ─── Phase: idle / loading ─── */
 
@@ -265,80 +277,114 @@ export default function App() {
   /* ─── Phase: ready ─── */
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      {/* Header */}
-      <Text style={styles.title}>CampusNav</Text>
-      <Text style={styles.subtitle}>Visitor runtime — no sign-in needed</Text>
-      <Text style={styles.statusLabel}>Graph: {graph!.graph.buildings.length} buildings</Text>
-
-      {/* Destination Picker */}
-      <View style={styles.section}>
-        <DestinationPicker
-          graph={graph!}
-          selection={selection}
-          onNodeSelect={onNodeSelect}
-        />
-      </View>
-
-      {/* Route Preview (when ready) */}
-      {sessionState && sessionState.phase === 'ready' && (
-        <View style={styles.section}>
-          <RoutePreview
-            directions={sessionState.directions}
-            accessibleMode={accessibleMode}
+    <View style={styles.container}>
+      {/* Guidance overlay (rendered above everything) */}
+      {showGuidanceOverlay && (
+        <View style={styles.guidanceOverlayContainer}>
+          <LiveGuidanceOverlay
+            guidanceState={guidanceState}
+            onConfirmPosition={() => {
+              // When in low-confidence, tapping the map confirms position.
+              // For now, use the first route node as a fallback.
+              if (sessionState?.phase === 'ready') {
+                const firstNodeId = sessionState.path.nodeIds[0];
+                if (firstNodeId) confirmPosition(firstNodeId);
+              }
+            }}
+            onStopGuidance={stopGuidance}
           />
         </View>
       )}
 
-      {/* Session phase / route status */}
-      {sessionState && (
-        <View style={styles.sessionStatus}>
-          <Text style={styles.statusLabel}>Route: {sessionState.phase}</Text>
-          {sessionState.phase === 'no-route' && (
-            <Text style={styles.statusMessage}>No path found between selected locations.</Text>
-          )}
-          {sessionState.phase === 'error' && (
-            <Text style={styles.errorReason}>{sessionState.errorMessage}</Text>
-          )}
+      {/* Confidence indicator dot — top-right corner, always visible during guidance */}
+      {showGuidanceOverlay && (
+        <View style={styles.confidenceDotContainer}>
+          <ConfidenceIndicator confidence={guidanceState.positionConfidence} />
         </View>
       )}
 
-      {/* Map Viewport with floor switcher */}
-      <View style={styles.section}>
-        <MapViewportFloor
-          activeFloorId={activeFloorId}
-          floorTargets={floorTargets}
-          activeFloorTarget={activeFloorTarget}
-          routePath={routePath}
-          onFloorChange={(target) => {
-            setActiveFloorTarget(target);
-            if (graph) setActiveFloorId(getFloorId(target, graph));
-          }}
-          showRouteOverlay={sessionState?.phase === 'ready'}
-          showFloorSelector={floorTargets.length > 1}
-          onTransformChange={onTransformChange}
-        />
-      </View>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <Text style={styles.title}>CampusNav</Text>
+        <Text style={styles.subtitle}>Visitor runtime — no sign-in needed</Text>
+        <Text style={styles.statusLabel}>Graph: {graph!.graph.buildings.length} buildings</Text>
 
-      {/* Accessible mode toggle */}
-      <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>Accessible mode</Text>
-        <Pressable
-          style={[styles.toggleButton, accessibleMode && styles.toggleButtonActive]}
-          onPress={toggleAccessibleMode}
-        >
-          <Text style={[styles.toggleButtonText, accessibleMode && styles.toggleButtonTextActive]}>
-            {accessibleMode ? 'ON' : 'OFF'}
-          </Text>
-        </Pressable>
-      </View>
+        {/* Destination Picker */}
+        <View style={styles.section}>
+          <DestinationPicker
+            graph={graph!}
+            selection={selection}
+            onNodeSelect={onNodeSelect}
+          />
+        </View>
 
-      {/* Telemetry */}
-      <Text style={styles.telemetryText}>
-        viewport scale={formatMetric(transformState.scale)} rotation={formatMetric(transformState.rotationDeg)}°
-        tx={formatMetric(transformState.translation.x)} ty={formatMetric(transformState.translation.y)}
-      </Text>
-    </ScrollView>
+        {/* Route Preview (when ready) */}
+        {sessionState && sessionState.phase === 'ready' && (
+          <View style={styles.section}>
+            <RoutePreview
+              directions={sessionState.directions}
+              accessibleMode={accessibleMode}
+            />
+          </View>
+        )}
+
+        {/* Start Guidance button — visible when route ready and not yet guiding */}
+        {showStartGuidance && (
+          <Pressable style={styles.startGuidanceButton} onPress={startGuidance}>
+            <Text style={styles.startGuidanceText}>Start Guidance</Text>
+          </Pressable>
+        )}
+
+        {/* Session phase / route status */}
+        {sessionState && (
+          <View style={styles.sessionStatus}>
+            <Text style={styles.statusLabel}>Route: {sessionState.phase}</Text>
+            {sessionState.phase === 'no-route' && (
+              <Text style={styles.statusMessage}>No path found between selected locations.</Text>
+            )}
+            {sessionState.phase === 'error' && (
+              <Text style={styles.errorReason}>{sessionState.errorMessage}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Map Viewport with floor switcher */}
+        <View style={styles.section}>
+          <MapViewportFloor
+            activeFloorId={activeFloorId}
+            floorTargets={floorTargets}
+            activeFloorTarget={activeFloorTarget}
+            routePath={routePath}
+            onFloorChange={(target) => {
+              setActiveFloorTarget(target);
+              if (graph) setActiveFloorId(getFloorId(target, graph));
+            }}
+            showRouteOverlay={sessionState?.phase === 'ready'}
+            showFloorSelector={floorTargets.length > 1}
+            onTransformChange={onTransformChange}
+          />
+        </View>
+
+        {/* Accessible mode toggle */}
+        <View style={styles.toggleRow}>
+          <Text style={styles.toggleLabel}>Accessible mode</Text>
+          <Pressable
+            style={[styles.toggleButton, accessibleMode && styles.toggleButtonActive]}
+            onPress={toggleAccessibleMode}
+          >
+            <Text style={[styles.toggleButtonText, accessibleMode && styles.toggleButtonTextActive]}>
+              {accessibleMode ? 'ON' : 'OFF'}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Telemetry */}
+        <Text style={styles.telemetryText}>
+          viewport scale={formatMetric(transformState.scale)} rotation={formatMetric(transformState.rotationDeg)}°
+          tx={formatMetric(transformState.translation.x)} ty={formatMetric(transformState.translation.y)}
+        </Text>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -448,5 +494,36 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontVariant: ['tabular-nums'],
     marginBottom: 8,
+  },
+  // Guidance overlay — fixed overlay at top of viewport
+  guidanceOverlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+  },
+  // Confidence indicator dot — fixed top-right corner
+  confidenceDotContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 101,
+  },
+  // Start guidance button — styled to match existing destination picker / route preview buttons
+  startGuidanceButton: {
+    backgroundColor: '#0f4a7a',
+    borderColor: '#38bdf8',
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  startGuidanceText: {
+    color: '#38bdf8',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

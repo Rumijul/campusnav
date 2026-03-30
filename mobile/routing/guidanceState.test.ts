@@ -97,9 +97,9 @@ function makeRoute(
 }
 
 /** Mock PathResult that carries nodeById for coordinate lookup */
-interface PathWithNodeById extends import('../domain/navGraph').PathResult {
+type PathWithNodeById = import('../domain/navGraph').PathResult & {
   nodeById: Map<string, import('../domain/navGraph').NormalizedNodeRecord>;
-}
+};
 
 /** Build a RouteSessionReadyState path with embedded nodeById map */
 function buildRouteWithNodes(
@@ -483,7 +483,7 @@ describe('getActiveStep', () => {
   it('returns null when route phase is not "ready"', () => {
     const step0 = makeStep('Turn left at the cafeteria');
     const route = buildRouteWithNodes(['a', 'b'], [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }], [step0]);
-    const nonReadyRoute = { ...route, phase: 'idle' } as import('./routeSessionState').RouteSessionState;
+    const nonReadyRoute = { ...route, phase: 'idle' } as unknown as import('./routeSessionState').RouteSessionState;
     const state = makeGuidanceState(
       'idle',
       nonReadyRoute as import('./routeSessionState').RouteSessionReadyState,
