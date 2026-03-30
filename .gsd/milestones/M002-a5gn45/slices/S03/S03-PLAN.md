@@ -166,7 +166,7 @@ Steps:
   - Estimate: 1h
   - Files: mobile/hooks/useCurrentPosition.ts, mobile/hooks/useCurrentPosition.test.ts
   - Verify: `npm test -- --run mobile/hooks/useCurrentPosition.test.ts` passes with 0 TypeScript errors
-- [ ] **T04: Implement useGuidanceSession orchestrator hook** — Create the guidance session hook in `mobile/hooks/useGuidanceSession.ts` that wires together `useRouteSession` (from S02), `useCurrentPosition` (T03), and the guidance state machine (T02) into a live guidance loop.
+- [x] **T04: Implemented useGuidanceSession orchestrator hook with 45 passing tests and 0 TypeScript errors** — Create the guidance session hook in `mobile/hooks/useGuidanceSession.ts` that wires together `useRouteSession` (from S02), `useCurrentPosition` (T03), and the guidance state machine (T02) into a live guidance loop.
 
 Steps:
 1. Create `mobile/hooks/useGuidanceSession.ts`.
