@@ -11,169 +11,171 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import type { NavBuilding, NavFloor, NavGraph } from '../../src/shared/types';
+import type { NavGraph } from '../../src/shared/types';
 import { useRouteSession } from './useRouteSession';
-import { normalizeNavGraph } from '../domain/navGraph';
+import { normalizeNavGraph, type NormalizedNavGraph } from '../domain/navGraph';
+
+/** Extract normalized graph from result, throwing if normalization fails (test helper). */
+function getTestGraph(navGraph: NavGraph): NormalizedNavGraph {
+  const result = normalizeNavGraph(navGraph);
+  if (!result.ok) {
+    throw new Error(`Test graph normalization failed: ${result.error.code}`);
+  }
+  return result.data;
+}
 
 /** Build a minimal two-room graph on a single floor with one connecting edge. */
 function createTestNavGraph(): NavGraph {
-  const building: NavBuilding = {
-    id: 1,
-    name: 'Test Building',
-    abbreviation: 'TB',
-    floors: [
+  return {
+    buildings: [
       {
         id: 1,
-        buildingId: 1,
-        floorNumber: 1,
-        name: 'Floor 1',
-        level: 1,
-        svgPath: '',
-        nodes: [
+        name: 'Test Building',
+        floors: [
           {
-            id: 'room-a',
-            x: 0.1,
-            y: 0.5,
-            floorId: 1,
-            type: 'room',
-            searchable: true,
-            label: 'Room A',
-            roomNumber: 'A101',
-          },
-          {
-            id: 'room-b',
-            x: 0.9,
-            y: 0.5,
-            floorId: 1,
-            type: 'room',
-            searchable: true,
-            label: 'Room B',
-            roomNumber: 'B101',
-          },
-        ],
-        edges: [
-          {
-            id: 'edge-a-b',
-            sourceId: 'room-a',
-            targetId: 'room-b',
-            standardWeight: 0.8,
-            accessibleWeight: 0.8,
-            accessible: true,
-            bidirectional: true,
+            id: 1,
+            floorNumber: 1,
+            imagePath: '',
+            updatedAt: '2024-01-01T00:00:00Z',
+            nodes: [
+              {
+                id: 'room-a',
+                x: 0.1,
+                y: 0.5,
+                floorId: 1,
+                type: 'room',
+                searchable: true,
+                label: 'Room A',
+                roomNumber: 'A101',
+              },
+              {
+                id: 'room-b',
+                x: 0.9,
+                y: 0.5,
+                floorId: 1,
+                type: 'room',
+                searchable: true,
+                label: 'Room B',
+                roomNumber: 'B101',
+              },
+            ],
+            edges: [
+              {
+                id: 'edge-a-b',
+                sourceId: 'room-a',
+                targetId: 'room-b',
+                standardWeight: 0.8,
+                accessibleWeight: 0.8,
+                accessible: true,
+                bidirectional: true,
+              },
+            ],
           },
         ],
       },
     ],
   };
-
-  return { buildings: [building] };
 }
 
 /** Build a graph with a disconnected component (no route between room-a and room-c). */
 function createDisconnectedNavGraph(): NavGraph {
-  const building: NavBuilding = {
-    id: 1,
-    name: 'Test Building',
-    abbreviation: 'TB',
-    floors: [
+  return {
+    buildings: [
       {
         id: 1,
-        buildingId: 1,
-        floorNumber: 1,
-        name: 'Floor 1',
-        level: 1,
-        svgPath: '',
-        nodes: [
-          { id: 'room-a', x: 0.1, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room A', roomNumber: 'A101' },
-          { id: 'room-b', x: 0.9, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room B', roomNumber: 'B101' },
+        name: 'Test Building',
+        floors: [
+          {
+            id: 1,
+            floorNumber: 1,
+            imagePath: '',
+            updatedAt: '2024-01-01T00:00:00Z',
+            nodes: [
+              { id: 'room-a', x: 0.1, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room A', roomNumber: 'A101' },
+              { id: 'room-b', x: 0.9, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room B', roomNumber: 'B101' },
+            ],
+            edges: [
+              { id: 'edge-a-b', sourceId: 'room-a', targetId: 'room-b', standardWeight: 0.8, accessibleWeight: 0.8, accessible: true, bidirectional: true },
+            ],
+          },
+          {
+            id: 2,
+            floorNumber: 2,
+            imagePath: '',
+            updatedAt: '2024-01-01T00:00:00Z',
+            nodes: [
+              { id: 'room-c', x: 0.5, y: 0.5, floorId: 2, type: 'room', searchable: true, label: 'Room C', roomNumber: 'C101' },
+            ],
+            edges: [],
+          },
         ],
-        edges: [
-          { id: 'edge-a-b', sourceId: 'room-a', targetId: 'room-b', standardWeight: 0.8, accessibleWeight: 0.8, accessible: true, bidirectional: true },
-        ],
-      },
-      {
-        id: 2,
-        buildingId: 1,
-        floorNumber: 2,
-        name: 'Floor 2',
-        level: 2,
-        svgPath: '',
-        nodes: [
-          { id: 'room-c', x: 0.5, y: 0.5, floorId: 2, type: 'room', searchable: true, label: 'Room C', roomNumber: 'C101' },
-        ],
-        edges: [],
       },
     ],
   };
-
-  return { buildings: [building] };
 }
 
 /** Build a graph with a stairs-only inter-floor connection (blocked in accessible mode). */
 function createStairsOnlyNavGraph(): NavGraph {
-  const building: NavBuilding = {
-    id: 1,
-    name: 'Test Building',
-    abbreviation: 'TB',
-    floors: [
+  return {
+    buildings: [
       {
         id: 1,
-        buildingId: 1,
-        floorNumber: 1,
-        name: 'Floor 1',
-        level: 1,
-        svgPath: '',
-        nodes: [
-          { id: 'room-f1', x: 0.1, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room F1', roomNumber: 'F101' },
+        name: 'Test Building',
+        floors: [
           {
-            id: 'stairs-1',
-            x: 0.9,
-            y: 0.5,
-            floorId: 1,
-            type: 'stairs',
-            searchable: false,
-            label: 'Stairs',
-            connectsToNodeAboveId: 'stairs-2',
-            connectsToFloorAboveId: 2,
-            connectsToNodeBelowId: undefined,
-            connectsToFloorBelowId: undefined,
+            id: 1,
+            floorNumber: 1,
+            imagePath: '',
+            updatedAt: '2024-01-01T00:00:00Z',
+            nodes: [
+              { id: 'room-f1', x: 0.1, y: 0.5, floorId: 1, type: 'room', searchable: true, label: 'Room F1', roomNumber: 'F101' },
+              {
+                id: 'stairs-1',
+                x: 0.9,
+                y: 0.5,
+                floorId: 1,
+                type: 'stairs',
+                searchable: false,
+                label: 'Stairs',
+                connectsToNodeAboveId: 'stairs-2',
+                connectsToFloorAboveId: 2,
+                connectsToNodeBelowId: undefined,
+                connectsToFloorBelowId: undefined,
+              },
+            ],
+            edges: [
+              { id: 'edge-f1-stairs', sourceId: 'room-f1', targetId: 'stairs-1', standardWeight: 0.2, accessibleWeight: 0.2, accessible: true, bidirectional: true },
+            ],
           },
-        ],
-        edges: [
-          { id: 'edge-f1-stairs', sourceId: 'room-f1', targetId: 'stairs-1', standardWeight: 0.2, accessibleWeight: 0.2, accessible: true, bidirectional: true },
-        ],
-      },
-      {
-        id: 2,
-        buildingId: 1,
-        floorNumber: 2,
-        name: 'Floor 2',
-        level: 2,
-        svgPath: '',
-        nodes: [
-          { id: 'room-f2', x: 0.9, y: 0.5, floorId: 2, type: 'room', searchable: true, label: 'Room F2', roomNumber: 'F201' },
           {
-            id: 'stairs-2',
-            x: 0.9,
-            y: 0.5,
-            floorId: 2,
-            type: 'stairs',
-            searchable: false,
-            label: 'Stairs',
-            connectsToNodeBelowId: 'stairs-1',
-            connectsToFloorBelowId: 1,
-            connectsToNodeAboveId: undefined,
-            connectsToFloorAboveId: undefined,
+            id: 2,
+            floorNumber: 2,
+            imagePath: '',
+            updatedAt: '2024-01-01T00:00:00Z',
+            nodes: [
+              { id: 'room-f2', x: 0.9, y: 0.5, floorId: 2, type: 'room', searchable: true, label: 'Room F2', roomNumber: 'F201' },
+              {
+                id: 'stairs-2',
+                x: 0.9,
+                y: 0.5,
+                floorId: 2,
+                type: 'stairs',
+                searchable: false,
+                label: 'Stairs',
+                connectsToNodeBelowId: 'stairs-1',
+                connectsToFloorBelowId: 1,
+                connectsToNodeAboveId: undefined,
+                connectsToFloorAboveId: undefined,
+              },
+            ],
+            edges: [
+              { id: 'edge-f2-stairs', sourceId: 'room-f2', targetId: 'stairs-2', standardWeight: 0.2, accessibleWeight: 0.2, accessible: true, bidirectional: true },
+            ],
           },
-        ],
-        edges: [
-          { id: 'edge-f2-stairs', sourceId: 'room-f2', targetId: 'stairs-2', standardWeight: 0.2, accessibleWeight: 0.2, accessible: true, bidirectional: true },
         ],
       },
     ],
   };
-
-  return { buildings: [building] };
 }
 
 function makeNavNode(id: string, label: string): import('../../src/shared/types').NavNode {
@@ -195,7 +197,7 @@ function makeNavNode(id: string, label: string): import('../../src/shared/types'
 describe('useRouteSession', () => {
   describe('idle state', () => {
     it('returns idle phase when no start is set', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -207,7 +209,7 @@ describe('useRouteSession', () => {
     });
 
     it('returns idle phase when no destination is set', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -219,7 +221,7 @@ describe('useRouteSession', () => {
     });
 
     it('returns idle phase when both are null', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -233,7 +235,7 @@ describe('useRouteSession', () => {
 
   describe('ready state', () => {
     it('returns ready phase when both start and destination are valid and reachable', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -249,7 +251,7 @@ describe('useRouteSession', () => {
     });
 
     it('path result contains correct node IDs', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -264,7 +266,7 @@ describe('useRouteSession', () => {
     });
 
     it('directions result contains arrive step', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -281,7 +283,7 @@ describe('useRouteSession', () => {
 
   describe('no-route state', () => {
     it('returns no-route when start and destination are in disconnected components', () => {
-      const graph = normalizeNavGraph(createDisconnectedNavGraph()).data!;
+      const graph = getTestGraph(createDisconnectedNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -295,7 +297,7 @@ describe('useRouteSession', () => {
 
   describe('error state', () => {
     it('returns error when start node is not in the graph', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -313,7 +315,7 @@ describe('useRouteSession', () => {
     });
 
     it('returns error when destination node is not in the graph', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,
@@ -330,7 +332,7 @@ describe('useRouteSession', () => {
 
   describe('accessible mode', () => {
     it('returns ready with accessible mode when stairs-only path is blocked', () => {
-      const graph = normalizeNavGraph(createStairsOnlyNavGraph()).data!;
+      const graph = getTestGraph(createStairsOnlyNavGraph());
 
       // First verify standard mode works (should find route via stairs)
       const { result: standardResult } = renderHook(() =>
@@ -345,12 +347,6 @@ describe('useRouteSession', () => {
       expect(standardResult.current.sessionState.phase).toBe('ready');
 
       // Accessible mode should block stairs and return no-route
-      const { result: accessibleResult } = renderHook(() => {
-        const { useRouteSession: _useRouteSession } = require('./useRouteSession');
-        // Use routeMode: 'accessible' by setting it before the hook
-        return { current: null };
-      });
-
       // Direct test via computeRouteSession
       const { computeRouteSession } = require('./routeSessionState');
       const standardSession = computeRouteSession({
@@ -373,7 +369,7 @@ describe('useRouteSession', () => {
 
   describe('routeMode state', () => {
     it('exposes routeMode and setRouteMode', () => {
-      const graph = normalizeNavGraph(createTestNavGraph()).data!;
+      const graph = getTestGraph(createTestNavGraph());
       const { result } = renderHook(() =>
         useRouteSession({
           graph,

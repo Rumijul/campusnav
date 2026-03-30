@@ -148,6 +148,50 @@ export function getEffectiveAccessibleWeight(edge: Pick<NavEdge, 'accessible' | 
   return edge.accessible ? edge.accessibleWeight : Number.POSITIVE_INFINITY;
 }
 
+/**
+ * Calculate the bearing (angle) from point A to point B in screen-space coordinates.
+ * 0° = north (positive y), 90° = east (positive x), 180° = south, 270° = west.
+ * Returns value normalized to [0, 360).
+ */
+export function bearing(ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax;
+  const dy = by - ay;
+
+  // Handle same-point case (division by zero)
+  if (dx === 0 && dy === 0) {
+    return 0;
+  }
+
+  // In screen-space: north = positive y, east = positive x.
+  // atan2(y, x) gives angle from east axis (standard math convention).
+  // Since east is +90° from north in our system, we rotate by +270° (same as -90°).
+  // Use -dx instead of dx because screen x-axis points opposite to math x-axis.
+  // Formula: atan2(dy, -dx) * (180/π) + 270, normalized to [0, 360).
+  let angle = Math.atan2(dy, -dx) * (180 / Math.PI) + 270;
+
+  // Normalize to [0, 360)
+  if (angle < 0) {
+    angle += 360;
+  }
+  angle = angle % 360;
+
+  return angle;
+}
+
+/**
+ * Normalize an angular delta to the range [-180, 180].
+ * Used for calculating the shortest turn direction.
+ */
+export function normalizeDelta(delta: number): number {
+  let result = delta % 360;
+  if (result > 180) {
+    result -= 360;
+  } else if (result < -180) {
+    result += 360;
+  }
+  return result;
+}
+
 export function normalizeNavGraph(graph: NavGraph): NavGraphNormalizationResult {
   const buildingById = new Map<number, NavBuilding>();
   const floorById = new Map<number, NormalizedFloorRecord>();

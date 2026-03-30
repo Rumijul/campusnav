@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T04",
+  "unitId": "M002-a5gn45/S02/T04",
+  "timestamp": 1774866960398,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npm --prefix mobile run typecheck",
+      "exitCode": 2,
+      "durationMs": 1302,
+      "verdict": "fail"
+    },
+    {
+      "command": "npm --prefix mobile run test -- mobile/map/MapViewportFloor.test.tsx",
+      "exitCode": 1,
+      "durationMs": 964,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}
