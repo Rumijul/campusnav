@@ -39,7 +39,7 @@ Use a script or sed to handle all files systematically. The T01 blocker task fix
   - Estimate: 30m
   - Files: mobile/app.json, mobile/eas.json, mobile/.env
   - Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON
-- [ ] **T05: Build Android APK/AAB artifact** — Build Android APK or AAB from the generated android/ directory. Run `npx eas build --platform android --profile preview --non-interactive` or fall back to `./gradlew assembleRelease` inside `mobile/android/`. If EAS credentials are not configured, fall back to local gradle build. The APK/AAB must be generated in `mobile/android/app/build/outputs/` or the EAS default output directory. Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file.
+- [x] **T05: Built Android debug APK via Gradle with SDK path fix; app-debug.apk generated at mobile/android/app/build/outputs/apk/debug/** — Build Android APK or AAB from the generated android/ directory. Run `npx eas build --platform android --profile preview --non-interactive` or fall back to `./gradlew assembleRelease` inside `mobile/android/`. If EAS credentials are not configured, fall back to local gradle build. The APK/AAB must be generated in `mobile/android/app/build/outputs/` or the EAS default output directory. Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file.
   - Estimate: 30m
   - Files: mobile/android/, mobile/.env
   - Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file
