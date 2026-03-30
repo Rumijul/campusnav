@@ -24,7 +24,7 @@ Steps:
   - Estimate: 30m
   - Files: mobile/domain/navGraph.ts, mobile/domain/bearing.test.ts
   - Verify: `npm test -- --run mobile/domain/bearing.test.ts` passes all 8 tests with 0 TypeScript errors
-- [ ] **T02: Implement guidance state machine with pure helper functions** — Create the core guidance state machine in `mobile/routing/guidanceState.ts`. This is a pure TypeScript module with no React dependencies — fully unit-testable.
+- [x] **T02: Implemented guidance state machine in mobile/routing/guidanceState.ts with 41 passing tests and 0 TypeScript errors** — Create the core guidance state machine in `mobile/routing/guidanceState.ts`. This is a pure TypeScript module with no React dependencies — fully unit-testable.
 
 Steps:
 1. Create `mobile/routing/guidanceState.ts` with:

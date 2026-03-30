@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-30T11:27:28.360Z",
+  "exported_at": "2026-03-30T11:40:22.212Z",
   "milestones": [
     {
       "id": "M001",
@@ -648,19 +648,26 @@
       "milestone_id": "M002-a5gn45",
       "slice_id": "S03",
       "id": "T02",
-      "title": "Implement guidance state machine with pure helper functions",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Implemented guidance state machine in mobile/routing/guidanceState.ts with 41 passing tests and 0 TypeScript errors",
+      "status": "complete",
+      "one_liner": "Implemented guidance state machine in mobile/routing/guidanceState.ts with 41 passing tests and 0 TypeScript errors",
+      "narrative": "Built the confidence-gated guidance state machine as a pure TypeScript module. Exports: ConfidenceLevel and GuidancePhase types, GuidanceState interface, deriveConfidence (4-level classification from position+heading fixes), isOffRoute (perpendicular distance to current path segment), shouldAdvanceStep (same algorithm with smaller 0.03 threshold), deriveNextPhase (full state machine transitions), getActiveStep. Coordinate resolution uses two-phase nodeById lookup to bridge production (NormalizedNavGraph nodeById on route.path) and test shapes (pathWithNodeById). All 41 tests pass and TypeScript compiles clean.",
+      "verification_result": "npm test -- --run mobile/routing/guidanceState.test.ts: 41 tests pass in 6ms; npx tsc --noEmit: 0 TypeScript errors",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-03-30T11:40:22.175Z",
       "blocker_discovered": false,
       "deviations": "",
       "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "key_files": [
+        "mobile/routing/guidanceState.ts",
+        "mobile/routing/guidanceState.test.ts"
+      ],
+      "key_decisions": [
+        "Confidence: isConfident false with finite accuracy → 'low' (not 'none') per plan spec; 'none' only when accuracy is null or infinite",
+        "Coordinate resolution: isOffRoute/shouldAdvanceStep access nodeById via two-phase lookup — first path.nodeById (production extended property), then route.path.nodeById (NormalizedNavGraph) — for compatibility with both test and production shapes",
+        "Degenerate segment: pointToSegmentDistance uses Euclidean fallback when lenSq===0; test verifies ~0.071 distance for (0.55,0.55) from (0.5,0.5)"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S03\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/routing/guidanceState.ts\n  - mobile/routing/guidanceState.test.ts\nkey_decisions:\n  - Confidence: isConfident false with finite accuracy → 'low' (not 'none') per plan spec; 'none' only when accuracy is null or infinite\n  - Coordinate resolution: isOffRoute/shouldAdvanceStep access nodeById via two-phase lookup — first path.nodeById (production extended property), then route.path.nodeById (NormalizedNavGraph) — for compatibility with both test and production shapes\n  - Degenerate segment: pointToSegmentDistance uses Euclidean fallback when lenSq===0; test verifies ~0.071 distance for (0.55,0.55) from (0.5,0.5)\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T11:40:22.176Z\nblocker_discovered: false\n---\n\n# T02: Implemented guidance state machine in mobile/routing/guidanceState.ts with 41 passing tests and 0 TypeScript errors\n\n**Implemented guidance state machine in mobile/routing/guidanceState.ts with 41 passing tests and 0 TypeScript errors**\n\n## What Happened\n\nBuilt the confidence-gated guidance state machine as a pure TypeScript module. Exports: ConfidenceLevel and GuidancePhase types, GuidanceState interface, deriveConfidence (4-level classification from position+heading fixes), isOffRoute (perpendicular distance to current path segment), shouldAdvanceStep (same algorithm with smaller 0.03 threshold), deriveNextPhase (full state machine transitions), getActiveStep. Coordinate resolution uses two-phase nodeById lookup to bridge production (NormalizedNavGraph nodeById on route.path) and test shapes (pathWithNodeById). All 41 tests pass and TypeScript compiles clean.\n\n## Verification\n\nnpm test -- --run mobile/routing/guidanceState.test.ts: 41 tests pass in 6ms; npx tsc --noEmit: 0 TypeScript errors\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm test -- --run mobile/routing/guidanceState.test.ts` | 0 | ✅ pass | 161ms |\n| 2 | `npx tsc --noEmit` | 0 | ✅ pass | 0ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `mobile/routing/guidanceState.ts`\n- `mobile/routing/guidanceState.test.ts`\n",
       "description": "Create the core guidance state machine in `mobile/routing/guidanceState.ts`. This is a pure TypeScript module with no React dependencies — fully unit-testable.\n\nSteps:\n1. Create `mobile/routing/guidanceState.ts` with:\n\n   a. **ConfidenceLevel type**: `'high' | 'medium' | 'low' | 'none'`\n\n   b. **GuidancePhase type**: `'idle' | 'low-confidence' | 'guiding' | 'rerouting' | 'arrived'`\n\n   c. **GuidanceState interface** with fields:\n      - `phase: GuidancePhase`\n      - `route: RouteSessionReadyState` (the route being followed)\n      - `currentStepIndex: number` (which DirectionStep is active)\n      - `snappedPosition: NormalizedPoint` (user's current map-space position)\n      - `snappedNodeId: string` (nearest walkable node to position)\n      - `heading: number | null` (device heading degrees 0-360)\n      - `headingConfidence: number | null` (heading accuracy in degrees)\n      - `positionConfidence: ConfidenceLevel`\n      - `lastFixTimestamp: number`\n      - `offRouteDetectedAt: number | null` (for reroute timer tracking)\n      - `offRouteFixCount: number` (consecutive off-route fixes)\n      - `rerouteResult: PathResult | null` (result of last reroute computation)\n\n   d. **deriveConfidence(positionFix, headingFix)** pure function: returns ConfidenceLevel based on:\n      - `high`: GPS fix confident (isGpsFixConfident) AND heading accuracy <= 15°\n      - `medium`: GPS fix confident (isGpsFixConfident) AND heading missing or > 15°\n      - `low`: GPS fix not confident but finite (accuracy exists)\n      - `none`: No GPS fix or infinite accuracy\n\n   e. **isOffRoute(position: NormalizedPoint, currentStepIndex: number, path: PathResult, threshold: number = 0.05)** pure function:\n      - Returns true when the perpendicular distance from `position` to the current path segment exceeds `threshold` in normalized units.\n      - Current segment = line from `path.nodeIds[currentStepIndex]` to `path.nodeIds[currentStepIndex+1]`.\n      - Use point-to-segment perpendicular distance formula. If currentStepIndex is at or beyond path.nodeIds.length-1, use distance to last node.\n\n   f. **shouldAdvanceStep(position: NormalizedPoint, currentStepIndex: number, path: PathResult, advanceThreshold: number = 0.03)** pure function:\n      - Returns true when user has crossed the perpendicular threshold near the next waypoint (currentStepIndex + 1).\n      - AdvanceThreshold should be smaller than off-route threshold to prevent false reroutes.\n\n   g. **deriveNextPhase(state: GuidanceState, isConfident: boolean, hasArrived: boolean, offRouteFixCount: number, rerouteConfirmFixes: number)** pure function:\n      - idle → if isConfident: 'guiding', else: 'low-confidence'\n      - low-confidence → if isConfident: 'guiding' (proceed), else: stay in 'low-confidence'\n      - guiding → if hasArrived: 'arrived'; if offRouteFixCount >= rerouteConfirmFixes: 'rerouting'; else: stay 'guiding'\n      - rerouting → 'guiding' (assumes reroute succeeded; caller sets rerouteResult)\n      - arrived → stay 'arrived'\n\n   h. **getActiveStep(state: GuidanceState): DirectionStep | null** helper\n\n2. Create `mobile/routing/guidanceState.test.ts` with tests for:\n   - `deriveConfidence`: all four confidence levels from various fix combinations\n   - `isOffRoute`: off-route true when position far from segment, false when near; edge at path start/end\n   - `shouldAdvanceStep`: advances when close to next waypoint, not before\n   - `deriveNextPhase`: all phase transitions (idle→guiding, idle→low-confidence, guiding→rerouting when offRouteFixCount >= threshold, guiding→arrived, rerouting→guiding)\n   - `getActiveStep`: returns correct step from state\n\n3. Run `npm test -- --run mobile/routing/guidanceState.test.ts` and verify all tests pass.\n4. Verify TypeScript: 0 errors.",
       "estimate": "1h",
       "files": [
@@ -1368,6 +1375,28 @@
       "verdict": "✅ pass",
       "duration_ms": 5000,
       "created_at": "2026-03-30T11:27:28.338Z"
+    },
+    {
+      "id": 33,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm test -- --run mobile/routing/guidanceState.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 161,
+      "created_at": "2026-03-30T11:40:22.175Z"
+    },
+    {
+      "id": 34,
+      "task_id": "T02",
+      "slice_id": "S03",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 0,
+      "created_at": "2026-03-30T11:40:22.175Z"
     }
   ]
 }
