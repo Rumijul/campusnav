@@ -5,9 +5,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  View,
-  type LayoutChangeEvent,
-  type PanResponderInstance,
+  View, LayoutChangeEvent, PanResponderInstance,
 } from 'react-native';
 
 import {
@@ -15,9 +13,7 @@ import {
   applyPinchRotate,
   createInitialMapTransform,
   mapTransformsEqual,
-  type MapTransform,
-  type ViewportDimensions,
-  type ViewportPoint,
+  type MapTransform, ViewportDimensions, ViewportPoint,
 } from './mapTransform';
 
 interface MapViewportProps {

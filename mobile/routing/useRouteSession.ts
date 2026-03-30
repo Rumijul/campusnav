@@ -11,14 +11,12 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { NavNode } from '../../src/shared/types';
-import type { NormalizedNavGraph, RouteMode } from '../domain/navGraph';
+import { NavNode } from '../../src/shared/types';
+import { NormalizedNavGraph, RouteMode } from '../domain/navGraph';
 import {
   type RouteSessionState,
   type RouteSessionIdleState,
-  type RouteSessionReadyState,
-  type RouteSessionNoRouteState,
-  type RouteSessionErrorState,
+  type RouteSessionReadyState, RouteSessionNoRouteState, RouteSessionErrorState,
   computeRouteSession,
 } from './routeSessionState';
 
@@ -83,4 +81,4 @@ export function useRouteSession({ graph, selection }: UseRouteSessionProps): {
 // Type exports for consumers
 // ============================================================
 
-export type { RouteSessionState, RouteSessionIdleState, RouteSessionReadyState, RouteSessionNoRouteState, RouteSessionErrorState };
+export { RouteSessionState, RouteSessionIdleState, RouteSessionReadyState, RouteSessionNoRouteState, RouteSessionErrorState };

@@ -6,7 +6,7 @@
  * - RouteSelection interface inlined (no shared module dependency)
  */
 
-import type { NavNode } from '../../src/shared/types';
+import { NavNode } from '../../src/shared/types';
 import { useCallback, useMemo, useState } from 'react';
 
 /* ──────────────── Types ──────────────── */

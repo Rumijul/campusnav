@@ -5,7 +5,7 @@
 import { renderHook } from '@testing-library/react';
 import { useLocationSearch } from './useLocationSearch';
 import { normalizeNavGraph } from '../domain/navGraph';
-import type { NavBuilding, NavFloor, NavGraph } from '../../src/shared/types';
+import { NavBuilding, NavFloor, NavGraph } from '../../src/shared/types';
 
 function createTestNavGraph(): NavGraph {
   const libF1Nodes = [

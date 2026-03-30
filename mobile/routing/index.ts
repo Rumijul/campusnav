@@ -7,7 +7,7 @@
 
 export { MobilePathfindingEngine } from './pathfindingEngine';
 export { computeRouteSession } from './routeSessionState';
-export type { RouteSessionState, RouteSessionReadyState } from './routeSessionState';
+export { RouteSessionState, RouteSessionReadyState } from './routeSessionState';
 export {
   deriveConfidence,
   isOffRoute,
@@ -15,5 +15,5 @@ export {
   deriveNextPhase,
   getActiveStep,
 } from './guidanceState';
-export type { GuidanceState, GuidancePhase, ConfidenceLevel } from './guidanceState';
+export { GuidanceState, GuidancePhase, ConfidenceLevel } from './guidanceState';
 export { bearing, normalizeDelta } from '../domain/navGraph';

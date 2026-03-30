@@ -1,12 +1,12 @@
-import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '../../src/shared/types';
+import { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '../../src/shared/types';
 import {
   type NavGraphContractValidationError,
   validateNavGraphPayload,
 } from './navGraphSchema';
-import type { PathResult, PathSegment, RouteMode } from '../../src/shared/pathfinding/types';
+import { PathResult, PathSegment, RouteMode } from '../../src/shared/pathfinding/types';
 
 // Re-export pathfinding types so routing module can import everything from domain/navGraph
-export type { PathResult, PathSegment, RouteMode };
+export { PathResult, PathSegment, RouteMode };
 
 /**
  * Direction generation types — turn-by-turn step generation.
@@ -19,7 +19,7 @@ export type { PathResult, PathSegment, RouteMode };
  * Icon types for direction step visualization.
  * Maps to icons in the mobile UI icon set.
  */
-export type StepIcon =
+export StepIcon =
   | 'straight'
   | 'turn-left'
   | 'turn-right'
@@ -103,7 +103,7 @@ export interface NormalizedNavGraph {
   outgoingEdgesByNodeId: Map<string, NormalizedEdgeRecord[]>;
 }
 
-export type NavGraphNormalizationErrorCode =
+export NavGraphNormalizationErrorCode =
   | 'duplicate-building-id'
   | 'duplicate-floor-id'
   | 'duplicate-floor-number-per-building'
@@ -118,11 +118,11 @@ export interface NavGraphNormalizationError {
   message: string;
 }
 
-export type NavGraphNormalizationResult =
+export NavGraphNormalizationResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphNormalizationError };
 
-export type NavGraphParseAndNormalizeResult =
+export NavGraphParseAndNormalizeResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphContractValidationError | NavGraphNormalizationError };
 

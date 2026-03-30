@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '../../src/shared/types';
+import { NavBuilding, NavEdge, NavFloor, NavGraph, NavNode } from '../../src/shared/types';
 import { computeRouteSession } from './routeSessionState';
 import { normalizeNavGraph } from '../domain/navGraph';
 

@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { NavBuilding, NavFloor, NavGraph, NavNode, NavEdge } from '../../src/shared/types';
+import { NavBuilding, NavFloor, NavGraph, NavNode, NavEdge } from '../../src/shared/types';
 import { MobilePathfindingEngine } from './pathfindingEngine';
 import { normalizeNavGraph } from '../domain/navGraph';
 

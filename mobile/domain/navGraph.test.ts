@@ -1,4 +1,4 @@
-import type { NavGraph } from '../../src/shared/types';
+import { NavGraph } from '../../src/shared/types';
 import { describe, expect, it } from 'vitest';
 import {
   floorLookupKey,

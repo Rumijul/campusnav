@@ -5,8 +5,8 @@
  * Used by mobile routing UI to convert computed paths into human-readable directions.
  */
 
-import type { NavFloor, NavNode } from '../../src/shared/types';
-import type { DirectionsResult, DirectionStep, PathResult, RouteMode, StepIcon } from '../domain/navGraph';
+import { NavFloor, NavNode } from '../../src/shared/types';
+import { DirectionsResult, DirectionStep, PathResult, RouteMode, StepIcon } from '../domain/navGraph';
 
 // ============================================================
 // Constants

@@ -1,4 +1,4 @@
-import type { NormalizedNavGraph } from '../domain/navGraph';
+import { NormalizedNavGraph } from '../domain/navGraph';
 
 /**
  * Find the nearest node on a given floor to a reference position.

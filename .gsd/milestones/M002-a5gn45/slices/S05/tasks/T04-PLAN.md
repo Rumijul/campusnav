@@ -1,23 +1,25 @@
 ---
 estimated_steps: 1
-estimated_files: 2
+estimated_files: 3
 skills_used: []
 ---
 
-# T04: Build Android APK/AAB artifact
+# T04: Configure Expo build artifacts (app.json, eas.json, .env, prebuild)
 
-Build Android APK or AAB from the generated android/ directory. Run `npx eas build --platform android --profile preview --non-interactive` or fall back to `./gradlew assembleRelease` inside `mobile/android/`. If EAS credentials are not configured, fall back to local gradle build. The APK/AAB must be generated in `mobile/android/app/build/outputs/` or the EAS default output directory.
+Expand app.json with icon, splash, and build configuration. Create eas.json with internal build profiles (dev, preview). Create .env with EXPO_PUBLIC_API_BASE_URL for Android emulator (10.0.2.2:3000) and iOS simulator (localhost:3000). Then run `npx expo prebuild --clean` to generate android/ and ios/ native directories. Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON with `build.profiles` key.
 
 ## Inputs
 
-- `mobile/android/`
-- `eas.json`
+- None specified.
 
 ## Expected Output
 
-- `mobile/android/app/build/outputs/apk/debug/app-debug.apk or similar APK file`
-- `or: mobile/android/app/build/outputs/bundle/release/app-release.aab or similar AAB file`
+- `mobile/app.json`
+- `mobile/eas.json`
+- `mobile/.env`
+- `mobile/android/`
+- `mobile/ios/`
 
 ## Verification
 
-ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file
+ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON

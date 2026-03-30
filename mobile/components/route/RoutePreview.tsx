@@ -11,8 +11,8 @@
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { groupDirectionSections } from '../../routing/directionSections';
-import type { DirectionsResult, DirectionSection, DirectionStep } from '../../domain/navGraph';
-import type { NavFloor } from '../../../src/shared/types';
+import { DirectionsResult, DirectionSection, DirectionStep } from '../../domain/navGraph';
+import { NavFloor } from '../../../src/shared/types';
 
 /* ─── Icons ─── */
 

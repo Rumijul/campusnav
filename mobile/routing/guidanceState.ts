@@ -5,10 +5,10 @@
  * Drives the live guidance UI overlay and reroute logic.
  */
 
-import type { DirectionStep, NormalizedNodeRecord } from '../domain/navGraph';
-import type { PathResult } from '../domain/navGraph';
-import type { RouteSessionReadyState } from './routeSessionState';
-import type { NormalizedPoint } from '../../src/shared/gps';
+import { DirectionStep, NormalizedNodeRecord } from '../domain/navGraph';
+import { PathResult } from '../domain/navGraph';
+import { RouteSessionReadyState } from './routeSessionState';
+import { NormalizedPoint } from '../../src/shared/gps';
 
 // ============================================================
 // Core types
@@ -20,7 +20,7 @@ import type { NormalizedPoint } from '../../src/shared/gps';
  * Used by `deriveConfidence` to determine how aggressively
  * the guidance engine trusts the current position fix.
  */
-export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
+export ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
 
 /**
  * Phase of the guidance state machine.
@@ -32,7 +32,7 @@ export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
  * - `rerouting`     → Off-route detected, computing new path
  * - `arrived`        → User has reached the destination
  */
-export type GuidancePhase =
+export GuidancePhase =
   | 'idle'
   | 'low-confidence'
   | 'guiding'

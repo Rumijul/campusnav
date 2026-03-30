@@ -1,26 +1,24 @@
-import type { NavFloor } from '../../src/shared/types';
-import type { NormalizedNavGraph } from '../domain/navGraph';
+import { NavFloor } from '../../src/shared/types';
+import { NormalizedNavGraph } from '../domain/navGraph';
 import { normalizeNavGraph } from '../domain/navGraph';
 import {
   type FloorPlanTarget,
   type MapApiClient,
-  type MapApiErrorReason,
-  type MapApiResult,
-  type MapImageContract,
+  type MapApiErrorReason, MapApiResult, MapImageContract,
   createMapApiClient,
 } from '../data/mapApiClient';
 import { validateApiBaseUrl } from './appBootstrap';
 
-export type MapBootstrapFetchPhase = 'map' | 'image';
+export MapBootstrapFetchPhase = 'map' | 'image';
 
-export type MapBootstrapErrorReason =
+export MapBootstrapErrorReason =
   | 'missing-api-base-url'
   | 'invalid-api-base-url'
   | MapApiErrorReason
   | 'normalization-failure'
   | 'empty-graph';
 
-export type MapBootstrapState =
+export MapBootstrapState =
   | {
       phase: 'idle';
       authRequired: false;

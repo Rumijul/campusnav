@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { DirectionStep } from '../domain/navGraph';
+import { DirectionStep } from '../domain/navGraph';
 import { groupDirectionSections } from './directionSections';
 
 /**

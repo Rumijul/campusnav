@@ -7,7 +7,7 @@
  */
 
 import { StyleSheet, View } from 'react-native';
-import type { ViewportDimensions } from '../../map/mapTransform';
+import { ViewportDimensions } from '../../map/mapTransform';
 
 /* ─── Types ─── */
 

@@ -17,7 +17,7 @@ import {
   projectLatLngToNormalizedPoint,
   snapLatLngToNearestWalkableNode,
 } from '../../src/shared/gps';
-import type {
+import {
   DirectionsResult,
   NormalizedNavGraph,
   PathResult,
@@ -27,7 +27,7 @@ import {
   isOffRoute,
   shouldAdvanceStep,
 } from '../routing/guidanceState';
-import type {
+import {
   ConfidenceLevel,
   GuidancePhase,
   GuidanceState,
@@ -35,9 +35,9 @@ import type {
   PositionFix,
 } from '../routing/guidanceState';
 import { MobilePathfindingEngine } from '../routing/pathfindingEngine';
-import type { RouteSessionReadyState } from '../routing/routeSessionState';
+import { RouteSessionReadyState } from '../routing/routeSessionState';
 import { useCurrentPosition } from './useCurrentPosition';
-import type {
+import {
   HeadingData,
   PositionFix as HookPositionFix,
 } from './useCurrentPosition';

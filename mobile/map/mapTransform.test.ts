@@ -11,8 +11,7 @@ import {
   mapTransformsEqual,
   normalizeRotationDeg,
   screenFromWorld,
-  worldFromScreen,
-  type MapTransform,
+  worldFromScreen, MapTransform,
 } from './mapTransform';
 
 const EPSILON = 1e-6;

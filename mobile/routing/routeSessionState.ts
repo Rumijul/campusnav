@@ -5,8 +5,8 @@
  * into a single discriminated union state that drives the UI.
  */
 
-import type { NavNode } from '../../src/shared/types';
-import type {
+import { NavNode } from '../../src/shared/types';
+import {
   DirectionsResult,
   NormalizedNavGraph,
   PathResult,
@@ -19,7 +19,7 @@ import { generateDirections } from './generateDirections';
 // Phase types
 // ============================================================
 
-export type RouteSessionPhase =
+export RouteSessionPhase =
   | 'idle'
   | 'computing'
   | 'ready'
@@ -92,7 +92,7 @@ export interface RouteSessionErrorState {
  * - `no-route`: Start & dest selected but no path exists
  * - `error`:  Node not present in graph or other error
  */
-export type RouteSessionState =
+export RouteSessionState =
   | RouteSessionIdleState
   | RouteSessionComputingState
   | RouteSessionReadyState

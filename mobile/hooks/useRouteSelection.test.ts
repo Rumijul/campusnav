@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useRouteSelection } from './useRouteSelection';
-import type { NavNode } from '../../src/shared/types';
+import { NavNode } from '../../src/shared/types';
 
 function makeNode(id: string, label = `Node ${id}`): NavNode {
   return {

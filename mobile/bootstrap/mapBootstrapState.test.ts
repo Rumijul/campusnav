@@ -1,6 +1,6 @@
-import type { NavGraph } from '../../src/shared/types';
+import { NavGraph } from '../../src/shared/types';
 import { describe, expect, it, vi } from 'vitest';
-import type { MapApiClient, MapApiResult, MapImageContract } from '../data/mapApiClient';
+import { MapApiClient, MapApiResult, MapImageContract } from '../data/mapApiClient';
 import { runMapBootstrap } from './mapBootstrapState';
 
 const BASE_URL = 'https://campusnav.example.com';

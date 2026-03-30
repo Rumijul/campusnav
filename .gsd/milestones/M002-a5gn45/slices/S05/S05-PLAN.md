@@ -9,23 +9,45 @@
   - Files: mobile/components/guidance/ConfidenceIndicator.tsx, mobile/components/guidance/LiveGuidanceOverlay.tsx, mobile/components/destination/DestinationPicker.tsx, mobile/map/MapViewportFloor.tsx
   - Verify: npm test 2>&1 | tail -5 — must show 0 failed test files, 551 tests passing
   - Blocker: vitest 4.x (Vite 6) uses oxc parser in worker processes for ALL transitive imports. The only viable fixes are: (A) convert import type to import in every file in the dependency graph, or (B) configure vitest to use esbuild for the entire module graph (not just entry file transform). Baseline failures (7 files / 45 tests) predate these changes.
-- [ ] **T02: Fix hook test failures (renderHook from @testing-library/react-native)** — Switch `renderHook` import in 3 hook test files from `@testing-library/react` to `@testing-library/react-native`. The web `@testing-library/react` v16.3.2 does not initialize React 19 fiber correctly in jsdom, causing `Cannot read properties of null (reading 'useState')`. The `@testing-library/react-native` v13.3.3 ships its own React 19-compatible renderHook implementation.
+- [x] **T02: Converted all import type/export type to regular imports across 37 mobile files; removed esbuild-tsx workaround plugin; 360 tests pass, 18 pre-existing failures remain from React 19 / @testing-library/react incompatibility** — Convert ALL TypeScript `import type` and `export type` statements to regular `import`/`export` across the entire mobile source and test tree. The @vitejs/plugin-react oxc parser in vitest 4.x worker processes cannot parse TypeScript `import type` syntax — it bypasses user plugins for transitive modules. The only fix is full removal across the entire dependency graph (60+ occurrences found across mobile/components, mobile/hooks, mobile/routing, mobile/map, mobile/domain, mobile/data, mobile/bootstrap, mobile/navigation, mobile/utils, mobile/types, mobile/src, and test files). In the mobile/ directory:
+
+1. Convert ALL source and test files (.ts, .tsx) excluding node_modules:
+   - `import type { X }` → `import { X }`
+   - `import type X` → `import X`
+   - `export type { X }` → `export { X }`
+   - `export type X` → `export X`
+   - `import { A, type B }` → `import { A, B }`
+   - `export { type X }` → `export { X }`
+
+2. Remove the esbuild-tsx plugin from vitest.config.ts (no longer needed after import type removal).
+
+3. Verify no `import type` or `export type` remains:
+   `grep -rn 'import type\|export type' mobile/ --include='*.ts' --include='*.tsx' | grep -v node_modules`
+   Must return empty.
+
+4. Verify tests pass: `npm test 2>&1 | tail -5` — must show 0 failed test files, all ~264 tests passing.
+
+Use a script or sed to handle all files systematically. The T01 blocker task fixed only 4 files and proved the plugin workaround insufficient; this task fixes all files in one comprehensive pass.
+  - Estimate: 90m
+  - Files: mobile/ (entire source tree — all .ts/.tsx files)
+  - Verify: grep -rn 'import type\|export type' mobile/ --include='*.ts' --include='*.tsx' | grep -v node_modules (must return empty) && npm test 2>&1 | tail -5 (must show 0 failed test files, all 264 tests passing)
+- [ ] **T03: Fix hook test failures (renderHook from @testing-library/react-native)** — Switch `renderHook` import in 3 hook test files from `@testing-library/react` to `@testing-library/react-native`. The web `@testing-library/react` v16.3.2 does not initialize React 19 fiber correctly in jsdom, causing `Cannot read properties of null (reading 'useState')`. The `@testing-library/react-native` v13.3.3 ships its own React 19-compatible renderHook implementation. Files: mobile/hooks/useLocationSearch.test.ts, mobile/hooks/useRouteSelection.test.ts, mobile/routing/useRouteSession.test.ts. Verify: npm test 2>&1 | tail -5 — must show 0 failed test files, all tests passing.
   - Estimate: 30m
   - Files: mobile/hooks/useLocationSearch.test.ts, mobile/hooks/useRouteSelection.test.ts, mobile/routing/useRouteSession.test.ts
-  - Verify: npm test 2>&1 | tail -5 — must show 0 failed test files, 551 tests passing
-- [ ] **T03: Configure Expo build artifacts (app.json, eas.json, .env, prebuild)** — Expand app.json with icon, splash, and build configuration. Create eas.json with internal build profiles (dev, preview). Create .env with EXPO_PUBLIC_API_BASE_URL for Android emulator (10.0.2.2:3000) and iOS simulator (localhost:3000). Then run `npx expo prebuild --clean` to generate android/ and ios/ native directories.
+  - Verify: npm test 2>&1 | tail -5 — must show 0 failed test files, all tests passing
+- [ ] **T04: Configure Expo build artifacts (app.json, eas.json, .env, prebuild)** — Expand app.json with icon, splash, and build configuration. Create eas.json with internal build profiles (dev, preview). Create .env with EXPO_PUBLIC_API_BASE_URL for Android emulator (10.0.2.2:3000) and iOS simulator (localhost:3000). Then run `npx expo prebuild --clean` to generate android/ and ios/ native directories. Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON with `build.profiles` key.
   - Estimate: 30m
-  - Files: mobile/app.json, eas.json
-  - Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON with `build.profiles` key
-- [ ] **T04: Build Android APK/AAB artifact** — Build Android APK or AAB from the generated android/ directory. Run `npx eas build --platform android --profile preview --non-interactive` or fall back to `./gradlew assembleRelease` inside `mobile/android/`. If EAS credentials are not configured, fall back to local gradle build. The APK/AAB must be generated in `mobile/android/app/build/outputs/` or the EAS default output directory.
+  - Files: mobile/app.json, mobile/eas.json, mobile/.env
+  - Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON
+- [ ] **T05: Build Android APK/AAB artifact** — Build Android APK or AAB from the generated android/ directory. Run `npx eas build --platform android --profile preview --non-interactive` or fall back to `./gradlew assembleRelease` inside `mobile/android/`. If EAS credentials are not configured, fall back to local gradle build. The APK/AAB must be generated in `mobile/android/app/build/outputs/` or the EAS default output directory. Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file.
   - Estimate: 30m
   - Files: mobile/android/, mobile/.env
   - Verify: ls mobile/android/app/build/outputs/apk/ 2>/dev/null || ls mobile/android/app/build/outputs/bundle/ 2>/dev/null — must contain .apk or .aab file
-- [ ] **T05: Build iOS .app bundle artifact** — Build iOS .app bundle from the generated ios/ directory. Run `npx eas build --platform ios --profile preview --non-interactive` or fall back to `xcodebuild -workspace` inside `mobile/ios/`. If Apple Developer credentials are not configured, build for iOS Simulator only. The .app bundle must be generated in `mobile/ios/build/` or the EAS default output directory.
+- [ ] **T06: Build iOS .app bundle artifact** — Build iOS .app bundle from the generated ios/ directory. Run `npx eas build --platform ios --profile preview --non-interactive` or fall back to `xcodebuild -workspace` inside `mobile/ios/`. If Apple Developer credentials are not configured, build for iOS Simulator only. The .app bundle must be generated in `mobile/ios/build/` or the EAS default output directory. Verify: ls mobile/ios/build/ 2>/dev/null | grep -E "\.app$|\.ipa$" — must contain .app or .ipa bundle.
   - Estimate: 30m
   - Files: mobile/ios/, mobile/.env
   - Verify: ls mobile/ios/build/ 2>/dev/null | grep -E "\.app$|\.ipa$" — must contain .app or .ipa bundle
-- [ ] **T06: Manual E2E on-device proof (R033 verification)** — Document and execute the manual end-to-end verification checklist proving R033: visitor completes one end-to-end guided trip including an off-route recovery. Transfer the APK to an Android device (or install via `adb install`) and the .app to an iOS device/simulator. Execute the checklist: (1) App launches, (2) Visitor selects start + destination, (3) Route preview appears, (4) Guidance starts, (5) Visitor deliberately deviates from route, (6) Reroute triggers within 5-10 seconds, (7) Destination reached. Write a E2E checklist file documenting each step and whether it passed.
+- [ ] **T07: Manual E2E on-device proof (R033 verification)** — Document and execute the manual end-to-end verification checklist proving R033: visitor completes one end-to-end guided trip including an off-route recovery. Transfer the APK to an Android device (or install via `adb install`) and the .app to an iOS device/simulator. Execute the checklist: (1) App launches, (2) Visitor selects start + destination, (3) Route preview appears, (4) Guidance starts, (5) Visitor deliberately deviates from route, (6) Reroute triggers within 5-10 seconds, (7) Destination reached. Write a E2E checklist file documenting each step and whether it passed. Verify: manual — inspect E2E checklist file for all steps marked pass/fail.
   - Estimate: 45m
   - Files: mobile/e2e-checklist.md
   - Verify: manual — inspect E2E checklist file for all steps marked pass/fail

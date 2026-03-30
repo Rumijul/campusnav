@@ -11,9 +11,9 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
-import type { NavGraph } from '../../src/shared/types';
+import { NavGraph } from '../../src/shared/types';
 import { useRouteSession } from './useRouteSession';
-import { normalizeNavGraph, type NormalizedNavGraph } from '../domain/navGraph';
+import { normalizeNavGraph, NormalizedNavGraph } from '../domain/navGraph';
 
 /** Extract normalized graph from result, throwing if normalization fails (test helper). */
 function getTestGraph(navGraph: NavGraph): NormalizedNavGraph {

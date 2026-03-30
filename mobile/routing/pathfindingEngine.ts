@@ -11,8 +11,8 @@
  * - Explicit result types (no exceptions for not-found)
  */
 
-import type { NavFloor, NavNode } from '../../src/shared/types';
-import type {
+import { NavFloor, NavNode } from '../../src/shared/types';
+import {
   DirectionStep,
   DirectionsResult,
   NormalizedEdgeRecord,

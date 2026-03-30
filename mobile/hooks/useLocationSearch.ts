@@ -5,8 +5,8 @@
  */
 
 import { useMemo } from 'react';
-import type { NormalizedNavGraph } from '../domain/navGraph';
-import type { NavNodeType } from '../../src/shared/types';
+import { NormalizedNavGraph } from '../domain/navGraph';
+import { NavNodeType } from '../../src/shared/types';
 
 export interface SearchNode {
   node: import('../../src/shared/types').NavNode;

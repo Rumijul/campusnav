@@ -12,7 +12,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type {
+import {
   HeadingData,
   HeadingReader,
   PositionFix,

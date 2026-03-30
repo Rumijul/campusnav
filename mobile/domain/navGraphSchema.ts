@@ -1,4 +1,4 @@
-import type { NavGraph } from '../../src/shared/types';
+import { NavGraph } from '../../src/shared/types';
 import { z } from 'zod';
 
 const navNodeTypeValues = [
@@ -88,7 +88,7 @@ export const navGraphContractSchema = z
   })
   .strict();
 
-export type NavGraphContract = z.output<typeof navGraphContractSchema>;
+export NavGraphContract = z.output<typeof navGraphContractSchema>;
 
 export interface NavGraphContractValidationError {
   reason: 'contract-validation-error';
@@ -96,7 +96,7 @@ export interface NavGraphContractValidationError {
   issues: string[];
 }
 
-export type NavGraphValidationResult =
+export NavGraphValidationResult =
   | { ok: true; data: NavGraph }
   | { ok: false; error: NavGraphContractValidationError };
 

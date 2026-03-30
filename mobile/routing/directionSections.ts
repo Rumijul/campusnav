@@ -4,7 +4,7 @@
  * Ported from src/client/components/directionSections.ts with corrected imports.
  */
 
-import type { DirectionSection, DirectionStep } from '../domain/navGraph';
+import { DirectionSection, DirectionStep } from '../domain/navGraph';
 
 /**
  * Group contiguous direction steps by floor metadata.

@@ -4,7 +4,7 @@ estimated_files: 4
 skills_used: []
 ---
 
-# T01: Fix TSX component test failures (import type → import)
+# T01: Source + test file import type fixes applied; vitest.config.ts esbuild plugin attempted but insufficient — full dependency chain still has import type blocking transitive module parse
 
 Convert all TypeScript `import type` statements to regular `import` in 4 component source files. The `@vitejs/plugin-react` oxc parser cannot handle `import type` in TSX files, causing SyntaxError when vitest tries to parse the source for component tests. TypeScript erases types at compile time anyway, so the runtime behavior is identical. Also fix `export { type ConfidenceLevel }` → `export { ConfidenceLevel }`.
 

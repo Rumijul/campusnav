@@ -10,12 +10,12 @@
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import type { NavNode } from '../../src/shared/types';
+import { NavNode } from '../../src/shared/types';
 import {
   projectLatLngToNormalizedPoint,
   snapLatLngToNearestWalkableNode,
 } from '../../src/shared/gps';
-import type {
+import {
   DirectionsResult,
   NormalizedEdgeRecord,
   NormalizedNavGraph,
@@ -23,15 +23,15 @@ import type {
   PathResult,
 } from '../domain/navGraph';
 import { MobilePathfindingEngine } from '../routing/pathfindingEngine';
-import type { HeadingFix, PositionFix } from '../routing/guidanceState';
+import { HeadingFix, PositionFix } from '../routing/guidanceState';
 import {
   deriveConfidence,
   isOffRoute,
   shouldAdvanceStep,
 } from '../routing/guidanceState';
-import type { RouteSessionReadyState } from '../routing/routeSessionState';
-import type { PositionFix as HookPositionFix } from './useCurrentPosition';
-import type { HeadingData } from './useCurrentPosition';
+import { RouteSessionReadyState } from '../routing/routeSessionState';
+import { PositionFix as HookPositionFix } from './useCurrentPosition';
+import { HeadingData } from './useCurrentPosition';
 import {
   hookFixToStateFix,
   hookHeadingToStateHeading,
@@ -237,7 +237,7 @@ function makePathWithNodeById(
 
 /* ──────────────── GPS bounds builder ──────────────── */
 
-import type { NavFloorGpsBounds } from '../../src/shared/types';
+import { NavFloorGpsBounds } from '../../src/shared/types';
 
 function makeGpsBounds(
   minLat: number,

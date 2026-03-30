@@ -3,9 +3,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { NavNode, NavFloor } from '../../src/shared/types';
+import { NavNode, NavFloor } from '../../src/shared/types';
 import { generateDirections, routesAreIdentical } from './generateDirections';
-import type { PathResult } from '../domain/navGraph';
+import { PathResult } from '../domain/navGraph';
 
 /**
  * Create a test node with given properties.

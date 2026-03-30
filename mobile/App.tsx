@@ -20,22 +20,20 @@ import {
 } from 'react-native';
 
 import {
-  IDLE_MAP_BOOTSTRAP_STATE,
-  type MapBootstrapState,
+  IDLE_MAP_BOOTSTRAP_STATE, MapBootstrapState,
   runMapBootstrap,
 } from './bootstrap/mapBootstrapState';
-import type { NormalizedNavGraph } from './domain/navGraph';
+import { NormalizedNavGraph } from './domain/navGraph';
 import { MapViewportFloor } from './map/MapViewportFloor';
-import type { FloorPlanTarget } from './data/mapApiClient';
+import { FloorPlanTarget } from './data/mapApiClient';
 import { createMapApiClient } from './data/mapApiClient';
 import {
   createInitialMapTransform,
-  mapTransformsEqual,
-  type MapTransform,
+  mapTransformsEqual, MapTransform,
 } from './map/mapTransform';
 import { DestinationPicker } from './components/destination/DestinationPicker';
 import { RoutePreview } from './components/route/RoutePreview';
-import { RoutePathOverlay, type RoutePathPoint } from './components/route/RoutePathOverlay';
+import { RoutePathOverlay, RoutePathPoint } from './components/route/RoutePathOverlay';
 import { useRouteSelection } from './hooks/useRouteSelection';
 import { useRouteSession } from './routing/useRouteSession';
 import { useGuidanceSession } from './hooks/useGuidanceSession';
@@ -43,7 +41,7 @@ import { useCurrentPosition } from './hooks/useCurrentPosition';
 import { findNearestNodeOnFloor } from './hooks/findNearestNodeOnFloor';
 import { LiveGuidanceOverlay } from './components/guidance/LiveGuidanceOverlay';
 import { ConfidenceIndicator } from './components/guidance/ConfidenceIndicator';
-import type { NavNode } from '@shared/types';
+import { NavNode } from '@shared/types';
 
 /* ─── Helpers ─── */
 
