@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T03",
+  "unitId": "M002-a5gn45/S02/T03",
+  "timestamp": 1774863571082,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "npm --prefix mobile run test -- mobile/hooks/useLocationSearch.test.ts mobile/components/destination/DestinationPicker.test.tsx",
+      "exitCode": 1,
+      "durationMs": 1592,
+      "verdict": "fail"
+    },
+    {
+      "command": "npm --prefix mobile run typecheck",
+      "exitCode": 2,
+      "durationMs": 4821,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

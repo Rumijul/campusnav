@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['mobile/**/*.test.ts'],
+    include: ['**/*.test.ts', '**/*.test.tsx'],
     exclude: ['**/node_modules/**', '**/.git/**'],
     clearMocks: true,
     restoreMocks: true,

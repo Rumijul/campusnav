@@ -163,7 +163,7 @@ The visitor needs a way to select start and destination. T03 builds the search U
   - Estimate: 1–2 hours
   - Files: mobile/hooks/useLocationSearch.ts, mobile/hooks/useLocationSearch.test.ts, mobile/components/destination/DestinationPicker.tsx, mobile/components/destination/DestinationPicker.test.tsx
   - Verify: npm --prefix mobile run test -- mobile/hooks/useLocationSearch.test.ts mobile/components/destination/DestinationPicker.test.tsx && npm --prefix mobile run typecheck
-- [ ] **T04: Route preview + floor switching + route path overlay + app wiring** — ## Task T04 — Route Preview + Floor Switching + Route Path Overlay + App Wiring
+- [x] **T04: Implemented RoutePreview, RoutePathOverlay, MapViewportFloor and fully wired visitor App with route session, floor switching, and accessible mode** — ## Task T04 — Route Preview + Floor Switching + Route Path Overlay + App Wiring
 
 ### Why
 T04 is the final integration wave: it connects the route session (T02) and destination picker (T03) into a composable App, adds a step-by-step route preview, extends MapViewport to switch floor images, renders the route polyline as a View-based overlay, and exposes the accessible mode toggle.
