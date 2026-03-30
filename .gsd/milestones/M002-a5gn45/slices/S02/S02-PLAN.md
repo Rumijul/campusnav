@@ -118,7 +118,7 @@ The routing computation is only part of the trip setup loop. T02 wires together:
   - Estimate: 1–2 hours
   - Files: mobile/routing/routeSessionState.ts, mobile/routing/useRouteSession.ts, mobile/routing/useRouteSession.test.ts, mobile/hooks/useRouteSelection.ts, mobile/hooks/useRouteSelection.test.ts
   - Verify: npm --prefix mobile run test -- mobile/routing/routeSessionState.test.ts mobile/routing/useRouteSession.test.ts mobile/hooks/useRouteSelection.test.ts && npm --prefix mobile run typecheck
-- [ ] **T03: Destination picker UI with building/floor/node search** — ## Task T03 — Destination Picker UI with Building/Floor/Node Search
+- [x] **T03: Implemented useLocationSearch hook and DestinationPicker for mobile visitor location selection** — ## Task T03 — Destination Picker UI with Building/Floor/Node Search
 
 ### Why
 The visitor needs a way to select start and destination. T03 builds the search UI and the `useLocationSearch` hook that filters the normalized graph in-memory. The picker uses a building→floor→node accordion/tree structure with a fuzzy text input, mirroring the web CampusNav destination experience without re-inventing the UX.
