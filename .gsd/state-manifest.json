@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-30T13:11:30.037Z",
+  "exported_at": "2026-03-30T13:18:31.551Z",
   "milestones": [
     {
       "id": "M001",
@@ -938,19 +938,32 @@
       "milestone_id": "M002-a5gn45",
       "slice_id": "S04",
       "id": "T02",
-      "title": "Floor-aware guidance state + overlay",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Floor-aware guidance state (currentFloorId) and overlay (FloorBadge, FloorTransitionBanner, floor context) wired across guidanceState, useGuidanceSession, LiveGuidanceOverlay, and App.tsx",
+      "status": "complete",
+      "one_liner": "Floor-aware guidance state (currentFloorId) and overlay (FloorBadge, FloorTransitionBanner, floor context) wired across guidanceState, useGuidanceSession, LiveGuidanceOverlay, and App.tsx",
+      "narrative": "Extended the guidance state machine with floor tracking and updated the live overlay with floor-aware UI components. Added `currentFloorId: number | null` to the `GuidanceState` interface and the `deriveFloorContext(state)` pure helper function in `guidanceState.ts`. Updated `useGuidanceSession` to derive `currentFloorId` from `snappedRecord.floorId` on each position fix, track the previous floor via `previousFloorIdRef`, and emit `console.log('[Guidance] floor-transition', { from, to })` on genuine floor crossings. The ref is initialized in `startGuidance` and `confirmPosition`, and reset to null in `stopGuidance`. Extended `LiveGuidanceOverlayProps` with optional `floorId` and `floorMap` props. Added `FloorBadge` sub-component (shows \"Floor N\" chip below the step row), `FloorTransitionBanner` (full-width blue toast shown for 2500 ms when floor changes), and floor context text in `LowConfidenceBanner`. Updated `App.tsx` to wire `floorId` and `floorMap` from `graph.floorById`. Added 6 new floor-tracker tests for `deriveFloorContext`.",
+      "verification_result": "TypeScript: npx tsc --noEmit returned 0 errors. Targeted unit tests: npx vitest run mobile/routing/guidanceState.test.ts mobile/hooks/useGuidanceSession.test.ts mobile/map/mapTransform.test.ts returned 101 passed across 3 files. All gates pass.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-03-30T13:18:31.524Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "mobile/routing/guidanceState.ts",
+        "mobile/hooks/useGuidanceSession.ts",
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/App.tsx",
+        "mobile/routing/guidanceState.test.ts"
+      ],
+      "key_decisions": [
+        "currentFloorId initialized to null in idle state, updated on each position fix via snappedRecord.floorId",
+        "previousFloorIdRef tracks prior floor ID; floor-transition log fires only on genuine crossings (both non-null and different)",
+        "FloorTransitionBanner uses useRef inside the component body for prevFloorId tracking — state-free display updates",
+        "stopGuidance resets currentFloorId to null to match idle semantics",
+        "deriveFloorContext helper extracts floorId from GuidanceState snapshot for testability",
+        "previousFloorIdRef pattern for detecting state boundary crossings in hooks"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S04\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/routing/guidanceState.ts\n  - mobile/hooks/useGuidanceSession.ts\n  - mobile/components/guidance/LiveGuidanceOverlay.tsx\n  - mobile/App.tsx\n  - mobile/routing/guidanceState.test.ts\nkey_decisions:\n  - currentFloorId initialized to null in idle state, updated on each position fix via snappedRecord.floorId\n  - previousFloorIdRef tracks prior floor ID; floor-transition log fires only on genuine crossings (both non-null and different)\n  - FloorTransitionBanner uses useRef inside the component body for prevFloorId tracking — state-free display updates\n  - stopGuidance resets currentFloorId to null to match idle semantics\n  - deriveFloorContext helper extracts floorId from GuidanceState snapshot for testability\n  - previousFloorIdRef pattern for detecting state boundary crossings in hooks\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T13:18:31.524Z\nblocker_discovered: false\n---\n\n# T02: Floor-aware guidance state (currentFloorId) and overlay (FloorBadge, FloorTransitionBanner, floor context) wired across guidanceState, useGuidanceSession, LiveGuidanceOverlay, and App.tsx\n\n**Floor-aware guidance state (currentFloorId) and overlay (FloorBadge, FloorTransitionBanner, floor context) wired across guidanceState, useGuidanceSession, LiveGuidanceOverlay, and App.tsx**\n\n## What Happened\n\nExtended the guidance state machine with floor tracking and updated the live overlay with floor-aware UI components. Added `currentFloorId: number | null` to the `GuidanceState` interface and the `deriveFloorContext(state)` pure helper function in `guidanceState.ts`. Updated `useGuidanceSession` to derive `currentFloorId` from `snappedRecord.floorId` on each position fix, track the previous floor via `previousFloorIdRef`, and emit `console.log('[Guidance] floor-transition', { from, to })` on genuine floor crossings. The ref is initialized in `startGuidance` and `confirmPosition`, and reset to null in `stopGuidance`. Extended `LiveGuidanceOverlayProps` with optional `floorId` and `floorMap` props. Added `FloorBadge` sub-component (shows \"Floor N\" chip below the step row), `FloorTransitionBanner` (full-width blue toast shown for 2500 ms when floor changes), and floor context text in `LowConfidenceBanner`. Updated `App.tsx` to wire `floorId` and `floorMap` from `graph.floorById`. Added 6 new floor-tracker tests for `deriveFloorContext`.\n\n## Verification\n\nTypeScript: npx tsc --noEmit returned 0 errors. Targeted unit tests: npx vitest run mobile/routing/guidanceState.test.ts mobile/hooks/useGuidanceSession.test.ts mobile/map/mapTransform.test.ts returned 101 passed across 3 files. All gates pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 5000ms |\n| 2 | `npx vitest run mobile/routing/guidanceState.test.ts mobile/hooks/useGuidanceSession.test.ts mobile/map/mapTransform.test.ts` | 0 | ✅ pass (101 tests, 3 files) | 247ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `mobile/routing/guidanceState.ts`\n- `mobile/hooks/useGuidanceSession.ts`\n- `mobile/components/guidance/LiveGuidanceOverlay.tsx`\n- `mobile/App.tsx`\n- `mobile/routing/guidanceState.test.ts`\n",
       "description": "Add currentFloorId to GuidanceState, update useGuidanceSession to track floor changes, add floor badge and floor transition banner to LiveGuidanceOverlay, and wire floorId/floorMap props from App.\n\nSteps:\n1. Read mobile/routing/guidanceState.ts — add currentFloorId: number | null to the GuidanceState interface.\n2. Read mobile/hooks/useGuidanceSession.ts — after the existing snappedRecord = graph.nodeById.get(snappedNodeId) lookup, add currentFloorId field to the state snapshot. Track previousFloorId via useRef<number | null>(null). When currentFloorId !== previousFloorId.current, log console.log('[Guidance] floor-transition', { from: previousFloorId.current, to: currentFloorId }) and update previousFloorId.current. In startGuidance and confirmPosition, also initialize/update currentFloorId.\n3. Read mobile/components/guidance/LiveGuidanceOverlay.tsx — extend LiveGuidanceOverlayProps:\n   - floorId?: number | null\n   - floorMap?: Map<number, NormalizedFloorRecord> (import from mobile/domain/navGraph)\n   In LowConfidenceBanner: add floor context text \"You are on Floor N\" using floorMap lookup.\n   Add FloorBadge sub-component: View with floor label. Show it in GuidingCard stepRow next to the step icon.\n   Add FloorTransitionBanner: use useRef<number | null>(null) to track prevFloorId. When props.floorId differs from prevFloorId.current and both are non-null, render a temporary full-width banner \"Now on Floor N\" for 2500ms using setTimeout then return to normal card. Import useRef/useState from react (already imported).\n4. Add floor-tracker unit tests to mobile/routing/guidanceState.test.ts: test that deriveFloorContext (helper) returns correct floorId from a GuidanceState snapshot, and that floor transition fires only when floorId changes.\n5. Run npx tsc --noEmit.",
       "estimate": "1.5h",
       "files": [
@@ -1715,6 +1728,28 @@
       "verdict": "✅ pass",
       "duration_ms": 565,
       "created_at": "2026-03-30T13:11:30.008Z"
+    },
+    {
+      "id": 48,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 5000,
+      "created_at": "2026-03-30T13:18:31.524Z"
+    },
+    {
+      "id": 49,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx vitest run mobile/routing/guidanceState.test.ts mobile/hooks/useGuidanceSession.test.ts mobile/map/mapTransform.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass (101 tests, 3 files)",
+      "duration_ms": 247,
+      "created_at": "2026-03-30T13:18:31.524Z"
     }
   ]
 }

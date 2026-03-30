@@ -23,6 +23,7 @@ import {
   shouldAdvanceStep,
   deriveNextPhase,
   getActiveStep,
+  deriveFloorContext,
 } from './guidanceState';
 
 // ============================================================
@@ -151,6 +152,7 @@ function makeGuidanceState(
     offRouteDetectedAt: null,
     offRouteFixCount: 0,
     rerouteResult: null,
+    currentFloorId: null,
     ...overrides,
   };
 }
@@ -379,6 +381,7 @@ describe('deriveNextPhase', () => {
       offRouteDetectedAt: null,
       offRouteFixCount: 0,
       rerouteResult: null,
+      currentFloorId: null,
       ...overrides,
     };
   }
@@ -518,5 +521,67 @@ describe('getActiveStep', () => {
     } as unknown as import('./routeSessionState').RouteSessionReadyState;
     const state = makeGuidanceState('guiding', routeWithNullDirections, { currentStepIndex: 0 });
     expect(getActiveStep(state)).toBeNull();
+  });
+});
+
+// ============================================================
+// Tests: deriveFloorContext (floor tracker)
+// ============================================================
+
+describe('deriveFloorContext', () => {
+  const dummyRoute = buildRouteWithNodes(
+    ['a', 'b'],
+    [{ x: 0.1, y: 0.1 }, { x: 0.9, y: 0.9 }],
+    [],
+  );
+
+  function makeFloorState(currentFloorId: number | null, overrides?: Partial<GuidanceState>): GuidanceState {
+    return {
+      phase: 'guiding',
+      route: dummyRoute as import('./routeSessionState').RouteSessionReadyState,
+      currentStepIndex: 0,
+      snappedPosition: { x: 0.5, y: 0.5 },
+      snappedNodeId: 'a',
+      heading: null,
+      headingConfidence: null,
+      positionConfidence: 'high' as ConfidenceLevel,
+      lastFixTimestamp: Date.now(),
+      offRouteDetectedAt: null,
+      offRouteFixCount: 0,
+      rerouteResult: null,
+      currentFloorId,
+      ...overrides,
+    };
+  }
+
+  it('returns the floorId when currentFloorId is set', () => {
+    const state = makeFloorState(3);
+    expect(deriveFloorContext(state)).toBe(3);
+  });
+
+  it('returns the correct floorId across multiple floors', () => {
+    expect(deriveFloorContext(makeFloorState(1))).toBe(1);
+    expect(deriveFloorContext(makeFloorState(2))).toBe(2);
+    expect(deriveFloorContext(makeFloorState(7))).toBe(7);
+  });
+
+  it('returns null when currentFloorId is null (idle or no snapped node)', () => {
+    const state = makeFloorState(null);
+    expect(deriveFloorContext(state)).toBeNull();
+  });
+
+  it('returns null when currentFloorId is explicitly undefined in state', () => {
+    const state = makeFloorState(null);
+    // ensure null vs undefined distinction doesn't break helper
+    expect(deriveFloorContext({ ...state, currentFloorId: null })).toBeNull();
+  });
+
+  it('deriveFloorContext does not depend on phase — works in any phase', () => {
+    expect(deriveFloorContext(makeFloorState(2, { phase: 'guiding' }))).toBe(2);
+    expect(deriveFloorContext(makeFloorState(2, { phase: 'low-confidence' }))).toBe(2);
+    expect(deriveFloorContext(makeFloorState(2, { phase: 'idle' }))).toBe(2);
+    expect(deriveFloorContext(makeFloorState(2, { phase: 'arrived' }))).toBe(2);
+    expect(deriveFloorContext(makeFloorState(null, { phase: 'guiding' }))).toBeNull();
+    expect(deriveFloorContext(makeFloorState(null, { phase: 'idle' }))).toBeNull();
   });
 });

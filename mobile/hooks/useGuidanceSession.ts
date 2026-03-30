@@ -149,6 +149,7 @@ export function useGuidanceSession({
     offRouteDetectedAt: null,
     offRouteFixCount: 0,
     rerouteResult: null,
+    currentFloorId: null,
   });
 
   // guidanceState: React state snapshot — updated after each position
@@ -156,6 +157,10 @@ export function useGuidanceSession({
   const [guidanceState, setGuidanceState] = useState<GuidanceState>(
     guidanceStateRef.current,
   );
+
+  // ── Floor transition tracking ─────────────────────────────────────────────
+  // Tracks the previous floor ID to detect crossings and emit observability log.
+  const previousFloorIdRef = useRef<number | null>(null);
 
   // ── GPS + heading subscription ──────────────────────────────────────────
   const { position: hookPosition, heading: hookHeading } = useCurrentPosition({
@@ -200,6 +205,15 @@ export function useGuidanceSession({
     const floorBounds = snappedRecord
       ? graph.floorById.get(snappedRecord.floorId)?.floor.gpsBounds ?? null
       : null;
+    const currentFloorId = snappedRecord ? snappedRecord.floorId : null;
+
+    // ── Floor transition detection ────────────────────────────────────────
+    if (currentFloorId !== previousFloorIdRef.current && currentFloorId !== null && previousFloorIdRef.current !== null) {
+      console.log('[Guidance] floor-transition', { from: previousFloorIdRef.current, to: currentFloorId });
+    }
+    if (currentFloorId !== null) {
+      previousFloorIdRef.current = currentFloorId;
+    }
 
     let snappedPosition = state.snappedPosition;
     let snappedNodeId = state.snappedNodeId;
@@ -309,6 +323,7 @@ export function useGuidanceSession({
       offRouteFixCount,
       offRouteDetectedAt,
       rerouteResult,
+      currentFloorId,
     };
 
     guidanceStateRef.current = newState;
@@ -372,6 +387,7 @@ export function useGuidanceSession({
     const floorBounds = snappedRecord
       ? graph.floorById.get(snappedRecord.floorId)?.floor.gpsBounds ?? null
       : null;
+    const currentFloorId = snappedRecord ? snappedRecord.floorId : null;
 
     let snappedNodeId = guidanceStateRef.current.snappedNodeId;
     let snappedPosition = guidanceStateRef.current.snappedPosition;
@@ -405,6 +421,11 @@ export function useGuidanceSession({
 
     const phase: GuidancePhase = isConfident ? 'guiding' : 'low-confidence';
 
+    // Update previousFloorIdRef when starting guidance so first transition fires correctly.
+    if (currentFloorId !== null) {
+      previousFloorIdRef.current = currentFloorId;
+    }
+
     const newState: GuidanceState = {
       ...guidanceStateRef.current,
       phase,
@@ -418,6 +439,7 @@ export function useGuidanceSession({
       offRouteFixCount: 0,
       offRouteDetectedAt: null,
       rerouteResult: null,
+      currentFloorId,
     };
 
     guidanceStateRef.current = newState;
@@ -439,6 +461,7 @@ export function useGuidanceSession({
       offRouteDetectedAt: null,
       offRouteFixCount: 0,
       rerouteResult: null,
+      currentFloorId: null,
     };
 
     guidanceStateRef.current = newState;
@@ -454,6 +477,7 @@ export function useGuidanceSession({
 
       const floorBounds =
         graph.floorById.get(nodeRecord.floorId)?.floor.gpsBounds ?? null;
+      const currentFloorId = nodeRecord.floorId;
 
       let snappedPosition = guidanceStateRef.current.snappedPosition;
       if (floorBounds) {
@@ -475,6 +499,7 @@ export function useGuidanceSession({
         positionConfidence: confidence,
         offRouteFixCount: 0,
         offRouteDetectedAt: null,
+        currentFloorId,
       };
 
       guidanceStateRef.current = newState;

@@ -10,9 +10,10 @@
  */
 
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
 
 import { getActiveStep, type GuidanceState } from '../../routing/guidanceState';
-import type { DirectionStep } from '../../domain/navGraph';
+import type { DirectionStep, NormalizedFloorRecord } from '../../domain/navGraph';
 import { ConfidenceIndicator, type ConfidenceLevel } from './ConfidenceIndicator';
 
 // ─── Step icon helpers (mirrors RoutePreview) ────────────────────────────────
@@ -65,12 +66,26 @@ export interface LiveGuidanceOverlayProps {
   guidanceState: GuidanceState;
   onConfirmPosition: () => void;
   onStopGuidance: () => void;
+  /** Floor ID of the current snapped position. */
+  floorId?: number | null;
+  /** Floor lookup map for display labels. */
+  floorMap?: Map<number, NormalizedFloorRecord>;
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 /** Low-confidence banner: orange/yellow background, confirm button. */
-function LowConfidenceBanner({ onConfirmPosition }: { onConfirmPosition: () => void }) {
+function LowConfidenceBanner({
+  onConfirmPosition,
+  floorId,
+  floorMap,
+}: {
+  onConfirmPosition: () => void;
+  floorId?: number | null;
+  floorMap?: Map<number, NormalizedFloorRecord>;
+}) {
+  const floorLabel = floorId && floorMap ? floorMap.get(floorId)?.floor.floorNumber ?? floorId : null;
+
   return (
     <View style={styles.lowConfidenceBanner} testID="low-confidence-banner">
       <View style={styles.bannerRow}>
@@ -78,6 +93,7 @@ function LowConfidenceBanner({ onConfirmPosition }: { onConfirmPosition: () => v
         <Text style={styles.lowConfidenceText}>
           Can't confirm your location.{'\n'}
           Tap the map to confirm where you are, or move to an open area.
+          {floorLabel != null ? `\nYou are on Floor ${floorLabel}.` : ''}
         </Text>
       </View>
       <Pressable style={styles.confirmButton} onPress={onConfirmPosition} testID="confirm-position-btn">
@@ -101,9 +117,13 @@ function ReroutingBanner() {
 function GuidingCard({
   state,
   onStopGuidance,
+  floorId,
+  floorMap,
 }: {
   state: GuidanceState;
   onStopGuidance: () => void;
+  floorId?: number | null;
+  floorMap?: Map<number, NormalizedFloorRecord>;
 }) {
   const activeStep = getActiveStep(state);
   const { route, currentStepIndex, positionConfidence } = state;
@@ -129,6 +149,9 @@ function GuidingCard({
         </Text>
         <ConfidenceIndicator confidence={positionConfidence} />
       </View>
+
+      {/* Floor badge row */}
+      <FloorBadge floorId={floorId} floorMap={floorMap} />
 
       {/* Bottom row: distance + progress + end button */}
       <View style={styles.bottomRow}>
@@ -167,19 +190,72 @@ function ArrivedCard({
   );
 }
 
+/** Floor badge — shows current floor label next to step icon in the guiding card. */
+function FloorBadge({
+  floorId,
+  floorMap,
+}: {
+  floorId?: number | null;
+  floorMap?: Map<number, NormalizedFloorRecord>;
+}) {
+  if (!floorId || !floorMap) return null;
+  const record = floorMap.get(floorId);
+  if (!record) return null;
+  return (
+    <View style={styles.floorBadge} testID="floor-badge">
+      <Text style={styles.floorBadgeText}>Floor {record.floor.floorNumber}</Text>
+    </View>
+  );
+}
+
+/** Floor transition banner — briefly shown for 2500 ms when floor changes. */
+function FloorTransitionBanner({
+  floorId,
+  floorMap,
+}: {
+  floorId?: number | null;
+  floorMap?: Map<number, NormalizedFloorRecord>;
+}) {
+  const prevFloorIdRef = useRef<number | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [displayFloorId, setDisplayFloorId] = useState<number | null>(null);
+
+  if (floorId !== prevFloorIdRef.current && floorId !== null && prevFloorIdRef.current !== null) {
+    prevFloorIdRef.current = floorId;
+    const label = floorMap?.get(floorId)?.floor.floorNumber ?? floorId;
+    setDisplayFloorId(floorId);
+    setVisible(true);
+    setTimeout(() => setVisible(false), 2500);
+  } else if (floorId !== null) {
+    prevFloorIdRef.current = floorId;
+  }
+
+  if (!visible || displayFloorId === null) return null;
+
+  const label = floorMap?.get(displayFloorId)?.floor.floorNumber ?? displayFloorId;
+
+  return (
+    <View style={styles.floorTransitionBanner} testID="floor-transition-banner">
+      <Text style={styles.floorTransitionText}>Now on Floor {label}</Text>
+    </View>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export function LiveGuidanceOverlay({
   guidanceState,
   onConfirmPosition,
   onStopGuidance,
+  floorId,
+  floorMap,
 }: LiveGuidanceOverlayProps) {
   const { phase } = guidanceState;
 
   if (phase === 'idle') return null;
 
   if (phase === 'low-confidence') {
-    return <LowConfidenceBanner onConfirmPosition={onConfirmPosition} />;
+    return <LowConfidenceBanner onConfirmPosition={onConfirmPosition} floorId={floorId} floorMap={floorMap} />;
   }
 
   if (phase === 'rerouting') {
@@ -192,7 +268,15 @@ export function LiveGuidanceOverlay({
 
   // phase === 'guiding'
   return (
-    <GuidingCard state={guidanceState} onStopGuidance={onStopGuidance} />
+    <>
+      <FloorTransitionBanner floorId={floorId} floorMap={floorMap} />
+      <GuidingCard
+        state={guidanceState}
+        onStopGuidance={onStopGuidance}
+        floorId={floorId}
+        floorMap={floorMap}
+      />
+    </>
   );
 }
 
@@ -340,6 +424,38 @@ const styles = StyleSheet.create({
   doneButtonText: {
     color: '#052e16',
     fontSize: 15,
+    fontWeight: '700',
+  },
+
+  // Floor badge — small chip shown next to step icon
+  floorBadge: {
+    backgroundColor: '#1e3a5f',
+    borderRadius: 6,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+    marginTop: -4,
+    marginLeft: 46, // align with step icon start
+  },
+  floorBadgeText: {
+    color: '#7dd3fc',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+
+  // Floor transition banner — full-width toast shown for 2500 ms on floor change
+  floorTransitionBanner: {
+    backgroundColor: '#1d4ed8',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginHorizontal: 12,
+    marginBottom: 4,
+    alignItems: 'center',
+  },
+  floorTransitionText: {
+    color: '#eff6ff',
+    fontSize: 13,
     fontWeight: '700',
   },
 });

@@ -69,6 +69,8 @@ export interface GuidanceState {
   offRouteFixCount: number;
   /** Result of the last reroute computation, null if no reroute has been attempted. */
   rerouteResult: PathResult | null;
+  /** Floor ID of the current snapped node, null if not on any floor. */
+  currentFloorId: number | null;
 }
 
 // ============================================================
@@ -362,4 +364,14 @@ export function getActiveStep(state: GuidanceState): DirectionStep | null {
   const { steps } = route.directions;
   if (currentStepIndex < 0 || currentStepIndex >= steps.length) return null;
   return steps[currentStepIndex] ?? null;
+}
+
+/**
+ * Derive floor context from a GuidanceState snapshot.
+ *
+ * Returns the floorId of the current snapped node, or null when
+ * the user is not on any floor (idle or no snapped node).
+ */
+export function deriveFloorContext(state: GuidanceState): number | null {
+  return state.currentFloorId ?? null;
 }

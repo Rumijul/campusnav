@@ -16,7 +16,7 @@ Steps:
   - Estimate: 1h
   - Files: mobile/map/mapTransform.ts, mobile/map/MapViewport.tsx, mobile/map/MapViewportFloor.tsx, mobile/App.tsx
   - Verify: npx tsc --noEmit
-- [ ] **T02: Floor-aware guidance state + overlay** — Add currentFloorId to GuidanceState, update useGuidanceSession to track floor changes, add floor badge and floor transition banner to LiveGuidanceOverlay, and wire floorId/floorMap props from App.
+- [x] **T02: Floor-aware guidance state (currentFloorId) and overlay (FloorBadge, FloorTransitionBanner, floor context) wired across guidanceState, useGuidanceSession, LiveGuidanceOverlay, and App.tsx** — Add currentFloorId to GuidanceState, update useGuidanceSession to track floor changes, add floor badge and floor transition banner to LiveGuidanceOverlay, and wire floorId/floorMap props from App.
 
 Steps:
 1. Read mobile/routing/guidanceState.ts — add currentFloorId: number | null to the GuidanceState interface.

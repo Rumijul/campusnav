@@ -297,6 +297,8 @@ export default function App() {
               }
             }}
             onStopGuidance={stopGuidance}
+            floorId={guidanceState.currentFloorId}
+            floorMap={graph!.floorById}
           />
         </View>
       )}
