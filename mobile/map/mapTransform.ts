@@ -12,6 +12,8 @@ export interface MapTransform {
   scale: number;
   rotationDeg: number;
   translation: ViewportPoint;
+  /** Cumulative rotation applied by device heading during active guidance. Degrees (0–360), default 0. */
+  headingRotationDeg: number;
 }
 
 export interface PinchRotateInput {
@@ -28,6 +30,7 @@ const DEFAULT_TRANSFORM: MapTransform = {
   scale: 1,
   rotationDeg: 0,
   translation: { x: 0, y: 0 },
+  headingRotationDeg: 0,
 };
 
 const EPSILON = 1e-6;
@@ -83,6 +86,7 @@ export function createInitialMapTransform(): MapTransform {
     scale: DEFAULT_TRANSFORM.scale,
     rotationDeg: DEFAULT_TRANSFORM.rotationDeg,
     translation: { ...DEFAULT_TRANSFORM.translation },
+    headingRotationDeg: DEFAULT_TRANSFORM.headingRotationDeg,
   };
 }
 
@@ -179,6 +183,7 @@ export function applyPinchRotate(transform: MapTransform, input: PinchRotateInpu
     scale: nextScale,
     rotationDeg: nextRotation,
     translation: { x: 0, y: 0 },
+    headingRotationDeg: 0,
   });
 
   const nextTranslation = {
@@ -194,6 +199,7 @@ export function applyPinchRotate(transform: MapTransform, input: PinchRotateInpu
     scale: nextScale,
     rotationDeg: nextRotation,
     translation: nextTranslation,
+    headingRotationDeg: transform.headingRotationDeg,
   };
 }
 
@@ -202,6 +208,25 @@ export function mapTransformsEqual(a: MapTransform, b: MapTransform): boolean {
     Math.abs(a.scale - b.scale) < EPSILON &&
     Math.abs(a.rotationDeg - b.rotationDeg) < EPSILON &&
     Math.abs(a.translation.x - b.translation.x) < EPSILON &&
-    Math.abs(a.translation.y - b.translation.y) < EPSILON
+    Math.abs(a.translation.y - b.translation.y) < EPSILON &&
+    Math.abs(a.headingRotationDeg - b.headingRotationDeg) < EPSILON
   );
+}
+
+/**
+ * Applies device heading rotation to an existing transform.
+ * When headingDegrees is null, returns existing unchanged.
+ * When non-null, returns existing with headingRotationDeg set to headingDegrees.
+ */
+export function applyHeadingRotation(
+  existing: MapTransform,
+  headingDegrees: number | null,
+): MapTransform {
+  if (headingDegrees === null) {
+    return existing;
+  }
+  return {
+    ...existing,
+    headingRotationDeg: headingDegrees,
+  };
 }

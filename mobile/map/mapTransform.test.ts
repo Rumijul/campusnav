@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_VIEWPORT_SCALE,
   MIN_VIEWPORT_SCALE,
+  applyHeadingRotation,
   applyPanDelta,
   applyPinchRotate,
   clampViewportScale,
@@ -26,6 +27,7 @@ describe('mapTransform', () => {
       scale: 1.4,
       rotationDeg: 25,
       translation: { x: 40, y: -30 },
+      headingRotationDeg: 0,
     };
     const focal = { x: 210, y: 160 };
     const worldAnchor = worldFromScreen(focal, transform);
@@ -52,6 +54,7 @@ describe('mapTransform', () => {
         scale: 1,
         rotationDeg: 179,
         translation: { x: 0, y: 0 },
+        headingRotationDeg: 0,
       },
       {
         scaleFactor: 1,
@@ -75,6 +78,7 @@ describe('mapTransform', () => {
       scale: 3.9,
       rotationDeg: 0,
       translation: { x: 0, y: 0 },
+      headingRotationDeg: 0,
     };
 
     const next = applyPinchRotate(transform, {
@@ -92,6 +96,7 @@ describe('mapTransform', () => {
       scale: 1.2,
       rotationDeg: 15,
       translation: { x: 10, y: 12 },
+      headingRotationDeg: 0,
     };
 
     const nextNaNScale = applyPinchRotate(stable, {
@@ -128,5 +133,67 @@ describe('mapTransform', () => {
 
     const malformed = applyPanDelta(panned, { x: Number.NaN, y: 3 });
     expect(mapTransformsEqual(malformed, panned)).toBe(true);
+  });
+
+  describe('applyHeadingRotation', () => {
+    it('returns existing unchanged when headingDegrees is null', () => {
+      const existing: MapTransform = {
+        scale: 1.5,
+        rotationDeg: 20,
+        translation: { x: 10, y: -5 },
+        headingRotationDeg: 0,
+      };
+
+      const result = applyHeadingRotation(existing, null);
+
+      expect(result).toBe(existing);
+      expect(result.headingRotationDeg).toBe(0);
+    });
+
+    it('sets headingRotationDeg to the provided heading when non-null', () => {
+      const existing: MapTransform = {
+        scale: 1.5,
+        rotationDeg: 20,
+        translation: { x: 10, y: -5 },
+        headingRotationDeg: 0,
+      };
+
+      const result = applyHeadingRotation(existing, 90);
+
+      expect(result.scale).toBe(1.5);
+      expect(result.rotationDeg).toBe(20);
+      expect(result.translation).toEqual({ x: 10, y: -5 });
+      expect(result.headingRotationDeg).toBe(90);
+    });
+
+    it('preserves other fields when applying heading', () => {
+      const existing: MapTransform = {
+        scale: 2.0,
+        rotationDeg: -45,
+        translation: { x: 30, y: 15 },
+        headingRotationDeg: 0,
+      };
+
+      const result = applyHeadingRotation(existing, 270);
+
+      expect(result.scale).toBe(2.0);
+      expect(result.rotationDeg).toBe(-45);
+      expect(result.translation).toEqual({ x: 30, y: 15 });
+      expect(result.headingRotationDeg).toBe(270);
+    });
+
+    it('MapTransformsEqual returns true for transforms with same headingRotationDeg', () => {
+      const a: MapTransform = { scale: 1, rotationDeg: 0, translation: { x: 0, y: 0 }, headingRotationDeg: 45 };
+      const b: MapTransform = { scale: 1, rotationDeg: 0, translation: { x: 0, y: 0 }, headingRotationDeg: 45 };
+
+      expect(mapTransformsEqual(a, b)).toBe(true);
+    });
+
+    it('MapTransformsEqual returns false for transforms with different headingRotationDeg', () => {
+      const a: MapTransform = { scale: 1, rotationDeg: 0, translation: { x: 0, y: 0 }, headingRotationDeg: 45 };
+      const b: MapTransform = { scale: 1, rotationDeg: 0, translation: { x: 0, y: 0 }, headingRotationDeg: 90 };
+
+      expect(mapTransformsEqual(a, b)).toBe(false);
+    });
   });
 });

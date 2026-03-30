@@ -23,6 +23,8 @@ import {
 interface MapViewportProps {
   imageUri: string;
   onTransformChange?: (transform: MapTransform) => void;
+  /** Device heading rotation in degrees to add to manual rotation during active guidance. */
+  headingRotationDeg?: number;
 }
 
 interface GestureTracking {
@@ -63,7 +65,7 @@ function formatTransformValue(value: number): string {
   return value.toFixed(2);
 }
 
-export function MapViewport({ imageUri, onTransformChange }: MapViewportProps) {
+export function MapViewport({ imageUri, onTransformChange, headingRotationDeg }: MapViewportProps) {
   const [viewport, setViewport] = useState<ViewportDimensions | null>(null);
   const [transform, setTransform] = useState<MapTransform>(createInitialMapTransform);
 
@@ -271,7 +273,7 @@ export function MapViewport({ imageUri, onTransformChange }: MapViewportProps) {
               transform: [
                 { translateX: transform.translation.x },
                 { translateY: transform.translation.y },
-                { rotateZ: `${transform.rotationDeg}deg` },
+                { rotateZ: `${transform.rotationDeg + (headingRotationDeg ?? 0)}deg` },
                 { scale: transform.scale },
               ],
             },

@@ -45,6 +45,8 @@ export interface MapViewportFloorProps {
   showRouteOverlay?: boolean;
   /** Whether to show the floor selector strip */
   showFloorSelector?: boolean;
+  /** Device heading in degrees (0–360), applied to map rotation during active guidance. */
+  headingDegrees?: number | null;
 }
 
 /* ─── State ─── */
@@ -66,12 +68,14 @@ export function MapViewportFloor({
   onFloorChange,
   showRouteOverlay = true,
   showFloorSelector = true,
+  headingDegrees,
 }: MapViewportFloorProps) {
-  const [transform, setTransform] = useState<MapTransform>({
+  const [transform, setTransform] = useState<MapTransform>(() => ({
     scale: 1,
     rotationDeg: 0,
     translation: { x: 0, y: 0 },
-  });
+    headingRotationDeg: 0,
+  }));
   const [viewportDimensions, setViewportDimensions] = useState<ViewportDimensions>({ width: 300, height: 300 });
 
   const handleTransformChange = useCallback(
@@ -98,6 +102,7 @@ export function MapViewportFloor({
         <MapViewport
           imageUri=""
           onTransformChange={handleTransformChange}
+          headingRotationDeg={headingDegrees ?? undefined}
         />
         {showRouteOverlay && activeFloorTarget && (
           <RoutePathOverlay

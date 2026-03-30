@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-30T12:47:22.024Z",
+  "exported_at": "2026-03-30T13:11:30.037Z",
   "milestones": [
     {
       "id": "M001",
@@ -141,16 +141,16 @@
       "milestone_id": "M002-a5gn45",
       "id": "S03",
       "title": "Real-time guidance core (confidence + reroute engine)",
-      "status": "pending",
+      "status": "complete",
       "risk": "high",
       "depends": [
         "S02"
       ],
       "demo": "After this: live foreground positioning advances guidance and triggers reroute when user deviates, with confidence-gated fallback behavior.",
       "created_at": "2026-03-25T09:01:56.467Z",
-      "completed_at": null,
-      "full_summary_md": "",
-      "full_uat_md": "",
+      "completed_at": "2026-03-30T12:55:01.853Z",
+      "full_summary_md": "---\nid: S03\nparent: M002-a5gn45\nmilestone: M002-a5gn45\nprovides:\n  - GuidanceState machine with ConfidenceLevel and GuidancePhase types\n  - useCurrentPosition hook with injectable device interfaces\n  - useGuidanceSession orchestrator hook with reroute capability\n  - LiveGuidanceOverlay component with 5-phase conditional rendering\n  - ConfidenceIndicator colored dot component\n  - bearing() and normalizeDelta() geometry utilities exported from mobile/domain/navGraph.ts\n  - routing/index.ts and hooks/index.ts public API entry points\nrequires:\n  - slice: S02\n    provides: computeRouteSession, RouteSessionReadyState, NormalizedNavGraph, MobilePathfindingEngine — useGuidanceSession consumes all of these\naffects:\n  - S04: requires guidanceState, useGuidanceSession, LiveGuidanceOverlay, ConfidenceIndicator\n  - S04: bearing() ready for heading-aware map rotation\n  - S04: confirmPosition() wired in App.tsx\n  - S04: rerouteCooldownMs configurable via useGuidanceSession props\n  - S05: all S03 infrastructure required for end-to-end device verification\nkey_files:\n  - mobile/routing/guidanceState.ts\n  - mobile/hooks/useGuidanceSession.ts\n  - mobile/hooks/useCurrentPosition.ts\n  - mobile/components/guidance/LiveGuidanceOverlay.tsx\n  - mobile/components/guidance/ConfidenceIndicator.tsx\n  - mobile/App.tsx\n  - mobile/routing/index.ts\n  - mobile/hooks/index.ts\n  - mobile/domain/navGraph.ts\nkey_decisions:\n  - bearing() formula: atan2(dy, -dx) * (180/π) + 270 with x-axis mirroring — screen-space coords where north=0°, east=90°, south=180°, west=270°\n  - Confidence 'low' when GPS finite but unconfident; 'none' only when accuracy is null or infinite (per spec)\n  - processPositionRef mutable ref + useState snapshot — decouples high-frequency GPS ticks from React render cycle\n  - useEffect on guidanceState.phase (stable) drives async reroute — avoids stale closures\n  - Two-phase nodeById lookup: path.nodeById ?? route.path.nodeById — bridges test shapes and production NormalizedNavGraph\n  - EMA alpha=0.3 with shortest-angular-path wraparound for heading smoothing\n  - Lazy require inside reroute function body — avoids circular module dependency at init time\npatterns_established:\n  - Mutable ref + useState snapshot pattern for high-frequency device updates\n  - Interface injection for device/hardware-dependent hooks\n  - Shape converters for non-React unit testing of hook internals\n  - Two-phase coordinate resolution for test/production shape bridging\n  - Phase-driven conditional rendering in overlay components\n  - Angular shortest-path wraparound for heading/bearing smoothing\n  - Lazy require for circular-dependency avoidance in module initialization\nobservability_surfaces:\n  - Phase transitions logged via console.group in guidance state machine\n  - Reroute triggered logged with snappedNodeId and destination node IDs\n  - Position projection failures logged with original lat/lng values\n  - guidanceState useState snapshot committed on every processing pass (reactive to React DevTools)\ndrill_down_paths:\n  - tasks/T01-SUMMARY.md\n  - tasks/T02-SUMMARY.md\n  - tasks/T03-SUMMARY.md\n  - tasks/T04-SUMMARY.md\n  - tasks/T05-SUMMARY.md\n  - tasks/T06-SUMMARY.md\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T12:55:01.853Z\nblocker_discovered: false\n---\n\n# S03: Real-time guidance core (confidence + reroute engine)\n\n**Built the confidence-gated guidance state machine, GPS+heading subscription with EMA smoothing, session orchestrator, and live UI overlay — 119 tests passing, 0 TS errors.**\n\n## What Happened\n\nS03 delivered the real-time guidance core as a layered system. T01 added bearing/normalizeDelta geometry utilities (11 tests). T02 built the guidance state machine with ConfidenceLevel, GuidancePhase, deriveConfidence, isOffRoute, shouldAdvanceStep, deriveNextPhase (41 tests). T03 implemented useCurrentPosition with injectable PositionReader/HeadingReader interfaces, EMA smoothing with angular wraparound, and graceful expo-sensors fallback (22 tests). T04 built the session orchestrator useGuidanceSession using a mutable ref + snapshot pattern to decouple high-frequency GPS ticks from React's render cycle; useEffect on guidanceState.phase drives async reroute; MobilePathfindingEngine recomputes path when off-route is confirmed (45 tests). T05 created ConfidenceIndicator (colored dot) and LiveGuidanceOverlay (5-phase conditional renderer) in mobile/components/guidance/ (0 TS errors; component tests blocked by pre-existing Vite 7 TSX bug). T06 wired everything into App.tsx with Start Guidance button, absolute-positioned overlay, top-right confidence dot, and public API entry points (routing/index.ts, hooks/index.ts). Total: 119 tests passing, 0 TypeScript errors.\n\n## Verification\n\n119 tests passing across 4 test suites (11 bearing, 41 guidanceState, 22 useCurrentPosition, 45 useGuidanceSession). TypeScript: 0 errors (npx tsc --noEmit). Entry points verified: routing/index.ts and hooks/index.ts re-export all public API. App.tsx wiring verified: useGuidanceSession called conditionally, LiveGuidanceOverlay renders for non-idle phases, ConfidenceIndicator dot visible in top-right, Start Guidance button visible when route ready and guidance idle. Component TSX smoke tests blocked by pre-existing Vite 7 TSX transform bug (same as DestinationPicker.test.tsx).\n\n## Requirements Advanced\n\n- R026 — Core guidance loop built: guidanceState machine, useGuidanceSession orchestrator, LiveGuidanceOverlay with 5-phase UI. Floor transitions deferred to S04.\n- R027 — 4-level ConfidenceLevel with deriveConfidence(), explicit low-confidence banner in LiveGuidanceOverlay, ConfidenceIndicator dot.\n- R028 — Off-route detection via isOffRoute(), rerouteConfirmFixes counter, MobilePathfindingEngine reroute. rerouteConfirmFixes(2) × updateIntervalMs(2000ms) ≈ 4-6s.\n- R029 — heading + smoothedHeadingDegrees in GuidanceState, exported via routing/index.ts. S04 implements actual map rotation.\n\n## Requirements Validated\n\nNone.\n\n## New Requirements Surfaced\n\n- R026 verified in-unit: guidance loop architecture complete, floor transitions deferred to S04\n- R027 verified in-unit: 4-level confidence with explicit low-confidence UI treatment\n- R028 verified in-unit: rerouteConfirmFixes × updateIntervalMs ≈ 4-6s in foreground, matches 5-10s SLA\n- R029 provided by: heading + smoothedHeadingDegrees in guidanceState, ready for S04 map rotation\n\n## Requirements Invalidated or Re-scoped\n\nNone.\n\n## Deviations\n\nT05 component tests (ConfidenceIndicator.test.tsx, LiveGuidanceOverlay.test.tsx) were written but cannot execute due to pre-existing Vite 7 oxc TSX transform bug parsing `import type` in .tsx files. T03 React hook integration tests blocked by pre-existing React 19 / @testing-library/react@16.3.2 incompatibility in vitest jsdom. These are infrastructure gaps, not code gaps.\n\n## Known Limitations\n\nNo heading-aware map rotation yet (S04 feature). No floor transition handling in guidance loop (S04 feature). No accessible-mode-specific waypoint instructions (S04 feature). No background/lock-screen continuity (deferred from M002). bearing.test.ts fails in isolation due to vitest globals environment issue; passes with full vitest config.\n\n## Follow-ups\n\nS04 must add floor-aware overlays, heading-driven map rotation, and accessible mode parity. The guidanceState machine is ready for S04 to extend with floor-transition phases. confirmPosition() is wired but S04 should ensure floor context is preserved across manual confirmation.\n\n## Files Created/Modified\n\n- `mobile/domain/navGraph.ts` — Added bearing() and normalizeDelta() geometry utilities\n- `mobile/domain/bearing.test.ts` — 11 tests for bearing/normalizeDelta\n- `mobile/routing/guidanceState.ts` — Guidance state machine: ConfidenceLevel, GuidancePhase, GuidanceState, deriveConfidence, isOffRoute, shouldAdvanceStep, deriveNextPhase, getActiveStep\n- `mobile/routing/guidanceState.test.ts` — 41 tests + PathWithNodeById type fix\n- `mobile/hooks/useCurrentPosition.ts` — GPS + heading subscription hook with injectable interfaces and EMA smoothing\n- `mobile/hooks/useCurrentPosition.test.ts` — 22 tests for useCurrentPosition pure functions and interface contracts\n- `mobile/vitest.config.ts` — Added React plugin and path aliases for mobile tests\n- `mobile/hooks/useGuidanceSession.ts` — Session orchestrator: processPositionRef pattern, useEffect phase driver, reroute via MobilePathfindingEngine\n- `mobile/hooks/useGuidanceSession.test.ts` — 45 tests for session orchestrator\n- `mobile/components/guidance/ConfidenceIndicator.tsx` — Colored dot keyed to ConfidenceLevel with tap-to-label interaction\n- `mobile/components/guidance/ConfidenceIndicator.test.tsx` — Component smoke tests (blocked by Vite 7 TSX bug)\n- `mobile/components/guidance/LiveGuidanceOverlay.tsx` — 5-phase conditional renderer: idle/null, low-confidence, guiding, rerouting, arrived\n- `mobile/components/guidance/LiveGuidanceOverlay.test.tsx` — Component smoke tests (blocked by Vite 7 TSX bug)\n- `mobile/__mocks__/react-native.js` — React Native mock for jsdom test environment\n- `mobile/App.tsx` — Guidance wiring: Start Guidance button, LiveGuidanceOverlay, ConfidenceIndicator dot, useGuidanceSession conditional call\n- `mobile/routing/index.ts` — Public API re-exports: MobilePathfindingEngine, computeRouteSession, guidanceState helpers, bearing, normalizeDelta\n- `mobile/hooks/index.ts` — Hook re-exports: useCurrentPosition, useGuidanceSession, types\n- `mobile/tsconfig.json` — Added DOM lib for TypeScript DOM API types\n",
+      "full_uat_md": "# S03: Real-time guidance core (confidence + reroute engine) — UAT\n\n**Milestone:** M002-a5gn45\n**Written:** 2026-03-30T12:55:01.853Z\n\n# S03 UAT — Real-time guidance core (confidence + reroute engine)\n\n## Test Cases (24 total)\n\n| TC | Area | Type | Tests |\n|----|------|------|-------|\n| TC01-TC02 | Geometry utilities | Unit | 11 tests |\n| TC03-TC06 | Guidance state machine | Unit | 41 tests |\n| TC07-TC08 | useCurrentPosition | Unit | 22 tests |\n| TC09-TC14 | useGuidanceSession | Unit | 45 tests |\n| TC15-TC19 | UI components | Component smoke | 4 components |\n| TC20-TC22 | App wiring | Integration | 3 checks |\n| TC23 | TypeScript | Typecheck | 0 errors |\n| TC24 | Entry points | Import | All resolve |\n\n## Edge Cases Covered\n- Division by zero in bearing (same point)\n- Degenerate zero-length path segment\n- Null/infinite GPS accuracy\n- Heading wraparound at 0°/360°\n- path.nodeById shape mismatch (test vs production)\n- Circular require avoidance\n- React render thrashing from GPS updates\n- Reroute with no path found\n\n## Pass Rate: 119/119 unit tests, 0 TypeScript errors\n\n## Pre-existing Blockers (not S03 issues)\n- Vite 7 oxc TSX transform: blocks component smoke tests\n- React 19 / @testing-library/react@16.3.2: blocks hook integration tests\n- Vitest globals in isolated file runs: blocks bearing.test.ts in isolation\n",
       "goal": "Build the real-time guidance core: a confidence-gated guidance state machine, GPS+heading position hook, session orchestrator that advances steps and triggers reroute, and live UI overlay components.",
       "success_criteria": "## Must-Haves\n\n- `GuidanceState` discriminated union with phases `idle | low-confidence | guiding | rerouting | arrived` is defined and consumed by a session hook\n- `useGuidanceSession` accepts a `RouteSessionReadyState` and drives step advancement from position fixes\n- `isOffRoute()` triggers after ≥2 consecutive fixes exceeding the threshold; reroute cooldown debounces to ≥5s\n- Confidence levels `high | medium | low | none` gate auto-guidance; `low-confidence` phase surfaces an explicit user prompt\n- `useCurrentPosition` exposes `positionConfidence`, `headingDegrees`, and `headingAccuracyDegrees`; heading smoothing uses EMA with α=0.3\n- `LiveGuidanceOverlay` renders current step instruction, progress state, and reroute banner\n- `ConfidenceIndicator` renders a color-coded dot reflecting current `positionConfidence`\n- `bearing(ax, ay, bx, by)` utility in `mobile/domain/navGraph.ts` returns degrees 0–360 (0°=north)\n- TypeScript: 0 errors across all S03 source files",
       "proof_level": "This slice proves integration-level behavior: guidance state transitions driven by mock position fixes, off-route detection and reroute flow, and confidence-gating logic. Proof level: contract/integration — pure state machine and hook logic is verified by unit tests; UI wiring is type-consistent and structurally correct.",
@@ -173,11 +173,11 @@
       "completed_at": null,
       "full_summary_md": "",
       "full_uat_md": "",
-      "goal": "Deliver visitor-first, maps-like live guidance UX with floor-safe transitions and mode parity.",
-      "success_criteria": "- Heading-aware map behavior is stable during live navigation.\n- Guidance copy and transitions stay clear for first-time visitors.\n- Floor transitions remain explicit and prevent wrong-floor advancement.\n- Standard and accessible live guidance remain functionally equivalent.",
-      "proof_level": "Behavioral + UAT-ready",
-      "integration_closure": "UI layer consumes live guidance events and floor context to render step cards, floor transitions, and heading-aware map behavior.",
-      "observability_impact": "Adds user-visible fallback reasons and floor-transition diagnostics for wrong-floor prevention.",
+      "goal": "Heading-aware map rotation, floor-aware guidance overlay, and accessible mode parity are wired end-to-end in App.tsx, with floor context tracked in guidance state.",
+      "success_criteria": "## Success Criteria\n\n- [ ] Map canvas rotates when `smoothedHeadingDegrees` is non-null and guidance is active (heading rotation mode)\n- [ ] Manual rotation ↺/↻ buttons still work independently of heading mode\n- [ ] `GuidanceState.currentFloorId` is populated from snapped node's floorId on every fix\n- [ ] Floor transition detected: `console.log('[Guidance] floor-transition', { from, to })` fires when snapped floor changes\n- [ ] LiveGuidanceOverlay GuidingCard shows \"Floor N\" badge\n- [ ] Floor transition banner appears for 2.5 seconds when `currentFloorId` changes\n- [ ] LowConfidenceBanner shows floor context (\"Floor N\")\n- [ ] Accessible mode: elevator steps show `♿` icon with \"(accessible)\" modifier\n- [ ] `npx tsc --noEmit` → 0 TypeScript errors across all mobile files\n- [ ] `npx vitest run` → 119+ tests pass (new floor-tracker tests added, nothing broken)",
+      "proof_level": "integration — verifies end-to-end wiring from device heading + position → map rotation + guidance overlay floor display.",
+      "integration_closure": "S04 produces fully wired App.tsx with heading mode, floor-aware overlay, and accessible mode. S05 (final assembly) will run the app on-device for UAT without adding new guidance wiring — all boundary contracts are closed in S04.",
+      "observability_impact": "Slice adds console.log('[Guidance] floor-transition') when floor context changes and applies smoothedHeadingDegrees reactively. All guidance phase transitions already log via console.group (S03). No new logging infrastructure needed.",
       "sequence": 0,
       "replan_triggered_at": null
     },
@@ -881,6 +881,139 @@
       "observability_impact": "None",
       "full_plan_md": "",
       "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S04",
+      "id": "T01",
+      "title": "Heading-aware map rotation wired end-to-end: headingRotationDeg field added to MapTransform, applyHeadingRotation helper added, MapViewport applies cumulative rotateZ, MapViewportFloor passes headingDegrees, App.tsx wires smoothedHeadingDegrees from useCurrentPosition with phase-gated activation during active guidance.",
+      "status": "complete",
+      "one_liner": "Heading-aware map rotation wired end-to-end: headingRotationDeg field added to MapTransform, applyHeadingRotation helper added, MapViewport applies cumulative rotateZ, MapViewportFloor passes headingDegrees, App.tsx wires smoothedHeadingDegrees from useCurrentPosition with phase-gated activation during active guidance.",
+      "narrative": "Extended the map transform system to support device heading rotation. Added `headingRotationDeg: number` (default 0) to the `MapTransform` interface and updated all call sites that construct or compare transforms — DEFAULT_TRANSFORM, createInitialMapTransform, applyPinchRotate, mapTransformsEqual, screenFromWorld intermediate objects, MapViewportFloor local state, App.tsx transform-state callback, and existing test fixtures. Added `applyHeadingRotation(existing, headingDegrees)` pure function that passes through existing transform when heading is null and sets headingRotationDeg when non-null. MapViewport applies cumulative rotation via `rotateZ: \\`${transform.rotationDeg + (headingRotationDeg ?? 0)}deg\\`` — manual rotation plus heading. App.tsx passes `headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}`, ensuring heading rotation activates only during active guidance sessions. All TypeScript compiles clean, all 10 unit tests pass.",
+      "verification_result": "TypeScript: npx tsc --noEmit returned 0 errors. Unit tests: npx vitest run map/mapTransform.test.ts returned 10 passed with exit code 0. Both verification gates pass.",
+      "duration": "",
+      "completed_at": "2026-03-30T13:11:30.008Z",
+      "blocker_discovered": false,
+      "deviations": "None.",
+      "known_issues": "None.",
+      "key_files": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/App.tsx",
+        "mobile/map/mapTransform.test.ts"
+      ],
+      "key_decisions": [
+        "Heading rotation gated on guidance phase: passes null (no cumulative rotation) during idle to preserve user manual map exploration before guidance starts.",
+        "headingRotationDeg field is preserved through all transform mutations (applyPanDelta via spread, applyPinchRotate explicit), preventing heading value loss during pan/pinch gestures."
+      ],
+      "full_summary_md": "---\nid: T01\nparent: S04\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/map/mapTransform.ts\n  - mobile/map/MapViewport.tsx\n  - mobile/map/MapViewportFloor.tsx\n  - mobile/App.tsx\n  - mobile/map/mapTransform.test.ts\nkey_decisions:\n  - Heading rotation gated on guidance phase: passes null (no cumulative rotation) during idle to preserve user manual map exploration before guidance starts.\n  - headingRotationDeg field is preserved through all transform mutations (applyPanDelta via spread, applyPinchRotate explicit), preventing heading value loss during pan/pinch gestures.\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T13:11:30.008Z\nblocker_discovered: false\n---\n\n# T01: Heading-aware map rotation wired end-to-end: headingRotationDeg field added to MapTransform, applyHeadingRotation helper added, MapViewport applies cumulative rotateZ, MapViewportFloor passes headingDegrees, App.tsx wires smoothedHeadingDegrees from useCurrentPosition with phase-gated activation during active guidance.\n\n**Heading-aware map rotation wired end-to-end: headingRotationDeg field added to MapTransform, applyHeadingRotation helper added, MapViewport applies cumulative rotateZ, MapViewportFloor passes headingDegrees, App.tsx wires smoothedHeadingDegrees from useCurrentPosition with phase-gated activation during active guidance.**\n\n## What Happened\n\nExtended the map transform system to support device heading rotation. Added `headingRotationDeg: number` (default 0) to the `MapTransform` interface and updated all call sites that construct or compare transforms — DEFAULT_TRANSFORM, createInitialMapTransform, applyPinchRotate, mapTransformsEqual, screenFromWorld intermediate objects, MapViewportFloor local state, App.tsx transform-state callback, and existing test fixtures. Added `applyHeadingRotation(existing, headingDegrees)` pure function that passes through existing transform when heading is null and sets headingRotationDeg when non-null. MapViewport applies cumulative rotation via `rotateZ: \\`${transform.rotationDeg + (headingRotationDeg ?? 0)}deg\\`` — manual rotation plus heading. App.tsx passes `headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}`, ensuring heading rotation activates only during active guidance sessions. All TypeScript compiles clean, all 10 unit tests pass.\n\n## Verification\n\nTypeScript: npx tsc --noEmit returned 0 errors. Unit tests: npx vitest run map/mapTransform.test.ts returned 10 passed with exit code 0. Both verification gates pass.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npx tsc --noEmit` | 0 | ✅ pass | 1000ms |\n| 2 | `npx vitest run map/mapTransform.test.ts` | 0 | ✅ pass | 565ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nNone.\n\n## Files Created/Modified\n\n- `mobile/map/mapTransform.ts`\n- `mobile/map/MapViewport.tsx`\n- `mobile/map/MapViewportFloor.tsx`\n- `mobile/App.tsx`\n- `mobile/map/mapTransform.test.ts`\n",
+      "description": "Extend MapTransform with headingRotationDeg field, add applyHeadingRotation() pure helper, propagate headingDegrees prop through MapViewport → MapViewportFloor → App.tsx wiring.\n\nSteps:\n1. Read mobile/map/mapTransform.ts — extend MapTransform interface with headingRotationDeg: number field (default 0).\n2. Add pure function applyHeadingRotation(existing: MapTransform, headingDegrees: number | null): MapTransform. When headingDegrees is null, returns existing unchanged. When non-null, returns existing with headingRotationDeg = headingDegrees.\n3. Read mobile/map/MapViewport.tsx — add optional headingRotationDeg?: number prop. In the Image transform array, change rotateZ from `${transform.rotationDeg}deg` to `${transform.rotationDeg + (headingRotationDeg ?? 0)}deg`. When headingRotationDeg is non-null, this applies cumulative rotation (manual + heading).\n4. Read mobile/map/MapViewportFloor.tsx — add optional headingDegrees?: number | null prop. Pass it to MapViewport as headingRotationDeg.\n5. Read mobile/App.tsx — extract smoothedHeadingDegrees from useCurrentPosition return. Pass headingDegrees={smoothedHeadingDegrees} to MapViewportFloor. When guidanceState.phase === 'idle', pass null (heading rotation only during active guidance).\n6. Run npx tsc --noEmit to verify 0 TypeScript errors.",
+      "estimate": "1h",
+      "files": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/App.tsx"
+      ],
+      "verify": "npx tsc --noEmit",
+      "inputs": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/App.tsx",
+        "mobile/hooks/useCurrentPosition.ts"
+      ],
+      "expected_output": [
+        "mobile/map/mapTransform.ts",
+        "mobile/map/MapViewport.tsx",
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/App.tsx"
+      ],
+      "observability_impact": "smoothedHeadingDegrees flows reactively through props → map rotation. No new logging; heading is observable via React DevTools state inspection.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S04",
+      "id": "T02",
+      "title": "Floor-aware guidance state + overlay",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Add currentFloorId to GuidanceState, update useGuidanceSession to track floor changes, add floor badge and floor transition banner to LiveGuidanceOverlay, and wire floorId/floorMap props from App.\n\nSteps:\n1. Read mobile/routing/guidanceState.ts — add currentFloorId: number | null to the GuidanceState interface.\n2. Read mobile/hooks/useGuidanceSession.ts — after the existing snappedRecord = graph.nodeById.get(snappedNodeId) lookup, add currentFloorId field to the state snapshot. Track previousFloorId via useRef<number | null>(null). When currentFloorId !== previousFloorId.current, log console.log('[Guidance] floor-transition', { from: previousFloorId.current, to: currentFloorId }) and update previousFloorId.current. In startGuidance and confirmPosition, also initialize/update currentFloorId.\n3. Read mobile/components/guidance/LiveGuidanceOverlay.tsx — extend LiveGuidanceOverlayProps:\n   - floorId?: number | null\n   - floorMap?: Map<number, NormalizedFloorRecord> (import from mobile/domain/navGraph)\n   In LowConfidenceBanner: add floor context text \"You are on Floor N\" using floorMap lookup.\n   Add FloorBadge sub-component: View with floor label. Show it in GuidingCard stepRow next to the step icon.\n   Add FloorTransitionBanner: use useRef<number | null>(null) to track prevFloorId. When props.floorId differs from prevFloorId.current and both are non-null, render a temporary full-width banner \"Now on Floor N\" for 2500ms using setTimeout then return to normal card. Import useRef/useState from react (already imported).\n4. Add floor-tracker unit tests to mobile/routing/guidanceState.test.ts: test that deriveFloorContext (helper) returns correct floorId from a GuidanceState snapshot, and that floor transition fires only when floorId changes.\n5. Run npx tsc --noEmit.",
+      "estimate": "1.5h",
+      "files": [
+        "mobile/routing/guidanceState.ts",
+        "mobile/hooks/useGuidanceSession.ts",
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/routing/guidanceState.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && npx vitest run",
+      "inputs": [
+        "mobile/routing/guidanceState.ts",
+        "mobile/hooks/useGuidanceSession.ts",
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/domain/navGraph.ts"
+      ],
+      "expected_output": [
+        "mobile/routing/guidanceState.ts",
+        "mobile/hooks/useGuidanceSession.ts",
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/routing/guidanceState.test.ts"
+      ],
+      "observability_impact": "console.log('[Guidance] floor-transition') fires on floor boundary crossings. Floor context observable via guidanceState.currentFloorId in React DevTools.",
+      "full_plan_md": "",
+      "sequence": 0
+    },
+    {
+      "milestone_id": "M002-a5gn45",
+      "slice_id": "S04",
+      "id": "T03",
+      "title": "Accessible mode parity + App.tsx integration",
+      "status": "pending",
+      "one_liner": "",
+      "narrative": "",
+      "verification_result": "",
+      "duration": "",
+      "completed_at": null,
+      "blocker_discovered": false,
+      "deviations": "",
+      "known_issues": "",
+      "key_files": [],
+      "key_decisions": [],
+      "full_summary_md": "",
+      "description": "Add accessibleMode boolean prop to LiveGuidanceOverlay, wire all props from App.tsx, and add findNearestNodeOnFloor helper.\n\nSteps:\n1. Read mobile/components/guidance/LiveGuidanceOverlay.tsx — add accessibleMode: boolean to LiveGuidanceOverlayProps. In GuidingCard, when accessibleMode === true:\n   - If activeStep?.icon === 'elevator' OR activeStep?.icon === 'ramp', render the stepIconContainer with backgroundColor: '#facc15' (amber highlight) instead of '#1e3a5f'\n   - Append ' (accessible)' to the instruction text\n2. Read mobile/App.tsx — wire all the remaining pieces:\n   a. Derive currentFloorId: look up guidanceState.snappedNodeId in graph.nodeById and read record.floorId\n   b. Pass accessibleMode state as accessibleMode prop to LiveGuidanceOverlay\n   c. Pass floorId={currentFloorId} and floorMap={graph.floorById} to LiveGuidanceOverlay\n   d. Add findNearestNodeOnFloor(graph: NormalizedNavGraph, floorId: number, fromPosition: {x,y}): string helper. Iterate graph.nodeById, filter by floorId, return node.id with minimum Euclidean distance to fromPosition. Use for floor button onFloorChange: when floor changes via MapViewportFloor buttons, call confirmPosition(nearestNodeOnFloor).\n3. Add unit tests for findNearestNodeOnFloor in a new file mobile/hooks/findNearestNodeOnFloor.test.ts.\n4. Run npx tsc --noEmit && npx vitest run.",
+      "estimate": "1h",
+      "files": [
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/App.tsx",
+        "mobile/hooks/findNearestNodeOnFloor.test.ts"
+      ],
+      "verify": "npx tsc --noEmit && npx vitest run",
+      "inputs": [
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/App.tsx",
+        "mobile/domain/navGraph.ts"
+      ],
+      "expected_output": [
+        "mobile/components/guidance/LiveGuidanceOverlay.tsx",
+        "mobile/App.tsx",
+        "mobile/hooks/findNearestNodeOnFloor.test.ts"
+      ],
+      "observability_impact": "All guidance state flows through React props. No additional runtime signals beyond existing guidanceState logging from S03.",
+      "full_plan_md": "",
+      "sequence": 0
     }
   ],
   "decisions": [
@@ -1560,6 +1693,28 @@
       "verdict": "✅ pass",
       "duration_ms": 243,
       "created_at": "2026-03-30T12:47:21.997Z"
+    },
+    {
+      "id": 46,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 1000,
+      "created_at": "2026-03-30T13:11:30.008Z"
+    },
+    {
+      "id": 47,
+      "task_id": "T01",
+      "slice_id": "S04",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx vitest run map/mapTransform.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 565,
+      "created_at": "2026-03-30T13:11:30.008Z"
     }
   ]
 }

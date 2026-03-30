@@ -195,7 +195,12 @@ export default function App() {
     setTransformState(current =>
       mapTransformsEqual(current, nextTransform)
         ? current
-        : { scale: nextTransform.scale, rotationDeg: nextTransform.rotationDeg, translation: { ...nextTransform.translation } },
+        : {
+            scale: nextTransform.scale,
+            rotationDeg: nextTransform.rotationDeg,
+            translation: { ...nextTransform.translation },
+            headingRotationDeg: nextTransform.headingRotationDeg,
+          },
     );
   }, []);
 
@@ -230,7 +235,7 @@ export default function App() {
   /* ─── Guidance session (active only when route is ready) ─── */
 
   const isRouteReady = sessionState?.phase === 'ready' && graph !== null;
-  const { position } = useCurrentPosition();
+  const { position, smoothedHeadingDegrees } = useCurrentPosition();
   const { guidanceState, startGuidance, stopGuidance, confirmPosition } = isRouteReady
     ? useGuidanceSession({ graph, route: sessionState!, updateIntervalMs: 2000 })
     : { guidanceState: { phase: 'idle' } as ReturnType<typeof useGuidanceSession>['guidanceState'], startGuidance: () => {}, stopGuidance: () => {}, confirmPosition: (_nodeId: string) => {} };
@@ -362,6 +367,7 @@ export default function App() {
             showRouteOverlay={sessionState?.phase === 'ready'}
             showFloorSelector={floorTargets.length > 1}
             onTransformChange={onTransformChange}
+            headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}
           />
         </View>
 
