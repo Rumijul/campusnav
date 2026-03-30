@@ -35,7 +35,7 @@ Use a script or sed to handle all files systematically. The T01 blocker task fix
   - Estimate: 30m
   - Files: mobile/hooks/useLocationSearch.test.ts, mobile/hooks/useRouteSelection.test.ts, mobile/routing/useRouteSession.test.ts
   - Verify: npm test 2>&1 | tail -5 — must show 0 failed test files, all tests passing
-- [ ] **T04: Configure Expo build artifacts (app.json, eas.json, .env, prebuild)** — Expand app.json with icon, splash, and build configuration. Create eas.json with internal build profiles (dev, preview). Create .env with EXPO_PUBLIC_API_BASE_URL for Android emulator (10.0.2.2:3000) and iOS simulator (localhost:3000). Then run `npx expo prebuild --clean` to generate android/ and ios/ native directories. Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON with `build.profiles` key.
+- [x] **T04: Configured Expo build artifacts: expanded app.json with icons/splash/location permissions, created eas.json with dev/preview/production profiles, set up .env with API URL, generated Android native project via prebuild** — Expand app.json with icon, splash, and build configuration. Create eas.json with internal build profiles (dev, preview). Create .env with EXPO_PUBLIC_API_BASE_URL for Android emulator (10.0.2.2:3000) and iOS simulator (localhost:3000). Then run `npx expo prebuild --clean` to generate android/ and ios/ native directories. Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON with `build.profiles` key.
   - Estimate: 30m
   - Files: mobile/app.json, mobile/eas.json, mobile/.env
   - Verify: ls mobile/android/ && ls mobile/ios/ — both directories must exist after prebuild; eas.json must be valid JSON
