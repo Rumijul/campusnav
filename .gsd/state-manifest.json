@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-03-30T11:40:22.212Z",
+  "exported_at": "2026-03-30T11:56:59.606Z",
   "milestones": [
     {
       "id": "M001",
@@ -692,19 +692,28 @@
       "milestone_id": "M002-a5gn45",
       "slice_id": "S03",
       "id": "T03",
-      "title": "Implement useCurrentPosition hook with GPS + heading subscription",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Implement useCurrentPosition hook: GPS + heading subscription with EMA smoothing, injectable interfaces, 22 tests, 0 TS errors",
+      "status": "complete",
+      "one_liner": "Implement useCurrentPosition hook: GPS + heading subscription with EMA smoothing, injectable interfaces, 22 tests, 0 TS errors",
+      "narrative": "Built mobile/hooks/useCurrentPosition.ts with injectable PositionReader and HeadingReader interfaces. Returns position, heading, smoothedHeadingDegrees, isConfident, isHeadingValid. EMA smoothing alpha=0.3 with angular wraparound at 0/360deg. isGpsFixConfident imported from src/shared/gps.ts. DefaultNativeHeadingReader uses expo-sensors Magnetometer with graceful fallback. DefaultPositionReader uses navigator.geolocation.watchPosition. Cleanup stops both subscriptions on unmount. Fixed mobile/vitest.config.ts: added React plugin + path aliases, installed missing jsdom. Full hook integration tests blocked by pre-existing React 19 / @testing-library/react@16.3.2 incompatibility in vitest jsdom (same failure as useRouteSelection.test.ts). Tests cover pure EMA smoothing, cleanup spy verification, and interface contracts.",
+      "verification_result": "npm test -- --run mobile/hooks/useCurrentPosition.test.ts: 22 tests pass; npx tsc --noEmit: 0 TypeScript errors",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-03-30T11:56:59.578Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "Full hook integration tests (React rendering) not possible due to pre-existing React 19 incompatibility with @testing-library/react@16.3.2 in vitest jsdom (same failure affects useRouteSelection.test.ts).",
+      "known_issues": "Full hook integration tests blocked by React 19 incompatibility; fix requires @testing-library/react@19.x or downgrading React",
+      "key_files": [
+        "mobile/hooks/useCurrentPosition.ts",
+        "mobile/hooks/useCurrentPosition.test.ts",
+        "mobile/vitest.config.ts"
+      ],
+      "key_decisions": [
+        "EMA wraparound: shortest angular path — if |delta| > 180, subtract 360 to get shorter rotation",
+        "isConfident=false before first position (hasPosition ref guards initial null state)",
+        "DefaultNativeHeadingReader: atan2(x,y)+90deg rotation for compass bearing; catches expo-sensors absence gracefully",
+        "Test strategy: pure function EMA + interface contracts; full hook tests blocked by pre-existing React 19 / @testing-library/react@16.3.2 incompatibility"
+      ],
+      "full_summary_md": "---\nid: T03\nparent: S03\nmilestone: M002-a5gn45\nkey_files:\n  - mobile/hooks/useCurrentPosition.ts\n  - mobile/hooks/useCurrentPosition.test.ts\n  - mobile/vitest.config.ts\nkey_decisions:\n  - EMA wraparound: shortest angular path — if |delta| > 180, subtract 360 to get shorter rotation\n  - isConfident=false before first position (hasPosition ref guards initial null state)\n  - DefaultNativeHeadingReader: atan2(x,y)+90deg rotation for compass bearing; catches expo-sensors absence gracefully\n  - Test strategy: pure function EMA + interface contracts; full hook tests blocked by pre-existing React 19 / @testing-library/react@16.3.2 incompatibility\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-03-30T11:56:59.578Z\nblocker_discovered: false\n---\n\n# T03: Implement useCurrentPosition hook: GPS + heading subscription with EMA smoothing, injectable interfaces, 22 tests, 0 TS errors\n\n**Implement useCurrentPosition hook: GPS + heading subscription with EMA smoothing, injectable interfaces, 22 tests, 0 TS errors**\n\n## What Happened\n\nBuilt mobile/hooks/useCurrentPosition.ts with injectable PositionReader and HeadingReader interfaces. Returns position, heading, smoothedHeadingDegrees, isConfident, isHeadingValid. EMA smoothing alpha=0.3 with angular wraparound at 0/360deg. isGpsFixConfident imported from src/shared/gps.ts. DefaultNativeHeadingReader uses expo-sensors Magnetometer with graceful fallback. DefaultPositionReader uses navigator.geolocation.watchPosition. Cleanup stops both subscriptions on unmount. Fixed mobile/vitest.config.ts: added React plugin + path aliases, installed missing jsdom. Full hook integration tests blocked by pre-existing React 19 / @testing-library/react@16.3.2 incompatibility in vitest jsdom (same failure as useRouteSelection.test.ts). Tests cover pure EMA smoothing, cleanup spy verification, and interface contracts.\n\n## Verification\n\nnpm test -- --run mobile/hooks/useCurrentPosition.test.ts: 22 tests pass; npx tsc --noEmit: 0 TypeScript errors\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `npm test -- --run mobile/hooks/useCurrentPosition.test.ts` | 0 | ✅ pass | 4ms |\n| 2 | `npx tsc --noEmit` | 0 | ✅ pass | 0ms |\n\n\n## Deviations\n\nFull hook integration tests (React rendering) not possible due to pre-existing React 19 incompatibility with @testing-library/react@16.3.2 in vitest jsdom (same failure affects useRouteSelection.test.ts).\n\n## Known Issues\n\nFull hook integration tests blocked by React 19 incompatibility; fix requires @testing-library/react@19.x or downgrading React\n\n## Files Created/Modified\n\n- `mobile/hooks/useCurrentPosition.ts`\n- `mobile/hooks/useCurrentPosition.test.ts`\n- `mobile/vitest.config.ts`\n",
       "description": "Create the GPS + heading subscription hook in `mobile/hooks/useCurrentPosition.ts`. This is the position+heading interface that `useGuidanceSession` will consume. Keep the native module calls behind thin abstractions so the hook is testable without real device.\n\nSteps:\n1. Create `mobile/hooks/useCurrentPosition.ts` with:\n\n   a. **PositionFix interface**:\n      ```typescript\n      interface PositionFix {\n        latitude: number\n        longitude: number\n        accuracyMeters: number\n        headingDegrees: number | null\n        timestamp: number\n      }\n      ```\n\n   b. **HeadingData interface**:\n      ```typescript\n      interface HeadingData {\n        headingDegrees: number   // 0-360 magnetic north\n        accuracyDegrees: number  // heading accuracy\n      }\n      ```\n\n   c. **HeadingReader interface** (for testability — abstracts magnetometer API):\n      ```typescript\n      interface HeadingReader {\n        start(callback: (data: HeadingData) => void): void\n        stop(): void\n      }\n      ```\n\n   d. **PositionReader interface** (for testability — abstracts geolocation API):\n      ```typescript\n      interface PositionReader {\n        watchPosition(\n          onPosition: (fix: PositionFix) => void,\n          onError: (error: Error) => void,\n        ): { stop: () => void }\n      }\n      ```\n\n   e. **useCurrentPosition** hook with options:\n      ```typescript\n      interface UseCurrentPositionOptions {\n        updateIntervalMs?: number        // default: 2000\n        maxAccuracyMeters?: number       // default: 50, passed to isGpsFixConfident\n        headingReader?: HeadingReader     // defaults to native magnetometer\n        positionReader?: PositionReader  // defaults to native navigator.geolocation\n      }\n      ```\n\n      Hook behavior:\n      - On mount: subscribe to positionReader.watchPosition\n      - Subscribe to headingReader (if available) — only trust heading when accuracyDegrees <= 15°\n      - Apply exponential moving average (EMA) to heading: `smoothedHeading = alpha * newHeading + (1 - alpha) * smoothedHeading` where alpha = 0.3. Handle wraparound at 0°/360° by using the shorter angular path.\n      - Return `{ position: PositionFix | null, heading: HeadingData | null, smoothedHeadingDegrees: number | null, isConfident: boolean, isHeadingValid: boolean }`\n      - On unmount: stop both subscriptions\n\n   f. **DefaultNativeHeadingReader** class implementing HeadingReader:\n      - Uses `expo-sensors` Magnetometer if available in the environment\n      - Falls back to no-op (isHeadingValid stays false)\n      - Maps magnetometer events to { headingDegrees, accuracyDegrees: 10 } for simplicity\n\n   g. **DefaultPositionReader** class implementing PositionReader:\n      - Uses `navigator.geolocation.watchPosition` (React Native raw API, no extra package needed)\n      - Maps native GeolocationPosition to PositionFix\n      - Handles PERMISSION_DENIED, POSITION_UNAVAILABLE, TIMEOUT errors by calling onError\n\n   h. **isGpsFixConfident** import from `src/shared/gps.ts` for the confidence check.\n\n2. Create `mobile/hooks/useCurrentPosition.test.ts` with mocked PositionReader and HeadingReader:\n   - Test: confident position with good heading → isConfident=true, isHeadingValid=true\n   - Test: confident position with no heading → isConfident=true, isHeadingValid=false\n   - Test: unconfident GPS (accuracy > threshold) → isConfident=false\n   - Test: heading EMA smoothing: two readings 90° apart smooth toward new value\n   - Test: cleanup: subscriptions stopped on unmount\n\n3. Run `npm test -- --run mobile/hooks/useCurrentPosition.test.ts` and verify tests pass.\n4. Verify TypeScript: 0 errors.",
       "estimate": "1h",
       "files": [
@@ -1397,6 +1406,28 @@
       "verdict": "✅ pass",
       "duration_ms": 0,
       "created_at": "2026-03-30T11:40:22.175Z"
+    },
+    {
+      "id": 35,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M002-a5gn45",
+      "command": "npm test -- --run mobile/hooks/useCurrentPosition.test.ts",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 4,
+      "created_at": "2026-03-30T11:56:59.578Z"
+    },
+    {
+      "id": 36,
+      "task_id": "T03",
+      "slice_id": "S03",
+      "milestone_id": "M002-a5gn45",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 0,
+      "created_at": "2026-03-30T11:56:59.578Z"
     }
   ]
 }

@@ -83,7 +83,7 @@ Steps:
   - Estimate: 1h
   - Files: mobile/routing/guidanceState.ts, mobile/routing/guidanceState.test.ts
   - Verify: `npm test -- --run mobile/routing/guidanceState.test.ts` passes all tests with 0 TypeScript errors
-- [ ] **T03: Implement useCurrentPosition hook with GPS + heading subscription** — Create the GPS + heading subscription hook in `mobile/hooks/useCurrentPosition.ts`. This is the position+heading interface that `useGuidanceSession` will consume. Keep the native module calls behind thin abstractions so the hook is testable without real device.
+- [x] **T03: Implement useCurrentPosition hook: GPS + heading subscription with EMA smoothing, injectable interfaces, 22 tests, 0 TS errors** — Create the GPS + heading subscription hook in `mobile/hooks/useCurrentPosition.ts`. This is the position+heading interface that `useGuidanceSession` will consume. Keep the native module calls behind thin abstractions so the hook is testable without real device.
 
 Steps:
 1. Create `mobile/hooks/useCurrentPosition.ts` with:
