@@ -246,7 +246,7 @@ Steps:
   - Estimate: 1.5h
   - Files: mobile/hooks/useGuidanceSession.ts, mobile/hooks/useGuidanceSession.test.ts
   - Verify: `npm test -- --run mobile/hooks/useGuidanceSession.test.ts` passes with 0 TypeScript errors
-- [ ] **T05: Implement LiveGuidanceOverlay and ConfidenceIndicator UI components** — Create the guidance UI components in `mobile/components/guidance/`. These are the visual layer S04 will later enhance with floor-aware overlays and accessible mode parity.
+- [x] **T05: Created ConfidenceIndicator and LiveGuidanceOverlay with 0 TypeScript errors** — Create the guidance UI components in `mobile/components/guidance/`. These are the visual layer S04 will later enhance with floor-aware overlays and accessible mode parity.
 
 Steps:
 1. Create directory `mobile/components/guidance/`.

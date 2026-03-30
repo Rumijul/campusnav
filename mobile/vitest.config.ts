@@ -5,10 +5,14 @@ import { resolve } from 'node:path';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      '@shared': resolve(__dirname, '../src/shared'),
-      '@client': resolve(__dirname, '../src/client'),
-    },
+    alias: [
+      { find: '@shared', replacement: resolve(__dirname, '../src/shared') },
+      { find: '@client', replacement: resolve(__dirname, '../src/client') },
+      {
+        find: /^react-native$/,
+        replacement: resolve(__dirname, '__mocks__/react-native.js'),
+      },
+    ],
   },
   test: {
     environment: 'jsdom',
