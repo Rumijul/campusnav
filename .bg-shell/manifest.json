@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "e32c28a2",
+    "label": "android-emulator",
+    "command": "\"$LOCALAPPDATA/Android/Sdk/emulator/emulator.exe\" -avd Medium_Phone_API_36.1 -no-snapshot-load -no-audio -no-window 2>/dev/null",
+    "cwd": "C:\\Users\\admin\\Desktop\\projects\\campusnav",
+    "ownerSessionFile": "C:\\Users\\admin\\.gsd\\sessions\\--C--Users-admin-Desktop-projects-campusnav--\\2026-03-30T16-00-09-369Z_381c244a-783c-4e65-a962-45e389fd304a.jsonl",
+    "persistAcrossSessions": false,
+    "startedAt": 1774886647980,
+    "processType": "server",
+    "group": null,
+    "readyPattern": "device",
+    "readyPort": null,
+    "pid": 5832
+  }
+]

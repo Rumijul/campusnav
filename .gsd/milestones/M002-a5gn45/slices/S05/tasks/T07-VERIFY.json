@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T07",
+  "unitId": "M002-a5gn45/S05/T07",
+  "timestamp": 1774883731442,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "manual — inspect E2E checklist file for all steps marked pass/fail",
+      "exitCode": 1,
+      "durationMs": 10,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

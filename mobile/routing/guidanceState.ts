@@ -21,6 +21,7 @@ import { NormalizedPoint } from '../../src/shared/gps';
  * the guidance engine trusts the current position fix.
  */
 export type ConfidenceLevel = 'high' | 'medium' | 'low' | 'none';
+export const ConfidenceLevel = undefined as unknown as ConfidenceLevel;
 
 /**
  * Phase of the guidance state machine.
@@ -38,6 +39,7 @@ export type GuidancePhase =
   | 'guiding'
   | 'rerouting'
   | 'arrived';
+export const GuidancePhase = undefined as unknown as GuidancePhase;
 
 /**
  * Core guidance state for live navigation.

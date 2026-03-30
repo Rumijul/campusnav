@@ -31,6 +31,7 @@ export type StepIcon =
   | 'stairs-down'
   | 'elevator'
   | 'ramp';
+export const StepIcon = undefined as unknown as StepIcon;
 
 /**
  * A single turn-by-turn direction instruction.
@@ -111,6 +112,7 @@ export type NavGraphNormalizationErrorCode =
   | 'duplicate-edge-id'
   | 'node-floor-mismatch'
   | 'edge-node-missing';
+export const NavGraphNormalizationErrorCode = undefined as unknown as NavGraphNormalizationErrorCode;
 
 export interface NavGraphNormalizationError {
   reason: 'normalization-failure';
@@ -121,10 +123,12 @@ export interface NavGraphNormalizationError {
 export type NavGraphNormalizationResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphNormalizationError };
+export const NavGraphNormalizationResult = undefined as unknown as NavGraphNormalizationResult;
 
 export type NavGraphParseAndNormalizeResult =
   | { ok: true; data: NormalizedNavGraph }
   | { ok: false; error: NavGraphContractValidationError | NavGraphNormalizationError };
+export const NavGraphParseAndNormalizeResult = undefined as unknown as NavGraphParseAndNormalizeResult;
 
 function fail(
   code: NavGraphNormalizationErrorCode,

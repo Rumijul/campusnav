@@ -25,6 +25,7 @@ export type RouteSessionPhase =
   | 'ready'
   | 'no-route'
   | 'error';
+export const RouteSessionPhase = undefined as unknown as RouteSessionPhase;
 
 // ============================================================
 // Discriminated union state types
@@ -98,6 +99,7 @@ export type RouteSessionState =
   | RouteSessionReadyState
   | RouteSessionNoRouteState
   | RouteSessionErrorState;
+export const RouteSessionState = undefined as unknown as RouteSessionState;
 
 // ============================================================
 // Options

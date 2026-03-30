@@ -88,7 +88,29 @@ export const navGraphContractSchema = z
   })
   .strict();
 
-export type NavGraphContract = z.output<typeof navGraphContractSchema>;
+// NavGraphContract: inline type to avoid typeof in export type (oxc can't parse it)
+export type NavGraphContractNavNode = {
+  id: string; x: number; y: number; label: string;
+  type: 'room'|'entrance'|'elevator'|'stairs'|'ramp'|'restroom'|'junction'|'hallway'|'landmark';
+  searchable: boolean; floorId: number; roomNumber?: string; description?: string;
+  accessibilityNotes?: string; connectsToFloorAboveId?: number; connectsToFloorBelowId?: number;
+  connectsToNodeAboveId?: string; connectsToNodeBelowId?: string; connectsToBuildingId?: number;
+};
+export type NavGraphContractNavEdge = {
+  id: string; sourceId: string; targetId: string;
+  standardWeight: number; accessibleWeight: number;
+  accessible: boolean; bidirectional: boolean; accessibilityNotes?: string;
+};
+export type NavGraphContractNavFloor = {
+  id: number; floorNumber: number; imagePath: string; updatedAt: string;
+  gpsBounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number };
+  nodes: NavGraphContractNavNode[]; edges: NavGraphContractNavEdge[];
+};
+export type NavGraphContractNavBuilding = {
+  id: number; name: string; floors: NavGraphContractNavFloor[];
+};
+export type NavGraphContract = { buildings: NavGraphContractNavBuilding[] };
+export const NavGraphContract = undefined as unknown as NavGraphContract;
 
 export interface NavGraphContractValidationError {
   reason: 'contract-validation-error';
@@ -99,6 +121,7 @@ export interface NavGraphContractValidationError {
 export type NavGraphValidationResult =
   | { ok: true; data: NavGraph }
   | { ok: false; error: NavGraphContractValidationError };
+export const NavGraphValidationResult = undefined as unknown as NavGraphValidationResult;
 
 function formatIssuePath(path: PropertyKey[]): string {
   if (path.length === 0) {

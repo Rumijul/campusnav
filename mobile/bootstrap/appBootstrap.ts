@@ -1,6 +1,7 @@
 export const STARTUP_TIMEOUT_MS = 3_000;
 
 export type BootstrapPhase = 'idle' | 'loading' | 'ready' | 'error';
+export const BootstrapPhase = undefined as unknown as BootstrapPhase;
 
 export type BootstrapErrorReason =
   | 'missing-api-base-url'
@@ -8,6 +9,7 @@ export type BootstrapErrorReason =
   | 'startup-timeout'
   | 'startup-tooling-error'
   | 'invalid-startup-config';
+export const BootstrapErrorReason = undefined as unknown as BootstrapErrorReason;
 
 export type BootstrapState =
   | {
@@ -35,6 +37,7 @@ export type BootstrapState =
       failedPhase: 'loading';
       recoverable: boolean;
     };
+export const BootstrapState = undefined as unknown as BootstrapState;
 
 export interface BootstrapResult {
   state: BootstrapState;

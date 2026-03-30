@@ -10,6 +10,7 @@ import {
 import { validateApiBaseUrl } from './appBootstrap';
 
 export type MapBootstrapFetchPhase = 'map' | 'image';
+export const MapBootstrapFetchPhase = undefined as unknown as MapBootstrapFetchPhase;
 
 export type MapBootstrapErrorReason =
   | 'missing-api-base-url'
@@ -17,6 +18,7 @@ export type MapBootstrapErrorReason =
   | MapApiErrorReason
   | 'normalization-failure'
   | 'empty-graph';
+export const MapBootstrapErrorReason = undefined as unknown as MapBootstrapErrorReason;
 
 export type MapBootstrapState =
   | {
@@ -51,6 +53,7 @@ export type MapBootstrapState =
       recoverable: boolean;
       details?: string[];
     };
+export const MapBootstrapState = undefined as unknown as MapBootstrapState;
 
 export interface MapBootstrapResult {
   state: MapBootstrapState;

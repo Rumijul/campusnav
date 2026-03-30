@@ -38,16 +38,18 @@
  * - `junction` — Hallway intersection
  * - `hallway` — Mid-hallway point
  */
-export type NavNodeType =
-  | 'room'
-  | 'entrance'
-  | 'elevator'
-  | 'stairs'
-  | 'ramp'
-  | 'restroom'
-  | 'junction'
-  | 'hallway'
-  | 'landmark'
+export const NavNodeType = [
+  'room',
+  'entrance',
+  'elevator',
+  'stairs',
+  'ramp',
+  'restroom',
+  'junction',
+  'hallway',
+  'landmark',
+] as const;
+export type NavNodeType = (typeof NavNodeType)[number];
 
 /**
  * Data stored on each graph node (the `.data` field of an ngraph.graph Node).
