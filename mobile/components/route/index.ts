@@ -8,3 +8,6 @@ export type { RouteSummaryStripProps } from './RouteSummaryStrip';
 
 export { StartGuidanceButton } from './StartGuidanceButton';
 export type { StartGuidanceButtonProps } from './StartGuidanceButton';
+
+export { RoutePathOverlay, AnimatedRoutePathOverlay } from './RoutePathOverlay';
+export type { RoutePathPoint, AnimatedRoutePathOverlayProps } from './RoutePathOverlay';

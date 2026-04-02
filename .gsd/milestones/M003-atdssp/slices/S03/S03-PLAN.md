@@ -18,7 +18,7 @@ Steps:
   - Estimate: 45m
   - Files: mobile/components/guidance/ConfidenceIndicator.tsx, mobile/components/guidance/ConfidenceIndicator.test.tsx, mobile/theme/colors.ts
   - Verify: cd mobile && npm test -- --run ConfidenceIndicator && npx tsc --noEmit 2>&1 | head -10
-- [ ] **T02: Build AnimatedRoutePathOverlay with SVG strokeDashoffset** — Add AnimatedRoutePathOverlay component to mobile/components/route/RoutePathOverlay.tsx. Uses react-native-svg with a Path polyline for each floor's route segment. Animates strokeDashoffset from total path length to 0 over 800ms with ease-out easing. Exports RoutePathPoint type. Uses theme colors (colors.routeStart, colors.routeEnd, colors.routeLine) for dots and path. Renders behind the floor image (pointerEvents none). Exports both RoutePathOverlay (existing View-based) and AnimatedRoutePathOverlay (new SVG-based) from the file.
+- [x] **T02: Add AnimatedRoutePathOverlay with SVG strokeDashoffset draw-on animation** — Add AnimatedRoutePathOverlay component to mobile/components/route/RoutePathOverlay.tsx. Uses react-native-svg with a Path polyline for each floor's route segment. Animates strokeDashoffset from total path length to 0 over 800ms with ease-out easing. Exports RoutePathPoint type. Uses theme colors (colors.routeStart, colors.routeEnd, colors.routeLine) for dots and path. Renders behind the floor image (pointerEvents none). Exports both RoutePathOverlay (existing View-based) and AnimatedRoutePathOverlay (new SVG-based) from the file.
 
 Steps:
 1. Read mobile/components/route/RoutePathOverlay.tsx and confirm existing RoutePathPoint type and View-based implementation
