@@ -69,7 +69,7 @@ function makeGraph() {
 
 function makeSelection() {
   return {
-    start: null as ReturnType<typeof vi.fn>,
+    start: null,
     destination: null,
     activeField: 'start' as const,
     bothSelected: false,

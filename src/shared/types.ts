@@ -38,6 +38,16 @@
  * - `junction` — Hallway intersection
  * - `hallway` — Mid-hallway point
  */
+export type NavNodeType =
+  | 'room'
+  | 'entrance'
+  | 'elevator'
+  | 'stairs'
+  | 'ramp'
+  | 'restroom'
+  | 'junction'
+  | 'hallway'
+  | 'landmark';
 export const NavNodeType = [
   'room',
   'entrance',
@@ -49,9 +59,6 @@ export const NavNodeType = [
   'hallway',
   'landmark',
 ] as const;
-// oxc workaround removed: export type removed, keeping export const only
-// consumers that import { NavNodeType } as type will still work (TypeScript resolves types at compile time)
-export const NavNodeType = undefined as unknown as 'room' | 'entrance' | 'elevator' | 'stairs' | 'ramp' | 'restroom' | 'junction' | 'hallway' | 'landmark';
 
 /**
  * Data stored on each graph node (the `.data` field of an ngraph.graph Node).

@@ -4,22 +4,20 @@ import { normalizeNavGraph } from '../domain/navGraph';
 import {
   type FloorPlanTarget,
   type MapApiClient,
-  type MapApiErrorReason, MapApiResult, MapImageContract,
+  type MapApiErrorReason,
+  type MapApiResult,
+  type MapImageContract,
   createMapApiClient,
 } from '../data/mapApiClient';
 import { validateApiBaseUrl } from './appBootstrap';
 
 export type MapBootstrapFetchPhase = 'map' | 'image';
-export const MapBootstrapFetchPhase = undefined as unknown as MapBootstrapFetchPhase;
-
 export type MapBootstrapErrorReason =
   | 'missing-api-base-url'
   | 'invalid-api-base-url'
   | MapApiErrorReason
   | 'normalization-failure'
   | 'empty-graph';
-export const MapBootstrapErrorReason = undefined as unknown as MapBootstrapErrorReason;
-
 export type MapBootstrapState =
   | {
       phase: 'idle';
@@ -39,7 +37,7 @@ export type MapBootstrapState =
       attempt: number;
       apiBaseUrl: string;
       graph: NormalizedNavGraph;
-      image: MapImageContract;
+      image: MapImageContract | null;
       imageTarget: FloorPlanTarget;
     }
   | {
@@ -53,8 +51,6 @@ export type MapBootstrapState =
       recoverable: boolean;
       details?: string[];
     };
-export const MapBootstrapState = undefined as unknown as MapBootstrapState;
-
 export interface MapBootstrapResult {
   state: MapBootstrapState;
   transitions: MapBootstrapState[];
@@ -257,7 +253,7 @@ export async function runMapBootstrap(options: MapBootstrapOptions = {}): Promis
 
   const imageResult = await client.fetchFloorPlanImageContract(imageTarget);
 
-  let floorPlanImage: string | null = null;
+  let floorPlanImage: MapImageContract | null = null;
   if (imageResult.ok) {
     floorPlanImage = imageResult.data ?? null;
   } else if (imageResult.error.reason === 'http-error' && imageResult.error.status === 404) {

@@ -6,9 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-
-// NavNode placeholder - shared types import temporarily disabled for debug
-type NavNode = { id: string; name: string; floorId: number; x: number; y: number; category?: string };
+import { NavNode } from '../../src/shared/types';
 
 /* ──────────────── Types ──────────────── */
 

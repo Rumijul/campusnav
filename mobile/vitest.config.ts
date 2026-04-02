@@ -17,15 +17,7 @@ export default defineConfig({
     ],
   },
 
-  // Disable oxc — it cannot parse TypeScript `export type` syntax.
-  // With oxc disabled, vitest falls back to esbuild for TypeScript.
-  oxc: false,
-
-  // Force esbuild for TypeScript transformation (supports export type syntax)
-  esbuild: {
-    ts: true,
-    tsx: true,
-  },
+  esbuild: { ts: true, tsx: true },
 
   test: {
     environment: 'jsdom',
@@ -39,4 +31,4 @@ export default defineConfig({
       provider: 'v8',
     },
   },
-});
+} as Parameters<typeof defineConfig>[0]);

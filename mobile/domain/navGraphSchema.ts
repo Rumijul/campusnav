@@ -119,8 +119,9 @@ export interface NavGraphContractValidationError {
   issues: string[];
 }
 
-// NavGraphValidationResult was only used internally
-// No external imports found - removed 'export type' to avoid oxc parse errors
+export type NavGraphValidationResult =
+  | { ok: true; data: NavGraph }
+  | { ok: false; error: NavGraphContractValidationError };
 
 function formatIssuePath(path: PropertyKey[]): string {
   if (path.length === 0) {
