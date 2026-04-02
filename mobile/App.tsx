@@ -471,7 +471,6 @@ export default function App() {
           routePath={routePath}
           onFloorChange={handleFloorChange}
           showRouteOverlay={sessionState?.phase === 'ready'}
-          showFloorSelector={false}
           onTransformChange={onTransformChange}
           headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}
         />

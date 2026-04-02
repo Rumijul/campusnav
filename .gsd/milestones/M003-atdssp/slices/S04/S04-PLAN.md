@@ -8,7 +8,7 @@
   - Estimate: 1h
   - Files: mobile/App.tsx
   - Verify: cd mobile && npx tsc --noEmit
-- [ ] **T02: MapViewportFloor cleanup** — Replace hardcoded dark floor button colors with useTheme().colors. Remove the built-in floor selector ScrollView strip (now handled by FloatingFloorSwitcher in App.tsx). Add optional routeOverlay prop and render it inside mapContainer alongside RoutePathOverlay.
+- [x] **T02: MapViewportFloor stripped of floor selector strip, now accepts optional routeOverlay prop for additional overlays** — Replace hardcoded dark floor button colors with useTheme().colors. Remove the built-in floor selector ScrollView strip (now handled by FloatingFloorSwitcher in App.tsx). Add optional routeOverlay prop and render it inside mapContainer alongside RoutePathOverlay.
   - Estimate: 30m
   - Files: mobile/map/MapViewportFloor.tsx
   - Verify: cd mobile && npx tsc --noEmit

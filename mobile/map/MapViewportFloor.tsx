@@ -3,22 +3,14 @@
  *
  * Composes:
  * - MapViewport (floor plan image with pan/pinch/rotate controls)
- * - Floor selector strip (horizontal ScrollView of floor buttons)
  * - RoutePathOverlay (polyline overlay on active floor)
+ * - Optional routeOverlay prop for additional overlay content inside the map container
  *
- * The active floor target is tracked in state and drives both
- * which image is shown and which floor segment is rendered.
+ * The active floor target is tracked in state and drives which floor segment is rendered.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import {
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { MapViewport } from './MapViewport';
 import { RoutePathOverlay, RoutePathPoint } from '../components/route/RoutePathOverlay';
@@ -43,18 +35,10 @@ export interface MapViewportFloorProps {
   onFloorChange: (target: FloorPlanTarget) => void;
   /** Whether to show the route path overlay */
   showRouteOverlay?: boolean;
-  /** Whether to show the floor selector strip */
-  showFloorSelector?: boolean;
   /** Device heading in degrees (0–360), applied to map rotation during active guidance. */
   headingDegrees?: number | null;
-}
-
-/* ─── State ─── */
-
-interface FloorButtonData {
-  target: FloorPlanTarget;
-  label: string;
-  isActive: boolean;
+  /** Optional additional overlay node rendered inside mapContainer alongside RoutePathOverlay. */
+  routeOverlay?: React.ReactNode;
 }
 
 /* ─── Component ─── */
@@ -67,8 +51,8 @@ export function MapViewportFloor({
   routePath,
   onFloorChange,
   showRouteOverlay = true,
-  showFloorSelector = true,
   headingDegrees,
+  routeOverlay,
 }: MapViewportFloorProps) {
   const [transform, setTransform] = useState<MapTransform>(() => ({
     scale: 1,
@@ -85,15 +69,6 @@ export function MapViewportFloor({
     },
     [onTransformChange],
   );
-
-  // Build floor button data
-  const floorButtons: FloorButtonData[] = floorTargets.map(target => ({
-    target,
-    label: `Bldg ${target.buildingId} Fl ${target.floorNumber}`,
-    isActive: activeFloorTarget !== null
-      && activeFloorTarget.buildingId === target.buildingId
-      && activeFloorTarget.floorNumber === target.floorNumber,
-  }));
 
   return (
     <View style={styles.container}>
@@ -112,30 +87,8 @@ export function MapViewportFloor({
             scale={transform.scale}
           />
         )}
+        {routeOverlay}
       </View>
-
-      {/* Floor selector strip */}
-      {showFloorSelector && floorButtons.length > 0 && (
-        <View style={styles.floorSelector}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.floorScrollContent}
-          >
-            {floorButtons.map((btn, idx) => (
-              <Pressable
-                key={`floor-${idx}`}
-                style={[styles.floorButton, btn.isActive && styles.floorButtonActive]}
-                onPress={() => onFloorChange(btn.target)}
-              >
-                <Text style={[styles.floorButtonText, btn.isActive && styles.floorButtonTextActive]}>
-                  {btn.label}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
     </View>
   );
 }
@@ -152,36 +105,5 @@ const styles = StyleSheet.create({
     minHeight: 280,
     borderRadius: 12,
     overflow: 'hidden',
-  },
-  floorSelector: {
-    paddingVertical: 4,
-  },
-  floorScrollContent: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-  },
-  floorButton: {
-    backgroundColor: '#0f172a',
-    borderColor: '#334155',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  floorButtonActive: {
-    backgroundColor: '#0c2d4a',
-    borderColor: '#38bdf8',
-    borderWidth: 1.5,
-  },
-  floorButtonText: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  floorButtonTextActive: {
-    color: '#38bdf8',
-    fontWeight: '700',
   },
 });

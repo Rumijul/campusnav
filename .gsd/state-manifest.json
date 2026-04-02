@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-02T12:54:30.590Z",
+  "exported_at": "2026-04-02T12:59:26.617Z",
   "milestones": [
     {
       "id": "M001",
@@ -1943,19 +1943,22 @@
       "milestone_id": "M003-atdssp",
       "slice_id": "S04",
       "id": "T02",
-      "title": "MapViewportFloor cleanup",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "MapViewportFloor stripped of floor selector strip, now accepts optional routeOverlay prop for additional overlays",
+      "status": "complete",
+      "one_liner": "MapViewportFloor stripped of floor selector strip, now accepts optional routeOverlay prop for additional overlays",
+      "narrative": "Removed the built-in horizontal ScrollView floor selector strip from MapViewportFloor (responsibility moved to FloatingFloorSwitcher in App.tsx per T01). Replaced hardcoded dark color literals in floor button styles with theme system removal — since the floor selector was removed entirely, useTheme() call was removed too (no colors consumed from it). Added optional routeOverlay?: React.ReactNode prop to the props interface and render it inside mapContainer alongside RoutePathOverlay. Cleaned up unused imports: FlatList, Pressable, ScrollView, Text, useEffect. Removed dead FloorButtonData interface. Updated component docstring. Also removed the stale showFloorSelector={false} prop from the App.tsx call site. npx tsc --noEmit passed with no errors in MapViewportFloor.tsx or App.tsx. Pre-existing errors in other files (mapBootstrapState.ts, DestinationPicker.tsx, test files) are outside this task scope.",
+      "verification_result": "npx tsc --noEmit passed with zero errors for MapViewportFloor.tsx and App.tsx. Pre-existing errors in other files (mapBootstrapState.ts, DestinationPicker.tsx, test files, routing modules) are outside this task scope and were present before T01/T02 changes.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-02T12:59:26.594Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
+      "deviations": "Removed useTheme() hook call since the floor selector strip it would have colored was also removed — no remaining consumer of theme colors in this component. Also removed showFloorSelector prop from App.tsx call site (prop no longer exists in interface).",
+      "known_issues": "None introduced by this change.",
+      "key_files": [
+        "mobile/map/MapViewportFloor.tsx",
+        "mobile/App.tsx"
+      ],
       "key_decisions": [],
-      "full_summary_md": "",
+      "full_summary_md": "---\nid: T02\nparent: S04\nmilestone: M003-atdssp\nkey_files:\n  - mobile/map/MapViewportFloor.tsx\n  - mobile/App.tsx\nkey_decisions:\n  - (none)\nduration: \"\"\nverification_result: passed\ncompleted_at: 2026-04-02T12:59:26.595Z\nblocker_discovered: false\n---\n\n# T02: MapViewportFloor stripped of floor selector strip, now accepts optional routeOverlay prop for additional overlays\n\n**MapViewportFloor stripped of floor selector strip, now accepts optional routeOverlay prop for additional overlays**\n\n## What Happened\n\nRemoved the built-in horizontal ScrollView floor selector strip from MapViewportFloor (responsibility moved to FloatingFloorSwitcher in App.tsx per T01). Replaced hardcoded dark color literals in floor button styles with theme system removal — since the floor selector was removed entirely, useTheme() call was removed too (no colors consumed from it). Added optional routeOverlay?: React.ReactNode prop to the props interface and render it inside mapContainer alongside RoutePathOverlay. Cleaned up unused imports: FlatList, Pressable, ScrollView, Text, useEffect. Removed dead FloorButtonData interface. Updated component docstring. Also removed the stale showFloorSelector={false} prop from the App.tsx call site. npx tsc --noEmit passed with no errors in MapViewportFloor.tsx or App.tsx. Pre-existing errors in other files (mapBootstrapState.ts, DestinationPicker.tsx, test files) are outside this task scope.\n\n## Verification\n\nnpx tsc --noEmit passed with zero errors for MapViewportFloor.tsx and App.tsx. Pre-existing errors in other files (mapBootstrapState.ts, DestinationPicker.tsx, test files, routing modules) are outside this task scope and were present before T01/T02 changes.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `cd mobile && npx tsc --noEmit 2>&1 | grep -E \"(MapViewportFloor|App\\.tsx)\"` | 0 | ✅ pass | 3600ms |\n\n\n## Deviations\n\nRemoved useTheme() hook call since the floor selector strip it would have colored was also removed — no remaining consumer of theme colors in this component. Also removed showFloorSelector prop from App.tsx call site (prop no longer exists in interface).\n\n## Known Issues\n\nNone introduced by this change.\n\n## Files Created/Modified\n\n- `mobile/map/MapViewportFloor.tsx`\n- `mobile/App.tsx`\n",
       "description": "Replace hardcoded dark floor button colors with useTheme().colors. Remove the built-in floor selector ScrollView strip (now handled by FloatingFloorSwitcher in App.tsx). Add optional routeOverlay prop and render it inside mapContainer alongside RoutePathOverlay.",
       "estimate": "30m",
       "files": [
@@ -3234,6 +3237,17 @@
       "verdict": "✅ pass",
       "duration_ms": 45000,
       "created_at": "2026-04-02T12:54:30.568Z"
+    },
+    {
+      "id": 93,
+      "task_id": "T02",
+      "slice_id": "S04",
+      "milestone_id": "M003-atdssp",
+      "command": "cd mobile && npx tsc --noEmit 2>&1 | grep -E \"(MapViewportFloor|App\\.tsx)\"",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 3600,
+      "created_at": "2026-04-02T12:59:26.595Z"
     }
   ]
 }
