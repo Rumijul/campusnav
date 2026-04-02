@@ -22,7 +22,9 @@
       "versionCode": 1,
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "ios": {
@@ -46,8 +48,10 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "campusnav-mobile"
-      }
-    }
+        "projectId": "b8b610f4-3f28-4d5d-87b4-50071a5433b2"
+      },
+      "apiBaseUrl": "http://10.0.2.2:3001"
+    },
+    "owner": "rumijul"
   }
 }

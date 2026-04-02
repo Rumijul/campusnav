@@ -19,11 +19,8 @@ import {
   View,
 } from 'react-native';
 
-import {
-  IDLE_MAP_BOOTSTRAP_STATE, MapBootstrapState,
-  runMapBootstrap,
-} from './bootstrap/mapBootstrapState';
-import { NormalizedNavGraph } from './domain/navGraph';
+import { IDLE_MAP_BOOTSTRAP_STATE, MapBootstrapState, runMapBootstrap } from './bootstrap/mapBootstrapState';
+import { NormalizedNavGraph, NormalizedFloorRecord, NavBuilding, NormalizedNodeRecord, NormalizedEdgeRecord } from './domain/navGraph';
 import { MapViewportFloor } from './map/MapViewportFloor';
 import { FloorPlanTarget } from './data/mapApiClient';
 import { createMapApiClient } from './data/mapApiClient';
@@ -37,11 +34,13 @@ import { RoutePathOverlay, RoutePathPoint } from './components/route/RoutePathOv
 import { useRouteSelection } from './hooks/useRouteSelection';
 import { useRouteSession } from './routing/useRouteSession';
 import { useGuidanceSession } from './hooks/useGuidanceSession';
+import { RouteSessionReadyState } from './routing/routeSessionState';
 import { useCurrentPosition } from './hooks/useCurrentPosition';
 import { findNearestNodeOnFloor } from './hooks/findNearestNodeOnFloor';
 import { LiveGuidanceOverlay } from './components/guidance/LiveGuidanceOverlay';
 import { ConfidenceIndicator } from './components/guidance/ConfidenceIndicator';
-import { NavNode } from '@shared/types';
+// NavNode placeholder - shared types import temporarily disabled for debug
+type NavNode = { id: string; name: string; floorId: number; x: number; y: number; category?: string };
 
 /* ─── Helpers ─── */
 
@@ -91,6 +90,18 @@ function buildRoutePath(sessionPhase: 'ready', graph: NormalizedNavGraph): Route
   return [];
 }
 
+/* ─── Empty graph stub for useRouteSession during loading phase ─── */
+// Required so useRouteSession is always called unconditionally (React hooks rule)
+const EMPTY_GRAPH_STUB: NormalizedNavGraph = {
+  graph: { buildings: [], connectors: [], campusFloor: null },
+  buildingById: new Map<number, NavBuilding>(),
+  floorById: new Map<number, NormalizedFloorRecord>(),
+  floorByBuildingAndNumber: new Map<string, NormalizedFloorRecord>(),
+  nodeById: new Map<string, NormalizedNodeRecord>(),
+  edgeById: new Map<string, NormalizedEdgeRecord>(),
+  outgoingEdgesByNodeId: new Map<string, NormalizedEdgeRecord[]>(),
+};
+
 /* ─── Component ─── */
 
 export default function App() {
@@ -107,13 +118,23 @@ export default function App() {
   /* ─── Bootstrap ─── */
 
   const executeBootstrap = useCallback(async (attempt: number) => {
-    const result = await runMapBootstrap({ attempt });
-    for (const t of result.transitions) {
-      if (t.phase === 'loading') console.info('[mobile-bootstrap]', { phase: t.phase, attempt: t.attempt, currentPhase: t.currentPhase, endpoint: t.endpoint });
-      if (t.phase === 'ready') console.info('[mobile-bootstrap]', { phase: t.phase, attempt: t.attempt, endpoint: t.image.endpoint });
-      if (t.phase === 'error') console.warn('[mobile-bootstrap]', { phase: t.phase, attempt: t.attempt, failedPhase: t.failedPhase, reason: t.reason, recoverable: t.recoverable });
+    const envUrl = typeof process !== 'undefined' ? process.env.EXPO_PUBLIC_API_BASE_URL : undefined;
+    try {
+      const result = await runMapBootstrap({ attempt, envUrl });
+      setBootstrapState(result.state);
+    } catch (err) {
+      // Bootstrap threw an unexpected error — surface it
+      const message = err instanceof Error ? err.message : String(err);
+      setBootstrapState({
+        phase: 'error',
+        attempt,
+        reason: 'normalization-failure',
+        message: `Bootstrap threw: ${message}`,
+        failedPhase: 'map',
+        authRequired: false,
+        recoverable: false,
+      });
     }
-    setBootstrapState(result.state);
   }, []);
 
   useEffect(() => {
@@ -160,11 +181,12 @@ export default function App() {
 
   const selection = useRouteSelection();
 
-  /* ─── Route session ─── */
+  /* ─── Route session (always call hook — stub graph during loading) ─── */
 
-  const { sessionState, routeMode, setRouteMode } = graph
-    ? useRouteSession({ graph, selection })
-    : { sessionState: null, routeMode: 'standard' as const, setRouteMode: () => {} };
+  const { sessionState, routeMode, setRouteMode } = useRouteSession({
+    graph: graph ?? EMPTY_GRAPH_STUB,
+    selection,
+  });
 
   /* ─── Update route mode when accessibleMode changes ─── */
 
@@ -237,9 +259,20 @@ export default function App() {
 
   const isRouteReady = sessionState?.phase === 'ready' && graph !== null;
   const { position, smoothedHeadingDegrees } = useCurrentPosition();
-  const { guidanceState, startGuidance, stopGuidance, confirmPosition } = isRouteReady
-    ? useGuidanceSession({ graph, route: sessionState!, updateIntervalMs: 2000 })
-    : { guidanceState: { phase: 'idle' } as ReturnType<typeof useGuidanceSession>['guidanceState'], startGuidance: () => {}, stopGuidance: () => {}, confirmPosition: (_nodeId: string) => {} };
+  const stubRoute: RouteSessionReadyState = {
+    phase: 'ready',
+    start: null,
+    destination: null,
+    routeMode: 'standard',
+    path: { nodeIds: [], edges: [], estimatedMinutes: 0, distanceMeters: 0 },
+    directions: { steps: [], totalMinutes: 0, totalMeters: 0 },
+    errorMessage: null,
+  };
+  const { guidanceState, startGuidance, stopGuidance, confirmPosition } = useGuidanceSession({
+    graph: graph ?? EMPTY_GRAPH_STUB,
+    route: sessionState?.phase === 'ready' ? sessionState : stubRoute,
+    updateIntervalMs: 2000,
+  });
 
   const showStartGuidance = sessionState?.phase === 'ready' && guidanceState.phase === 'idle';
   const showGuidanceOverlay = guidanceState.phase !== 'idle';
@@ -276,6 +309,17 @@ export default function App() {
         <Pressable onPress={onRetryPress} style={styles.retryButton}>
           <Text style={styles.retryButtonText}>Retry startup</Text>
         </Pressable>
+      </View>
+    );
+  }
+
+  /* ─── Guard: graph must be loaded before rendering map UI ─── */
+
+  if (!graph) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>CampusNav</Text>
+        <Text style={styles.subtitle}>Loading map…</Text>
       </View>
     );
   }

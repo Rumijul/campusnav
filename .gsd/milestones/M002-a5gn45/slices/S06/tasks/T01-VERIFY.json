@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T01",
+  "unitId": "M002-a5gn45/S06/T01",
+  "timestamp": 1774887231715,
+  "passed": false,
+  "discoverySource": "package-json",
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "exitCode": 0,
+      "durationMs": 2293,
+      "verdict": "pass"
+    },
+    {
+      "command": "npm run lint",
+      "exitCode": 1,
+      "durationMs": 278,
+      "verdict": "fail"
+    },
+    {
+      "command": "npm run test",
+      "exitCode": 1,
+      "durationMs": 2325,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2,
+  "runtimeErrors": [
+    {
+      "source": "bg-shell",
+      "severity": "crash",
+      "message": "[backend-server] exitCode=1 errors: throw new Error('JWT_SECRET env var is required'); Error: JWT_SECRET env var is required",
+      "blocking": true
+    },
+    {
+      "source": "bg-shell",
+      "severity": "crash",
+      "message": "[postgres] exitCode=1 errors: unable to get image 'postgres:16': error during connect: Get \"http://%2F%2F.%2Fpipe%2FdockerDesktopLinuxEngine/v1.51/images/postgres:16/json\": open //./pipe/dockerDesktopLinuxEngine: The system cannot",
+      "blocking": true
+    }
+  ]
+}

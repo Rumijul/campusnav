@@ -213,7 +213,11 @@ export async function runAppBootstrap(options: BootstrapOptions = {}): Promise<B
     };
   }
 
-  const apiValidation = validateApiBaseUrl(env.EXPO_PUBLIC_API_BASE_URL);
+  const apiValidation = validateApiBaseUrl(
+    env.EXPO_PUBLIC_API_BASE_URL && env.EXPO_PUBLIC_API_BASE_URL !== 'undefined'
+      ? env.EXPO_PUBLIC_API_BASE_URL
+      : 'http://10.0.2.2:3001',
+  );
 
   if (!apiValidation.ok) {
     const configErrorState = toBootstrapError(

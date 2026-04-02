@@ -117,6 +117,10 @@ export class DefaultPositionReader implements PositionReader {
     onPosition: (fix: PositionFix) => void,
     onError: (error: Error) => void,
   ): { stop: () => void } {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      onError(new Error('[Geolocation] API not available in this environment.'));
+      return { stop: () => {} };
+    }
     let watchId: number;
 
     const onGeoSuccess = (pos: GeolocationPosition) => {

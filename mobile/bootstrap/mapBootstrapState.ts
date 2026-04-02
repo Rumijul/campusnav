@@ -62,6 +62,7 @@ export interface MapBootstrapResult {
 
 export interface MapBootstrapOptions {
   env?: Record<string, string | undefined>;
+  envUrl?: string;
   attempt?: number;
   now?: () => number;
   clientFactory?: (baseUrl: string) => MapApiClient;
@@ -185,7 +186,15 @@ export async function runMapBootstrap(options: MapBootstrapOptions = {}): Promis
   const env = options.env ?? process.env;
   const now = options.now ?? Date.now;
 
-  const apiBase = validateApiBaseUrl(env.EXPO_PUBLIC_API_BASE_URL);
+  // Read env var directly in this scope where Metro has inlined it
+  // options.envUrl takes precedence (passed from App.tsx where it was read correctly)
+  const envUrl = options.envUrl ?? (typeof process !== 'undefined' ? process.env.EXPO_PUBLIC_API_BASE_URL : undefined);
+
+  const apiBase = validateApiBaseUrl(
+    envUrl && envUrl !== 'undefined'
+      ? envUrl
+      : 'http://10.0.2.2:8080',
+  );
   if (!apiBase.ok) {
     const configError = toConfigError(apiBase.reason, apiBase.message, attempt);
     return {
@@ -247,7 +256,14 @@ export async function runMapBootstrap(options: MapBootstrapOptions = {}): Promis
   transitions.push(imageLoading);
 
   const imageResult = await client.fetchFloorPlanImageContract(imageTarget);
-  if (!imageResult.ok) {
+
+  let floorPlanImage: string | null = null;
+  if (imageResult.ok) {
+    floorPlanImage = imageResult.data ?? null;
+  } else if (imageResult.error.reason === 'http-error' && imageResult.error.status === 404) {
+    // Floor plan image not yet uploaded — skip gracefully, user sees empty floor plan
+    console.warn('[mapBootstrap] Floor plan image not found, continuing without it');
+  } else {
     const imageError = toMapApiError('image', attempt, imageResult);
     transitions.push(imageError);
     return {
@@ -262,7 +278,7 @@ export async function runMapBootstrap(options: MapBootstrapOptions = {}): Promis
     attempt,
     apiBaseUrl: apiBase.normalizedUrl,
     graph: normalized.data,
-    image: imageResult.data,
+    image: floorPlanImage,
     imageTarget,
   };
 

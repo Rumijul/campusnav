@@ -2,12 +2,13 @@
  * Mobile port of src/client/hooks/useRouteSelection.ts.
  *
  * Changes from web version:
- * - `@shared/types` import replaced with relative `../../src/shared/types`
  * - RouteSelection interface inlined (no shared module dependency)
  */
 
-import { NavNode } from '../../src/shared/types';
 import { useCallback, useMemo, useState } from 'react';
+
+// NavNode placeholder - shared types import temporarily disabled for debug
+type NavNode = { id: string; name: string; floorId: number; x: number; y: number; category?: string };
 
 /* ──────────────── Types ──────────────── */
 

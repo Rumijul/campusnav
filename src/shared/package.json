@@ -1,0 +1,13 @@
+{
+  "name": "@shared",
+  "version": "1.0.0",
+  "main": "./types.ts",
+  "exports": {
+    ".": "./types.ts",
+    "./types": "./types.ts",
+    "./gps": "./gps.ts",
+    "./pathfinding/graph-builder": "./pathfinding/graph-builder.ts",
+    "./pathfinding/engine": "./pathfinding/engine.ts",
+    "./pathfinding/types": "./pathfinding/types.ts"
+  }
+}

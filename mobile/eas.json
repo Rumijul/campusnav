@@ -10,7 +10,7 @@
         "simulator": true
       },
       "android": {
-        "buildType": "debug"
+        "buildType": "apk"
       }
     },
     "preview": {

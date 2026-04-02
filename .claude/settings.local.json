@@ -58,7 +58,10 @@
       "mcp__plugin_serena_serena__replace_content",
       "Skill(gsd:pause-work)",
       "Bash(cd C:\\\\Users\\\\admin\\\\Desktop\\\\projects\\\\campusnav:*)",
-      "Bash(echo === 21-01 SUMMARY ===:*)"
+      "Bash(echo === 21-01 SUMMARY ===:*)",
+      "Bash(npx:*)",
+      "Skill(update-config)",
+      "Read(//c/Users/admin/.claude/**)"
     ]
   }
 }
