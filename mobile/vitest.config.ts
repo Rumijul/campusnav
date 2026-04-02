@@ -10,6 +10,10 @@ export default defineConfig({
         find: /^react-native$/,
         replacement: resolve(__dirname, '__mocks__/react-native.js'),
       },
+      {
+        find: /^react-native-reanimated$/,
+        replacement: resolve(__dirname, '__mocks__/react-native-reanimated.ts'),
+      },
     ],
   },
   // Vite 8 uses oxc for TSX transform by default, which doesn't support TypeScript

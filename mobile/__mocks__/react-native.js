@@ -75,6 +75,7 @@ module.exports = {
     get: () => ({ width: 375, height: 812 }),
     addEventListener: () => ({ remove: () => {} }),
   },
+  useColorScheme: () => 'dark',
   PixelRatio: {
     get: () => 2,
   },
