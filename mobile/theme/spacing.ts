@@ -22,4 +22,6 @@ export const spacing = {
   '4xl': 64,
 } as const;
 
-export type Spacing = typeof spacing;
+// oxc workaround: removed export type; keeping const-only export
+// Spacing is only used as a TypeScript type (stripped at runtime)
+export const Spacing = undefined as unknown as Record<string, number>;

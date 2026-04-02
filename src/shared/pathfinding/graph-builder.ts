@@ -7,8 +7,8 @@
  * and A* heuristic.
  */
 
-import type { NavEdge, NavEdgeData, NavGraph, NavNode, NavNodeData } from '@shared/types'
-import type { Graph } from 'ngraph.graph'
+import { NavEdge, NavEdgeData, NavGraph, NavNode, NavNodeData } from '@shared/types'
+import { Graph } from 'ngraph.graph'
 import createGraph from 'ngraph.graph'
 
 /**

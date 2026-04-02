@@ -214,9 +214,9 @@ export async function runAppBootstrap(options: BootstrapOptions = {}): Promise<B
   }
 
   const apiValidation = validateApiBaseUrl(
-    env.EXPO_PUBLIC_API_BASE_URL && env.EXPO_PUBLIC_API_BASE_URL !== 'undefined'
-      ? env.EXPO_PUBLIC_API_BASE_URL
-      : 'http://10.0.2.2:3001',
+    // Use ?? so only undefined triggers the Android emulator fallback (http://10.0.2.2:3001).
+    // Empty string, 'undefined' literal, and other non-http(s) values reach validateApiBaseUrl.
+    env.EXPO_PUBLIC_API_BASE_URL ?? 'http://10.0.2.2:3001',
   );
 
   if (!apiValidation.ok) {

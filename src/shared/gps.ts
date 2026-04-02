@@ -1,5 +1,5 @@
 import { calculateWeight } from '@shared/pathfinding/graph-builder'
-import type { NavEdge, NavFloorGpsBounds, NavNode } from '@shared/types'
+import { NavEdge, NavFloorGpsBounds, NavNode } from '@shared/types'
 
 /** Default confidence threshold for student-facing GPS rendering. */
 export const DEFAULT_MAX_GPS_ACCURACY_METERS = 50

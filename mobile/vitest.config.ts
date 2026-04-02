@@ -12,6 +12,15 @@ export default defineConfig({
       },
     ],
   },
+  // Vite 8 uses oxc for TSX transform by default, which doesn't support TypeScript
+  // `export type` syntax in worker processes. Use esbuild for TS instead.
+  esbuild: {
+    ts: true,
+  },
+  optimizeDeps: {
+    // Force esbuild for TypeScript transpilation in both deps and workers
+    ts: 'esbuild',
+  },
   test: {
     environment: 'jsdom',
     globals: true,
@@ -20,5 +29,9 @@ export default defineConfig({
     clearMocks: true,
     restoreMocks: true,
     pool: 'forks',
+    // Disable oxc in workers — use esbuild for TypeScript
+    coverage: {
+      provider: 'v8',
+    },
   },
 });

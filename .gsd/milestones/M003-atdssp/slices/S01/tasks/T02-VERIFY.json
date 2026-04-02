@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "taskId": "T02",
+  "unitId": "M003-atdssp/S01/T02",
+  "timestamp": 1775126218516,
+  "passed": false,
+  "discoverySource": "task-plan",
+  "checks": [
+    {
+      "command": "cd mobile",
+      "exitCode": 0,
+      "durationMs": 6,
+      "verdict": "pass"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "durationMs": 2313,
+      "verdict": "pass"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 1,
+      "durationMs": 2177,
+      "verdict": "fail"
+    }
+  ],
+  "retryAttempt": 1,
+  "maxRetries": 2
+}

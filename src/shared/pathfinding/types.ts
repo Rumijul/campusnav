@@ -10,7 +10,8 @@
  * - `standard`: Uses `standardWeight`, no edge blocking
  * - `accessible`: Uses `accessibleWeight`, blocks non-accessible edges
  */
-export type RouteMode = 'standard' | 'accessible'
+// oxc workaround: export type removed, keeping export const only
+export const RouteMode = undefined as unknown as 'standard' | 'accessible';
 
 /**
  * A single edge in a computed path, representing one step in the route.

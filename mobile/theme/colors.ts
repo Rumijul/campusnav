@@ -132,5 +132,7 @@ export const lightColors = {
   chipTextActive: '#0284c7',
 } as const;
 
-export type DarkColors = typeof darkColors;
-export type LightColors = typeof lightColors;
+// oxc workaround: removed export type; keeping const-only export
+// DarkColors/LightColors are only used as TypeScript types (stripped at runtime)
+export const DarkColors = undefined as unknown as Record<string, string>;
+export const LightColors = undefined as unknown as Record<string, string>;

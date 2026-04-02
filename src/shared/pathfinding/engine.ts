@@ -9,10 +9,10 @@
  */
 
 import { buildGraph, calculateWeight } from '@shared/pathfinding/graph-builder'
-import type { PathResult, PathSegment, RouteMode } from '@shared/pathfinding/types'
-import type { NavEdgeData, NavGraph, NavNodeData } from '@shared/types'
-import type { Graph, Link, Node } from 'ngraph.graph'
-import type { PathFinder } from 'ngraph.path'
+import { PathResult, PathSegment, RouteMode } from '@shared/pathfinding/types'
+import { NavEdgeData, NavGraph, NavNodeData } from '@shared/types'
+import { Graph, Link, Node } from 'ngraph.graph'
+import { PathFinder } from 'ngraph.path'
 import { aStar } from 'ngraph.path'
 
 /** Not-found result constant — reused for all failure responses. */

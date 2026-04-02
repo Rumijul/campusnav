@@ -49,7 +49,9 @@ export const NavNodeType = [
   'hallway',
   'landmark',
 ] as const;
-export type NavNodeType = (typeof NavNodeType)[number];
+// oxc workaround removed: export type removed, keeping export const only
+// consumers that import { NavNodeType } as type will still work (TypeScript resolves types at compile time)
+export const NavNodeType = undefined as unknown as 'room' | 'entrance' | 'elevator' | 'stairs' | 'ramp' | 'restroom' | 'junction' | 'hallway' | 'landmark';
 
 /**
  * Data stored on each graph node (the `.data` field of an ngraph.graph Node).

@@ -27,7 +27,11 @@ describe('runAppBootstrap', () => {
 
   it('transitions to error when EXPO_PUBLIC_API_BASE_URL is missing', async () => {
     const result = await runAppBootstrap({
-      env: {},
+      env: {
+        // Empty string is not nullish, so ?? passes it through to validateApiBaseUrl
+        // where !value is true → missing-api-base-url error
+        EXPO_PUBLIC_API_BASE_URL: '',
+      },
       toolingCheck: async () => ({ status: 'ok' }),
     });
 

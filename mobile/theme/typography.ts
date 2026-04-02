@@ -55,4 +55,6 @@ export const typography = {
   } satisfies TextStyle,
 } as const;
 
-export type Typography = typeof typography;
+// oxc workaround: removed export type; keeping const-only export
+// Typography is only used as a TypeScript type (stripped at runtime)
+export const Typography = undefined as unknown as Record<string, TextStyle>;
