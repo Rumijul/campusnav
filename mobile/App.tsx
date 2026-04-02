@@ -1,46 +1,55 @@
 /**
  * App — visitor navigation runtime (no sign-in required).
  *
- * Composition:
- * - Bootstrap: loads nav graph + campus image from configured endpoints
- * - DestinationPicker: building/floor/node search with start/destination selection
- * - MapViewportFloor: floor plan image viewer + route path overlay + floor switcher
- * - RoutePreview: step-by-step directions when route is ready
- * - Accessible mode toggle: switches between standard / accessible routing
+ * Layered floating UI layout:
+ *   - Full-screen map backdrop (MapViewportFloor + AnimatedRoutePathOverlay)
+ *   - Floating search bar + floor switcher on top (absolute positioned)
+ *   - Bottom sheet with snap-driven content at bottom
+ *   - ConfidenceIndicator top-right during active guidance
+ *   - LiveGuidanceOverlay absolute overlay during guidance
+ *
+ * Bootstrap loads nav graph + campus image from configured endpoints.
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { IDLE_MAP_BOOTSTRAP_STATE, MapBootstrapState, runMapBootstrap } from './bootstrap/mapBootstrapState';
-import { NormalizedNavGraph, NormalizedFloorRecord, NavBuilding, NormalizedNodeRecord, NormalizedEdgeRecord } from './domain/navGraph';
+import { NavBuilding, NavNode } from '../src/shared/types';
+import {
+  NormalizedNavGraph,
+  NormalizedFloorRecord,
+  NormalizedNodeRecord,
+  NormalizedEdgeRecord,
+  PathResult,
+  DirectionsResult,
+} from './domain/navGraph';
 import { MapViewportFloor } from './map/MapViewportFloor';
 import { FloorPlanTarget } from './data/mapApiClient';
 import { createMapApiClient } from './data/mapApiClient';
 import {
   createInitialMapTransform,
-  mapTransformsEqual, MapTransform,
+  mapTransformsEqual,
+  MapTransform,
+  ViewportDimensions,
 } from './map/mapTransform';
 import { DestinationPicker } from './components/destination/DestinationPicker';
 import { RoutePreview } from './components/route/RoutePreview';
-import { RoutePathOverlay, RoutePathPoint } from './components/route/RoutePathOverlay';
-import { useRouteSelection } from './hooks/useRouteSelection';
-import { useRouteSession } from './routing/useRouteSession';
+import { RoutePathPoint } from './components/route/RoutePathOverlay';
+import { AnimatedRoutePathOverlay } from './components/route/RoutePathOverlay';
+import { RouteSelection, useRouteSelection } from './hooks/useRouteSelection';
 import { useGuidanceSession } from './hooks/useGuidanceSession';
 import { RouteSessionReadyState } from './routing/routeSessionState';
+import { useRouteSession } from './routing/useRouteSession';
+import type { RouteSelection as SessionRouteSelection } from './routing/useRouteSession';
 import { useCurrentPosition } from './hooks/useCurrentPosition';
 import { findNearestNodeOnFloor } from './hooks/findNearestNodeOnFloor';
 import { LiveGuidanceOverlay } from './components/guidance/LiveGuidanceOverlay';
 import { ConfidenceIndicator } from './components/guidance/ConfidenceIndicator';
-// NavNode placeholder - shared types import temporarily disabled for debug
-type NavNode = { id: string; name: string; floorId: number; x: number; y: number; category?: string };
+import { BottomSheet, DEFAULT_SNAP_POINTS, SnapIndex } from './components/sheet/BottomSheet';
+import { FloatingSearchBar } from './components/search/FloatingSearchBar';
+import { FloatingFloorSwitcher } from './components/floor/FloatingFloorSwitcher';
+import { useTheme } from './theme';
 
 /* ─── Helpers ─── */
 
@@ -58,13 +67,19 @@ function phaseMessage(state: MapBootstrapState): string {
   }
 }
 
-function formatMetric(value: number): string {
-  return Number.isFinite(value) ? value.toFixed(2) : '0';
-}
+/* ─── Empty graph stub (uses shared/types NavNode) ─── */
 
+const EMPTY_GRAPH_STUB: NormalizedNavGraph = {
+  graph: { buildings: [] },
+  buildingById: new Map<number, NavBuilding>(),
+  floorById: new Map<number, NormalizedFloorRecord>(),
+  floorByBuildingAndNumber: new Map<string, NormalizedFloorRecord>(),
+  nodeById: new Map<string, NormalizedNodeRecord>(),
+  edgeById: new Map<string, NormalizedEdgeRecord>(),
+  outgoingEdgesByNodeId: new Map<string, NormalizedEdgeRecord[]>(),
+};
 
-
-/* ─── Floor target from normalized graph ─── */
+/* ─── Floor helpers ─── */
 
 function buildFloorTargets(graph: NormalizedNavGraph): FloorPlanTarget[] {
   const targets: FloorPlanTarget[] = [];
@@ -76,30 +91,29 @@ function buildFloorTargets(graph: NormalizedNavGraph): FloorPlanTarget[] {
   return targets;
 }
 
-/* ─── Map FloorPlanTarget → floorId ─── */
-
 function getFloorId(target: FloorPlanTarget, graph: NormalizedNavGraph): number {
   const key = `${target.buildingId}:${target.floorNumber}`;
   return graph.floorByBuildingAndNumber.get(key)?.floor.id ?? 0;
 }
 
-/* ─── Route path from session ready state ─── */
+/* ─── Layout constants ─── */
 
-function buildRoutePath(sessionPhase: 'ready', graph: NormalizedNavGraph): RoutePathPoint[] {
-  if (!sessionPhase || sessionPhase !== 'ready') return [];
-  return [];
-}
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SEARCH_BAR_TOP = 56;
+const SEARCH_BAR_HORIZONTAL_PADDING = 16;
+const FLOOR_SWITCHER_TOP = SEARCH_BAR_TOP + 68 + 12;
+const CONFIDENCE_TOP = SEARCH_BAR_TOP + 8;
 
-/* ─── Empty graph stub for useRouteSession during loading phase ─── */
-// Required so useRouteSession is always called unconditionally (React hooks rule)
-const EMPTY_GRAPH_STUB: NormalizedNavGraph = {
-  graph: { buildings: [], connectors: [], campusFloor: null },
-  buildingById: new Map<number, NavBuilding>(),
-  floorById: new Map<number, NormalizedFloorRecord>(),
-  floorByBuildingAndNumber: new Map<string, NormalizedFloorRecord>(),
-  nodeById: new Map<string, NormalizedNodeRecord>(),
-  edgeById: new Map<string, NormalizedEdgeRecord>(),
-  outgoingEdgesByNodeId: new Map<string, NormalizedEdgeRecord[]>(),
+/* ─── Stub route (idle state) ─── */
+
+const STUB_READY_ROUTE: RouteSessionReadyState = {
+  phase: 'ready',
+  start: null,
+  destination: null,
+  routeMode: 'standard',
+  path: { found: false, nodeIds: [], totalDistance: 0, segments: [] } as PathResult,
+  directions: { steps: [], totalDistanceNorm: 0, totalDurationSec: 0 } as DirectionsResult,
+  errorMessage: null,
 };
 
 /* ─── Component ─── */
@@ -107,6 +121,7 @@ const EMPTY_GRAPH_STUB: NormalizedNavGraph = {
 export default function App() {
   const [bootstrapState, setBootstrapState] = useState<MapBootstrapState>(IDLE_MAP_BOOTSTRAP_STATE);
   const [transformState, setTransformState] = useState<MapTransform>(createInitialMapTransform());
+  const [viewportDimensions, setViewportDimensions] = useState<ViewportDimensions>({ width: SCREEN_WIDTH, height: SCREEN_HEIGHT });
   const [graph, setGraph] = useState<NormalizedNavGraph | null>(null);
   const [imageUri, setImageUri] = useState<string>('');
   const [activeFloorTarget, setActiveFloorTarget] = useState<FloorPlanTarget | null>(null);
@@ -114,6 +129,13 @@ export default function App() {
   const [routePath, setRoutePath] = useState<RoutePathPoint[]>([]);
   const [accessibleMode, setAccessibleMode] = useState(false);
   const [floorTargets, setFloorTargets] = useState<FloorPlanTarget[]>([]);
+  const [sheetSnap, setSheetSnap] = useState<SnapIndex>(0);
+
+  // Search bar text (local; drives FloatingSearchBar inputs)
+  const [searchOrigin, setSearchOrigin] = useState('');
+  const [searchDestination, setSearchDestination] = useState('');
+
+  const { colors } = useTheme();
 
   /* ─── Bootstrap ─── */
 
@@ -123,7 +145,6 @@ export default function App() {
       const result = await runMapBootstrap({ attempt, envUrl });
       setBootstrapState(result.state);
     } catch (err) {
-      // Bootstrap threw an unexpected error — surface it
       const message = err instanceof Error ? err.message : String(err);
       setBootstrapState({
         phase: 'error',
@@ -131,8 +152,9 @@ export default function App() {
         reason: 'normalization-failure',
         message: `Bootstrap threw: ${message}`,
         failedPhase: 'map',
-        authRequired: false,
+        endpoint: null,
         recoverable: false,
+        authRequired: false,
       });
     }
   }, []);
@@ -141,17 +163,16 @@ export default function App() {
     void executeBootstrap(1);
   }, [executeBootstrap]);
 
-  /* ─── Graph already normalized by bootstrap ─── */
+  /* ─── Graph loaded ─── */
 
   useEffect(() => {
     if (bootstrapState.phase !== 'ready') return;
     const normalized = bootstrapState.graph;
     setGraph(normalized);
-    const targets = buildFloorTargets(normalized);
-    setFloorTargets(targets);
+    setFloorTargets(buildFloorTargets(normalized));
   }, [bootstrapState]);
 
-  /* ─── Set initial active floor when floorTargets are first populated ─── */
+  /* ─── Initial active floor ─── */
 
   const [initialFloorSet, setInitialFloorSet] = useState(false);
   useEffect(() => {
@@ -163,38 +184,33 @@ export default function App() {
     }
   }, [initialFloorSet, floorTargets, graph]);
 
-  /* ─── Map API client for floor images ─── */
+  /* ─── Map client + floor image ─── */
 
   const mapClient = graph && bootstrapState.phase === 'ready'
     ? createMapApiClient({ baseUrl: bootstrapState.apiBaseUrl })
     : null;
 
-  /* ─── Update floor image when activeFloorTarget changes ─── */
-
   useEffect(() => {
     if (!mapClient || !activeFloorTarget) { setImageUri(''); return; }
-    const url = mapClient.resolveFloorPlanImageUrl(activeFloorTarget);
-    setImageUri(url);
+    setImageUri(mapClient.resolveFloorPlanImageUrl(activeFloorTarget));
   }, [mapClient, activeFloorTarget]);
 
   /* ─── Route selection ─── */
 
   const selection = useRouteSelection();
 
-  /* ─── Route session (always call hook — stub graph during loading) ─── */
+  /* ─── Route session ─── */
 
   const { sessionState, routeMode, setRouteMode } = useRouteSession({
     graph: graph ?? EMPTY_GRAPH_STUB,
-    selection,
+    selection: selection as unknown as SessionRouteSelection,
   });
-
-  /* ─── Update route mode when accessibleMode changes ─── */
 
   useEffect(() => {
     setRouteMode(accessibleMode ? 'accessible' : 'standard');
   }, [accessibleMode, setRouteMode]);
 
-  /* ─── Build route path when session is ready ─── */
+  /* ─── Route path ─── */
 
   useEffect(() => {
     if (!sessionState || sessionState.phase !== 'ready' || !graph) {
@@ -212,7 +228,7 @@ export default function App() {
     setRoutePath(waypoints);
   }, [sessionState, graph]);
 
-  /* ─── Transform change handler ─── */
+  /* ─── Transform ─── */
 
   const onTransformChange = useCallback((nextTransform: MapTransform) => {
     setTransformState(current =>
@@ -227,10 +243,11 @@ export default function App() {
     );
   }, []);
 
-  /* ─── Node select handler ─── */
+  /* ─── Node select ─── */
 
-  const onNodeSelect = useCallback((node: NavNode) => {
-    selection.setFromTap(node);
+  const handleNodeSelect = useCallback((node: NavNode) => {
+    // setFromTap expects the NavNode from useRouteSelection's local type alias (same shape)
+    selection.setFromTap(node as unknown as Parameters<typeof selection.setFromTap>[0]);
     if (graph) {
       const record = graph.nodeById.get(node.id);
       if (record) {
@@ -243,99 +260,275 @@ export default function App() {
     }
   }, [selection, graph, floorTargets]);
 
-  /* ─── Accessible mode toggle ─── */
-
-  const toggleAccessibleMode = useCallback(() => {
-    setAccessibleMode(prev => !prev);
-  }, []);
-
-  /* ─── Retry handler ─── */
-
-  const onRetryPress = useCallback(() => {
-    void executeBootstrap(nextAttemptFromState(bootstrapState));
-  }, [executeBootstrap, bootstrapState]);
-
-  /* ─── Guidance session (active only when route is ready) ─── */
+  /* ─── Guidance ─── */
 
   const isRouteReady = sessionState?.phase === 'ready' && graph !== null;
   const { position, smoothedHeadingDegrees } = useCurrentPosition();
-  const stubRoute: RouteSessionReadyState = {
-    phase: 'ready',
-    start: null,
-    destination: null,
-    routeMode: 'standard',
-    path: { nodeIds: [], edges: [], estimatedMinutes: 0, distanceMeters: 0 },
-    directions: { steps: [], totalMinutes: 0, totalMeters: 0 },
-    errorMessage: null,
-  };
+
   const { guidanceState, startGuidance, stopGuidance, confirmPosition } = useGuidanceSession({
     graph: graph ?? EMPTY_GRAPH_STUB,
-    route: sessionState?.phase === 'ready' ? sessionState : stubRoute,
+    route: sessionState?.phase === 'ready' ? sessionState : STUB_READY_ROUTE,
     updateIntervalMs: 2000,
   });
 
-  const showStartGuidance = sessionState?.phase === 'ready' && guidanceState.phase === 'idle';
   const showGuidanceOverlay = guidanceState.phase !== 'idle';
 
-  /* ─── Phase: idle / loading ─── */
+  /* ─── Floor change ─── */
+
+  const handleFloorChange = useCallback((target: FloorPlanTarget) => {
+    setActiveFloorTarget(target);
+    if (graph) {
+      setActiveFloorId(getFloorId(target, graph));
+      const newFloorId = getFloorId(target, graph);
+      const snappedPos = guidanceState.snappedPosition;
+      const nearestNodeId = findNearestNodeOnFloor(graph, newFloorId, snappedPos);
+      if (nearestNodeId) confirmPosition(nearestNodeId);
+    }
+  }, [graph, guidanceState.snappedPosition, confirmPosition]);
+
+  /* ─── Search bar handlers ─── */
+
+  const handleSwap = useCallback(() => {
+    setSearchOrigin(searchDestination);
+    setSearchDestination(searchOrigin);
+    const prevStart = selection.start;
+    const prevDest = selection.destination;
+    if (prevDest) selection.setFromTap(prevDest);
+    if (prevStart) selection.setDestination(prevStart);
+  }, [searchOrigin, searchDestination, selection]);
+
+  const handleSearchPress = useCallback(() => {
+    // useRouteSession picks up selection changes reactively
+    void selection;
+  }, [selection]);
+
+  /* ─── Sheet content based on snap ─── */
+
+  const renderSheetContent = () => {
+    if (!graph) return null;
+
+    switch (sheetSnap) {
+      case 0:
+        return (
+          <View style={sheetStyles.sheetContent}>
+            <DestinationPicker
+              graph={graph}
+              selection={selection as Parameters<typeof DestinationPicker>[0]['selection']}
+              onNodeSelect={handleNodeSelect}
+            />
+          </View>
+        );
+
+      case 1:
+        return (
+          <View style={sheetStyles.sheetContent}>
+            {sessionState && sessionState.phase === 'ready' && (
+              <RoutePreview
+                directions={sessionState.directions}
+                accessibleMode={accessibleMode}
+              />
+            )}
+            {sessionState?.phase === 'ready' && guidanceState.phase === 'idle' && (
+              <Pressable
+                style={[sheetStyles.startGuidanceButton, { backgroundColor: colors.accent }]}
+                onPress={startGuidance}
+              >
+                <Text style={[sheetStyles.startGuidanceText, { color: colors.textInverse }]}>
+                  Start Guidance
+                </Text>
+              </Pressable>
+            )}
+            {sessionState && sessionState.phase === 'no-route' && (
+              <Text style={[sheetStyles.statusMessage, { color: colors.error }]}>
+                No path found between selected locations.
+              </Text>
+            )}
+            {sessionState && sessionState.phase === 'error' && (
+              <Text style={[sheetStyles.statusMessage, { color: colors.error }]}>
+                {sessionState.errorMessage}
+              </Text>
+            )}
+          </View>
+        );
+
+      case 2:
+        return (
+          <View style={sheetStyles.sheetContent}>
+            <View style={sheetStyles.toggleRow}>
+              <Text style={[sheetStyles.toggleLabel, { color: colors.textSecondary }]}>
+                Accessible mode
+              </Text>
+              <Pressable
+                style={[
+                  sheetStyles.toggleButton,
+                  accessibleMode && { backgroundColor: colors.accentSubtle, borderColor: colors.accent },
+                ]}
+                onPress={() => setAccessibleMode(prev => !prev)}
+              >
+                <Text
+                  style={[
+                    sheetStyles.toggleButtonText,
+                    accessibleMode && { color: colors.accent },
+                  ]}
+                >
+                  {accessibleMode ? 'ON' : 'OFF'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  /* ─── Idle / Loading ─── */
 
   if (bootstrapState.phase === 'idle' || bootstrapState.phase === 'loading') {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>CampusNav</Text>
-        <Text style={styles.subtitle}>Visitor runtime shell (no sign-in)</Text>
-        <Text style={styles.statusLabel}>Bootstrap phase: {bootstrapState.phase}</Text>
-        <Text style={styles.statusMessage}>{phaseMessage(bootstrapState)}</Text>
-        {bootstrapState.phase === 'loading' && (
-          <View style={styles.loadingRow}>
-            <ActivityIndicator size="small" color="#38bdf8" />
-            <Text style={styles.loadingText}>{bootstrapState.currentPhase}</Text>
-          </View>
-        )}
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>CampusNav</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+            Visitor runtime shell (no sign-in)
+          </Text>
+          <Text style={[styles.statusLabel, { color: colors.textSecondary }]}>
+            Bootstrap phase: {bootstrapState.phase}
+          </Text>
+          <Text style={[styles.statusMessage, { color: colors.textMuted }]}>
+            {phaseMessage(bootstrapState)}
+          </Text>
+          {bootstrapState.phase === 'loading' && (
+            <View style={styles.loadingRow}>
+              <ActivityIndicator size="small" color={colors.accent} />
+              <Text style={[styles.loadingText, { color: colors.accent }]}>
+                {bootstrapState.currentPhase}
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
     );
   }
 
-  /* ─── Phase: error ─── */
+  /* ─── Error ─── */
 
   if (bootstrapState.phase === 'error') {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>CampusNav</Text>
-        <Text style={styles.statusLabel}>Bootstrap phase: error</Text>
-        <Text style={styles.errorReason}>Failed phase: {bootstrapState.failedPhase}</Text>
-        <Text style={styles.errorReason}>Reason: {bootstrapState.reason}</Text>
-        <Text style={styles.errorReason}>Endpoint: {bootstrapState.endpoint ?? 'n/a'}</Text>
-        <Pressable onPress={onRetryPress} style={styles.retryButton}>
-          <Text style={styles.retryButtonText}>Retry startup</Text>
-        </Pressable>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>CampusNav</Text>
+          <Text style={[styles.statusLabel, { color: colors.textSecondary }]}>
+            Bootstrap phase: error
+          </Text>
+          <Text style={[styles.errorReason, { color: colors.error }]}>
+            Failed phase: {bootstrapState.failedPhase}
+          </Text>
+          <Text style={[styles.errorReason, { color: colors.error }]}>
+            Reason: {bootstrapState.reason}
+          </Text>
+          <Text style={[styles.errorReason, { color: colors.error }]}>
+            Endpoint: {bootstrapState.endpoint ?? 'n/a'}
+          </Text>
+          <Pressable
+            style={[sheetStyles.startGuidanceButton, { backgroundColor: colors.surface }]}
+            onPress={() => void executeBootstrap(nextAttemptFromState(bootstrapState))}
+          >
+            <Text style={[sheetStyles.startGuidanceText, { color: colors.textPrimary }]}>
+              Retry startup
+            </Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
 
-  /* ─── Guard: graph must be loaded before rendering map UI ─── */
+  /* ─── Guard ─── */
 
   if (!graph) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>CampusNav</Text>
-        <Text style={styles.subtitle}>Loading map…</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.centerContent}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>CampusNav</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Loading map…</Text>
+        </View>
       </View>
     );
   }
 
-  /* ─── Phase: ready ─── */
+  /* ─── Ready — layered floating UI ─── */
 
   return (
-    <View style={styles.container}>
-      {/* Guidance overlay (rendered above everything) */}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+
+      {/* ── Full-screen map backdrop ── */}
+      <View style={styles.mapBackdrop}>
+        <MapViewportFloor
+          activeFloorId={activeFloorId}
+          floorTargets={floorTargets}
+          activeFloorTarget={activeFloorTarget}
+          routePath={routePath}
+          onFloorChange={handleFloorChange}
+          showRouteOverlay={sessionState?.phase === 'ready'}
+          showFloorSelector={false}
+          onTransformChange={onTransformChange}
+          headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}
+        />
+
+        {/* Animated route path overlay — layered above map */}
+        {sessionState?.phase === 'ready' && activeFloorTarget && (
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+            <AnimatedRoutePathOverlay
+              path={routePath}
+              activeFloorId={activeFloorId}
+              viewport={viewportDimensions}
+              scale={transformState.scale}
+            />
+          </View>
+        )}
+      </View>
+
+      {/* ── Floating search bar — top of screen ── */}
+      <View style={styles.searchBarContainer}>
+        <FloatingSearchBar
+          origin={searchOrigin}
+          destination={searchDestination}
+          onOriginChange={setSearchOrigin}
+          onDestinationChange={setSearchDestination}
+          onSwap={handleSwap}
+          onSearchPress={handleSearchPress}
+          disabled={!isRouteReady}
+        />
+      </View>
+
+      {/* ── Floating floor switcher — below search bar ── */}
+      {floorTargets.length > 0 && activeFloorTarget && (
+        <View style={styles.floorSwitcherContainer}>
+          <FloatingFloorSwitcher
+            floors={floorTargets}
+            selectedFloor={activeFloorTarget}
+            onSelectFloor={handleFloorChange}
+          />
+        </View>
+      )}
+
+      {/* ── Confidence indicator — top-right ── */}
+      {showGuidanceOverlay && (
+        <View style={styles.confidenceContainer}>
+          <ConfidenceIndicator
+            confidence={guidanceState.positionConfidence}
+            showPulse={true}
+          />
+        </View>
+      )}
+
+      {/* ── Live guidance overlay — absolute overlay ── */}
       {showGuidanceOverlay && (
         <View style={styles.guidanceOverlayContainer}>
           <LiveGuidanceOverlay
             guidanceState={guidanceState}
             onConfirmPosition={() => {
-              // When in low-confidence, tapping the map confirms position.
-              // For now, use the first route node as a fallback.
               if (sessionState?.phase === 'ready') {
                 const firstNodeId = sessionState.path.nodeIds[0];
                 if (firstNodeId) confirmPosition(firstNodeId);
@@ -343,108 +536,20 @@ export default function App() {
             }}
             onStopGuidance={stopGuidance}
             floorId={guidanceState.currentFloorId}
-            floorMap={graph!.floorById}
+            floorMap={graph.floorById}
             accessibleMode={accessibleMode}
           />
         </View>
       )}
 
-      {/* Confidence indicator dot — top-right corner, always visible during guidance */}
-      {showGuidanceOverlay && (
-        <View style={styles.confidenceDotContainer}>
-          <ConfidenceIndicator confidence={guidanceState.positionConfidence} />
-        </View>
-      )}
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <Text style={styles.title}>CampusNav</Text>
-        <Text style={styles.subtitle}>Visitor runtime — no sign-in needed</Text>
-        <Text style={styles.statusLabel}>Graph: {graph!.graph.buildings.length} buildings</Text>
-
-        {/* Destination Picker */}
-        <View style={styles.section}>
-          <DestinationPicker
-            graph={graph!}
-            selection={selection}
-            onNodeSelect={onNodeSelect}
-          />
-        </View>
-
-        {/* Route Preview (when ready) */}
-        {sessionState && sessionState.phase === 'ready' && (
-          <View style={styles.section}>
-            <RoutePreview
-              directions={sessionState.directions}
-              accessibleMode={accessibleMode}
-            />
-          </View>
-        )}
-
-        {/* Start Guidance button — visible when route ready and not yet guiding */}
-        {showStartGuidance && (
-          <Pressable style={styles.startGuidanceButton} onPress={startGuidance}>
-            <Text style={styles.startGuidanceText}>Start Guidance</Text>
-          </Pressable>
-        )}
-
-        {/* Session phase / route status */}
-        {sessionState && (
-          <View style={styles.sessionStatus}>
-            <Text style={styles.statusLabel}>Route: {sessionState.phase}</Text>
-            {sessionState.phase === 'no-route' && (
-              <Text style={styles.statusMessage}>No path found between selected locations.</Text>
-            )}
-            {sessionState.phase === 'error' && (
-              <Text style={styles.errorReason}>{sessionState.errorMessage}</Text>
-            )}
-          </View>
-        )}
-
-        {/* Map Viewport with floor switcher */}
-        <View style={styles.section}>
-          <MapViewportFloor
-            activeFloorId={activeFloorId}
-            floorTargets={floorTargets}
-            activeFloorTarget={activeFloorTarget}
-            routePath={routePath}
-            onFloorChange={(target) => {
-              setActiveFloorTarget(target);
-              if (graph) {
-                setActiveFloorId(getFloorId(target, graph));
-                // Snap to nearest node on the new floor using snapped position
-                const newFloorId = getFloorId(target, graph);
-                const snappedPos = guidanceState.snappedPosition;
-                const nearestNodeId = findNearestNodeOnFloor(graph, newFloorId, snappedPos);
-                if (nearestNodeId) confirmPosition(nearestNodeId);
-              }
-            }}
-            showRouteOverlay={sessionState?.phase === 'ready'}
-            showFloorSelector={floorTargets.length > 1}
-            onTransformChange={onTransformChange}
-            headingDegrees={guidanceState.phase === 'idle' ? null : smoothedHeadingDegrees}
-          />
-        </View>
-
-        {/* Accessible mode toggle */}
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Accessible mode</Text>
-          <Pressable
-            style={[styles.toggleButton, accessibleMode && styles.toggleButtonActive]}
-            onPress={toggleAccessibleMode}
-          >
-            <Text style={[styles.toggleButtonText, accessibleMode && styles.toggleButtonTextActive]}>
-              {accessibleMode ? 'ON' : 'OFF'}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Telemetry */}
-        <Text style={styles.telemetryText}>
-          viewport scale={formatMetric(transformState.scale)} rotation={formatMetric(transformState.rotationDeg)}°
-          tx={formatMetric(transformState.translation.x)} ty={formatMetric(transformState.translation.y)}
-        </Text>
-      </ScrollView>
+      {/* ── Bottom sheet — snap-driven content ── */}
+      <BottomSheet
+        snapPoints={DEFAULT_SNAP_POINTS}
+        initialSnapIndex={0}
+        onSnapChange={setSheetSnap}
+      >
+        {renderSheetContent()}
+      </BottomSheet>
     </View>
   );
 }
@@ -454,30 +559,58 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 12,
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  mapBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+  },
+  searchBarContainer: {
+    position: 'absolute',
+    top: SEARCH_BAR_TOP,
+    left: SEARCH_BAR_HORIZONTAL_PADDING,
+    right: SEARCH_BAR_HORIZONTAL_PADDING,
+    zIndex: 10,
+  },
+  floorSwitcherContainer: {
+    position: 'absolute',
+    top: FLOOR_SWITCHER_TOP,
+    left: SEARCH_BAR_HORIZONTAL_PADDING,
+    right: SEARCH_BAR_HORIZONTAL_PADDING,
+    zIndex: 10,
+  },
+  confidenceContainer: {
+    position: 'absolute',
+    top: CONFIDENCE_TOP,
+    right: 16,
+    zIndex: 20,
+  },
+  guidanceOverlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 15,
   },
   title: {
-    color: '#f8fafc',
     fontSize: 28,
     fontWeight: '700',
   },
   subtitle: {
-    color: '#cbd5e1',
     fontSize: 14,
     marginBottom: 4,
   },
   statusLabel: {
-    color: '#e2e8f0',
     fontSize: 15,
     fontWeight: '600',
   },
   statusMessage: {
-    color: '#94a3b8',
     fontSize: 13,
     marginBottom: 4,
   },
@@ -487,36 +620,33 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   loadingText: {
-    color: '#38bdf8',
     fontSize: 13,
-  },
-  section: {
-    minHeight: 120,
-    backgroundColor: '#0a0f1e',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  sessionStatus: {
-    gap: 2,
   },
   errorReason: {
-    color: '#fda4af',
     fontSize: 12,
   },
-  retryButton: {
-    marginTop: 6,
-    backgroundColor: '#0f172a',
-    borderColor: '#475569',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    alignSelf: 'flex-start',
+});
+
+const sheetStyles = StyleSheet.create({
+  sheetContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    gap: 12,
   },
-  retryButtonText: {
-    color: '#f8fafc',
+  startGuidanceButton: {
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginVertical: 4,
+  },
+  startGuidanceText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  statusMessage: {
     fontSize: 13,
-    fontWeight: '600',
   },
   toggleRow: {
     flexDirection: 'row',
@@ -525,7 +655,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   toggleLabel: {
-    color: '#cbd5e1',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -537,54 +666,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  toggleButtonActive: {
-    backgroundColor: '#0c2d4a',
-    borderColor: '#38bdf8',
-    borderWidth: 1.5,
-  },
   toggleButtonText: {
     color: '#94a3b8',
     fontSize: 13,
     fontWeight: '600',
-  },
-  toggleButtonTextActive: {
-    color: '#38bdf8',
-  },
-  telemetryText: {
-    color: '#64748b',
-    fontSize: 12,
-    fontVariant: ['tabular-nums'],
-    marginBottom: 8,
-  },
-  // Guidance overlay — fixed overlay at top of viewport
-  guidanceOverlayContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 100,
-  },
-  // Confidence indicator dot — fixed top-right corner
-  confidenceDotContainer: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    zIndex: 101,
-  },
-  // Start guidance button — styled to match existing destination picker / route preview buttons
-  startGuidanceButton: {
-    backgroundColor: '#0f4a7a',
-    borderColor: '#38bdf8',
-    borderWidth: 1.5,
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  startGuidanceText: {
-    color: '#38bdf8',
-    fontSize: 16,
-    fontWeight: '700',
   },
 });
