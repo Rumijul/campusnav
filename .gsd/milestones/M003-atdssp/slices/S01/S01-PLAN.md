@@ -8,7 +8,7 @@
   - Estimate: 30m
   - Files: mobile/package.json, mobile/babel.config.js
   - Verify: cd mobile && npx tsc --noEmit && npm test
-- [ ] **T02: Create mobile/theme/ token files and useTheme hook** — Create mobile/theme/colors.ts with darkColors and lightColors const-asserted token objects matching the design palette. Create mobile/theme/spacing.ts with xs/sm/md/lg/xl/2xl on a 4pt grid. Create mobile/theme/typography.ts with title/sectionHeader/body/caption text styles. Create mobile/theme/index.ts exporting a useTheme() hook using useColorScheme() that returns { colors, spacing, typography, isDark }. Verify with tsc --noEmit and npm test.
+- [x] **T02: Created mobile/theme/ with darkColors/lightColors palettes, spacing scale, typography tokens, and useTheme hook** — Create mobile/theme/colors.ts with darkColors and lightColors const-asserted token objects matching the design palette. Create mobile/theme/spacing.ts with xs/sm/md/lg/xl/2xl on a 4pt grid. Create mobile/theme/typography.ts with title/sectionHeader/body/caption text styles. Create mobile/theme/index.ts exporting a useTheme() hook using useColorScheme() that returns { colors, spacing, typography, isDark }. Verify with tsc --noEmit and npm test.
   - Estimate: 1h
   - Files: mobile/theme/colors.ts, mobile/theme/spacing.ts, mobile/theme/typography.ts, mobile/theme/index.ts
   - Verify: cd mobile && npx tsc --noEmit && npm test

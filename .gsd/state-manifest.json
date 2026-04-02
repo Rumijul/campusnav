@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exported_at": "2026-04-02T10:32:24.914Z",
+  "exported_at": "2026-04-02T10:36:51.338Z",
   "milestones": [
     {
       "id": "M001",
@@ -1628,19 +1628,27 @@
       "milestone_id": "M003-atdssp",
       "slice_id": "S01",
       "id": "T02",
-      "title": "Create mobile/theme/ token files and useTheme hook",
-      "status": "pending",
-      "one_liner": "",
-      "narrative": "",
-      "verification_result": "",
+      "title": "Created mobile/theme/ with darkColors/lightColors palettes, spacing scale, typography tokens, and useTheme hook",
+      "status": "complete",
+      "one_liner": "Created mobile/theme/ with darkColors/lightColors palettes, spacing scale, typography tokens, and useTheme hook",
+      "narrative": "Inspected existing component styles to extract the dark theme color palette. Created four theme files: colors.ts (darkColors/lightColors as const objects), spacing.ts (4pt grid scale), typography.ts (text style tokens), and index.ts (useTheme hook using useColorScheme). Fixed a type incompatibility in the Theme interface where colors was typed as typeof darkColors but the ternary returns either palette type.",
+      "verification_result": "Theme files pass TypeScript typecheck with no errors (excluding pre-existing node_modules type conflicts). Test suite shows same pre-existing failures as T01: appBootstrap EXPO_PUBLIC_API_BASE_URL test (expects 'error' but gets 'ready') and mapApiClient aborted vs timeout assertion.",
       "duration": "",
-      "completed_at": null,
+      "completed_at": "2026-04-02T10:36:51.325Z",
       "blocker_discovered": false,
-      "deviations": "",
-      "known_issues": "",
-      "key_files": [],
-      "key_decisions": [],
-      "full_summary_md": "",
+      "deviations": "None.",
+      "known_issues": "TypeScript shows ~31 pre-existing errors in App.tsx, bootstrap/, and test files (NavNode type mismatches, MapImageContract assignments). These are unrelated to the theme system.",
+      "key_files": [
+        "mobile/theme/colors.ts",
+        "mobile/theme/spacing.ts",
+        "mobile/theme/typography.ts",
+        "mobile/theme/index.ts"
+      ],
+      "key_decisions": [
+        "Used `const as const` assertion on color objects for readonly token immutability",
+        "Fixed Theme interface to accept `typeof darkColors | typeof lightColors` to resolve TypeScript union incompatibility"
+      ],
+      "full_summary_md": "---\nid: T02\nparent: S01\nmilestone: M003-atdssp\nkey_files:\n  - mobile/theme/colors.ts\n  - mobile/theme/spacing.ts\n  - mobile/theme/typography.ts\n  - mobile/theme/index.ts\nkey_decisions:\n  - Used `const as const` assertion on color objects for readonly token immutability\n  - Fixed Theme interface to accept `typeof darkColors | typeof lightColors` to resolve TypeScript union incompatibility\nduration: \"\"\nverification_result: mixed\ncompleted_at: 2026-04-02T10:36:51.325Z\nblocker_discovered: false\n---\n\n# T02: Created mobile/theme/ with darkColors/lightColors palettes, spacing scale, typography tokens, and useTheme hook\n\n**Created mobile/theme/ with darkColors/lightColors palettes, spacing scale, typography tokens, and useTheme hook**\n\n## What Happened\n\nInspected existing component styles to extract the dark theme color palette. Created four theme files: colors.ts (darkColors/lightColors as const objects), spacing.ts (4pt grid scale), typography.ts (text style tokens), and index.ts (useTheme hook using useColorScheme). Fixed a type incompatibility in the Theme interface where colors was typed as typeof darkColors but the ternary returns either palette type.\n\n## Verification\n\nTheme files pass TypeScript typecheck with no errors (excluding pre-existing node_modules type conflicts). Test suite shows same pre-existing failures as T01: appBootstrap EXPO_PUBLIC_API_BASE_URL test (expects 'error' but gets 'ready') and mapApiClient aborted vs timeout assertion.\n\n## Verification Evidence\n\n| # | Command | Exit Code | Verdict | Duration |\n|---|---------|-----------|---------|----------|\n| 1 | `cd mobile && npx tsc --noEmit theme/*.ts (theme errors only)` | 0 | ✅ pass | 500ms |\n| 2 | `cd mobile && npm test (test suite)` | 1 | ❌ fail (pre-existing) | 6000ms |\n\n\n## Deviations\n\nNone.\n\n## Known Issues\n\nTypeScript shows ~31 pre-existing errors in App.tsx, bootstrap/, and test files (NavNode type mismatches, MapImageContract assignments). These are unrelated to the theme system.\n\n## Files Created/Modified\n\n- `mobile/theme/colors.ts`\n- `mobile/theme/spacing.ts`\n- `mobile/theme/typography.ts`\n- `mobile/theme/index.ts`\n",
       "description": "Create mobile/theme/colors.ts with darkColors and lightColors const-asserted token objects matching the design palette. Create mobile/theme/spacing.ts with xs/sm/md/lg/xl/2xl on a 4pt grid. Create mobile/theme/typography.ts with title/sectionHeader/body/caption text styles. Create mobile/theme/index.ts exporting a useTheme() hook using useColorScheme() that returns { colors, spacing, typography, isDark }. Verify with tsc --noEmit and npm test.",
       "estimate": "1h",
       "files": [
@@ -2784,6 +2792,28 @@
       "verdict": "❌ fail (pre-existing)",
       "duration_ms": 29200,
       "created_at": "2026-04-02T10:32:24.897Z"
+    },
+    {
+      "id": 83,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-atdssp",
+      "command": "cd mobile && npx tsc --noEmit theme/*.ts (theme errors only)",
+      "exit_code": 0,
+      "verdict": "✅ pass",
+      "duration_ms": 500,
+      "created_at": "2026-04-02T10:36:51.325Z"
+    },
+    {
+      "id": 84,
+      "task_id": "T02",
+      "slice_id": "S01",
+      "milestone_id": "M003-atdssp",
+      "command": "cd mobile && npm test (test suite)",
+      "exit_code": 1,
+      "verdict": "❌ fail (pre-existing)",
+      "duration_ms": 6000,
+      "created_at": "2026-04-02T10:36:51.325Z"
     }
   ]
 }
