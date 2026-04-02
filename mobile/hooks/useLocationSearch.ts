@@ -6,10 +6,10 @@
 
 import { useMemo } from 'react';
 import { NormalizedNavGraph } from '../domain/navGraph';
-import { NavNodeType } from '../../src/shared/types';
+import type { NavNode, NavNodeType } from '../../src/shared/types';
 
 export interface SearchNode {
-  node: import('../../src/shared/types').NavNode;
+  node: NavNode;
   buildingId: number;
   buildingName: string;
   floorId: number;

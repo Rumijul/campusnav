@@ -21,7 +21,9 @@ import {
   DirectionsResult,
   NormalizedNavGraph,
   PathResult,
+  RouteMode,
 } from '../domain/navGraph';
+import { NavFloor, NavNode } from '../../src/shared/types';
 import {
   deriveConfidence,
   isOffRoute,
@@ -532,15 +534,15 @@ function recomputeDirections(
   // Import here to avoid circular dependency at module level.
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const { generateDirections } = require('../routing/generateDirections') as {
-    generateDirections: (nodeIds: string[], nodeMap: Map<string, import('../../src/shared/types').NavNode>, mode: import('../domain/navGraph').RouteMode, floorMap: Map<number, import('../../src/shared/types').NavFloor>) => DirectionsResult;
+    generateDirections: (nodeIds: string[], nodeMap: Map<string, NavNode>, mode: RouteMode, floorMap: Map<number, NavFloor>) => DirectionsResult;
   };
 
-  const nodeMap = new Map<string, import('../../src/shared/types').NavNode>();
+  const nodeMap = new Map<string, NavNode>();
   for (const [id, record] of graph.nodeById) {
     nodeMap.set(id, record.node);
   }
 
-  const floorMap = new Map<number, import('../../src/shared/types').NavFloor>();
+  const floorMap = new Map<number, NavFloor>();
   for (const [id, record] of graph.floorById) {
     floorMap.set(id, record.floor);
   }

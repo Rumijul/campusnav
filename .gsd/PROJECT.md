@@ -30,7 +30,11 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 
 - [x] M001: CampusNav v1.6 GPS Integration & UX Refinements
 - [x] M002-a5gn45: Native App Foundation + Foreground Real-Time Guidance
-- [ ] M003-atdssp: Visual Redesign — layered floating UI, bottom sheet, animations, light/dark theme
+- [x] M003-atdssp: Visual Redesign — layered floating UI, bottom sheet, animations, light/dark theme
+- [ ] M004: Reliability and Guidance Intelligence
+- [ ] M005: Maps-Like Experience Expansion
+- [ ] M006: Offline and Launch Hardening
+floating UI, bottom sheet, animations, light/dark theme
 - [ ] M004: Reliability and Guidance Intelligence
 - [ ] M005: Maps-Like Experience Expansion
 - [ ] M006: Offline and Launch Hardening

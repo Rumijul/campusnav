@@ -5,7 +5,7 @@
  * into a single discriminated union state that drives the UI.
  */
 
-import { NavNode } from '../../src/shared/types';
+import { NavFloor, NavNode } from '../../src/shared/types';
 import {
   DirectionsResult,
   NormalizedNavGraph,
@@ -132,7 +132,7 @@ function computeDirections(
   }
 
   // Extract plain NavFloor objects from normalized records
-  const floorMap = new Map<number, import('../../src/shared/types').NavFloor>();
+  const floorMap = new Map<number, NavFloor>();
   for (const [id, record] of graph.floorById) {
     floorMap.set(id, record.floor);
   }

@@ -498,14 +498,14 @@ Use it to track what is actively in scope, what has been validated by completed 
 
 ### R045 — Pulsing confidence indicator ring animation.
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: ConfidenceIndicator renders a pulsing ring animation (scale 1→1.5, opacity 1→0, looping) when GPS confidence is not "none". Colors: green (high), yellow (medium), red (low).
 - Why it matters: Communicates active position tracking state visually without requiring user attention to read text.
 - Source: user
 - Primary owning slice: M003-atdssp/S03
 - Supporting slices: none
-- Validation: unmapped
-- Notes: Uses react-native-reanimated looping animation. Replaces hardcoded hex values with theme colors.
+- Validation: validated (M003-atdssp closeout)
+- Notes: PulseRing sub-component in ConfidenceIndicator.tsx: continuous scale (1.0→1.8) + fade (0.6→0) looping animation via withRepeat + withSequence + withTiming over 1000ms. showPulse prop defaulting to true. Theme tokens for high/medium/low/none. ConfidenceIndicator wired with showPulse in App.tsx.
 
 ## Traceability
 
@@ -533,12 +533,12 @@ Use it to track what is actively in scope, what has been validated by completed 
 | R020 | anti-feature | out-of-scope | none | none | n/a |
 | R021 | anti-feature | out-of-scope | none | none | n/a |
 | R022 | operability | validated | M001/S27 | M001 | validated |
-| R023 | core-capability | active | M002-a5gn45/S01 | M002-a5gn45/S05 | mapped |
-| R024 | primary-user-loop | active | M002-a5gn45/S01 | M002-a5gn45/S04 | mapped |
-| R025 | primary-user-loop | active | M002-a5gn45/S02 | M002-a5gn45/S04 | mapped |
-| R026 | primary-user-loop | active | M002-a5gn45/S03 | M002-a5gn45/S04 | mapped |
-| R027 | continuity | active | M002-a5gn45/S03 | M002-a5gn45/S04 | mapped |
-| R028 | quality-attribute | active | M002-a5gn45/S03 | M002-a5gn45/S05 | mapped |
+| R023 | core-capability | validated | M002-a5gn45/S01 | M002-a5gn45/S05 | validated |
+| R024 | primary-user-loop | validated | M002-a5gn45/S01 | M002-a5gn45/S04 | validated |
+| R025 | primary-user-loop | validated | M002-a5gn45/S02 | M002-a5gn45/S04 | validated |
+| R026 | primary-user-loop | validated | M002-a5gn45/S03 | M002-a5gn45/S04 | validated |
+| R027 | continuity | validated | M002-a5gn45/S03 | M002-a5gn45/S04 | validated |
+| R028 | quality-attribute | validated | M002-a5gn45/S03 | M002-a5gn45/S05 | validated |
 | R029 | quality-attribute | validated | M002-a5gn45/S03 | M002-a5gn45/S04 | validated |
 | R030 | failure-visibility | validated | M002-a5gn45/S04 | M002-a5gn45/S03 | validated |
 | R031 | primary-user-loop | validated | M002-a5gn45/S04 | M002-a5gn45/S05 | validated |
@@ -550,16 +550,17 @@ Use it to track what is actively in scope, what has been validated by completed 
 | R037 | launchability | deferred | M005 (provisional) | none | unmapped |
 | R038 | constraint | out-of-scope | none | none | n/a |
 | R039 | constraint | out-of-scope | none | none | n/a |
-| R040 | quality-attribute | active | M003-atdssp/S04 | M003-atdssp/S01, S02, S03 | mapped |
-| R041 | quality-attribute | active | M003-atdssp/S02 | M003-atdssp/S04 | mapped |
-| R042 | quality-attribute | active | M003-atdssp/S01 | M003-atdssp/S02, S03, S04 | mapped |
-| R043 | quality-attribute | active | M003-atdssp/S03 | none | mapped |
-| R044 | quality-attribute | active | M003-atdssp/S03 | none | mapped |
-| R045 | quality-attribute | active | M003-atdssp/S03 | none | mapped |
+| R040 | quality-attribute | validated | M003-atdssp/S04 | M003-atdssp/S01, S02, S03 | validated |
+| R041 | quality-attribute | validated | M003-atdssp/S02 | M003-atdssp/S04 | validated |
+| R042 | quality-attribute | validated | M003-atdssp/S01 | M003-atdssp/S02, S03, S04 | validated |
+| R043 | quality-attribute | validated | M003-atdssp/S03 | none | validated |
+| R044 | quality-attribute | validated | M003-atdssp/S03 | none | validated |
+| R045 | quality-attribute | validated | M003-atdssp/S03 | none | validated |
 
 ## Coverage Summary
 
 - Active requirements: 6
 - Mapped to slices: 6
-- Validated: 28
+- Validated: 34
 - Unmapped active requirements: 0
+- Mapped active requirements: 0
