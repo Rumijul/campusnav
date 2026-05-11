@@ -1,5 +1,5 @@
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
-import { boolean, integer, pgTable, real, serial, text } from 'drizzle-orm/pg-core'
+import { boolean, integer, jsonb, pgTable, real, serial, text } from 'drizzle-orm/pg-core'
 
 export const buildings = pgTable('buildings', {
   id: serial('id').primaryKey(),
@@ -16,6 +16,7 @@ export const floors = pgTable('floors', {
   gpsMaxLat: real('gps_max_lat'),
   gpsMinLng: real('gps_min_lng'),
   gpsMaxLng: real('gps_max_lng'),
+  geometry: jsonb('geometry'),
 })
 
 export const nodes = pgTable('nodes', {

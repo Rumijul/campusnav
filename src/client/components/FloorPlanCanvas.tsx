@@ -8,6 +8,7 @@ import {
 import { PathfindingEngine } from '@shared/pathfinding/engine'
 import type { PathResult } from '@shared/pathfinding/types'
 import type { NavBuilding, NavFloor, NavNode } from '@shared/types'
+import type { FloorPlanGeometry } from '@shared/types'
 import type Konva from 'konva'
 import KonvaModule from 'konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -27,6 +28,7 @@ import { useRouteSelection } from '../hooks/useRouteSelection'
 import { useViewportSize } from '../hooks/useViewportSize'
 import { DirectionsSheet } from './DirectionsSheet'
 import FloorPlanImage from './FloorPlanImage'
+import FloorPlanGeometryLayer from './FloorPlanGeometryLayer'
 import { FloorTabStrip } from './FloorTabStrip'
 import { GpsLocationLayer } from './GpsLocationLayer'
 import GridBackground from './GridBackground'
@@ -126,6 +128,32 @@ export default function FloorPlanCanvas() {
   // Floor count across all buildings — used to show/hide the tab strip
   const floorCount = useMemo(() => totalFloorCount(allBuildings), [allBuildings])
 
+  // ── Vector geometry mode — when floor has geometry, render from vector data ──
+  const activeFloorGeometry = useMemo<FloorPlanGeometry | undefined>(() => {
+    return activeFloor?.geometry
+  }, [activeFloor])
+
+  // Compute image rect from geometry logical dimensions (for vector mode)
+  const geometryRect = useMemo<{ x: number; y: number; width: number; height: number } | null>(() => {
+    if (!activeFloorGeometry) return null
+    const padding = 40
+    const scale = Math.min(
+      (width - padding * 2) / activeFloorGeometry.logicalWidth,
+      (height - padding * 2) / activeFloorGeometry.logicalHeight,
+    )
+    const scaledW = activeFloorGeometry.logicalWidth * scale
+    const scaledH = activeFloorGeometry.logicalHeight * scale
+    return {
+      x: (width - scaledW) / 2,
+      y: (height - scaledH) / 2,
+      width: scaledW,
+      height: scaledH,
+    }
+  }, [activeFloorGeometry, width, height])
+
+  // Effective rect used by downstream layers — geometryRect takes priority
+  const effectiveRect = activeFloorGeometry ? geometryRect : imageRect
+
   // Compute target for useFloorPlanImage — must be stable (not constructed inline) to avoid hook dependency issues
   const floorImageTarget = useMemo<
     { buildingId: number; floorNumber: number } | 'campus' | undefined
@@ -195,12 +223,12 @@ export default function FloorPlanCanvas() {
   }, [routeSelection.start, routeSelection.destination])
 
   const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen } =
-    useMapViewport({ stageRef, imageRect, onScaleChange: setStageScale })
+    useMapViewport({ stageRef, imageRect: effectiveRect, onScaleChange: setStageScale })
 
   // Re-fit floor plan when viewport size changes (e.g. orientation change)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — re-fit on viewport resize only when image is loaded
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — re-fit on viewport resize only when image/geometry is loaded
   useEffect(() => {
-    if (image && imageRect) {
+    if (effectiveRect) {
       fitToScreen(width, height, true)
     }
   }, [width, height])
@@ -234,13 +262,13 @@ export default function FloorPlanCanvas() {
   const fitToBounds = useCallback(
     (nodeA: { x: number; y: number }, nodeB: { x: number; y: number }) => {
       const stage = stageRef.current
-      if (!stage || !imageRect) return
+      if (!stage || !effectiveRect) return
 
       // Convert normalized coords to pixel coords
-      const ax = imageRect.x + nodeA.x * imageRect.width
-      const ay = imageRect.y + nodeA.y * imageRect.height
-      const bx = imageRect.x + nodeB.x * imageRect.width
-      const by = imageRect.y + nodeB.y * imageRect.height
+      const ax = effectiveRect.x + nodeA.x * effectiveRect.width
+      const ay = effectiveRect.y + nodeA.y * effectiveRect.height
+      const bx = effectiveRect.x + nodeB.x * effectiveRect.width
+      const by = effectiveRect.y + nodeB.y * effectiveRect.height
 
       // Bounding box of both points
       const minX = Math.min(ax, bx)
@@ -280,7 +308,7 @@ export default function FloorPlanCanvas() {
       })
       tween.play()
     },
-    [imageRect, width, height],
+    [effectiveRect, width, height],
   )
 
   /** Switch to a new floor — updates state and re-fits the canvas */
@@ -400,16 +428,16 @@ export default function FloorPlanCanvas() {
   /** Convert node IDs to flat pixel coordinate array for RouteLayer */
   const buildRoutePoints = useCallback(
     (nodeIds: string[]): number[] => {
-      if (!imageRect) return []
+      if (!effectiveRect) return []
       const pts: number[] = []
       for (const id of nodeIds) {
         const n = nodeMap.get(id)
         if (!n) continue
-        pts.push(imageRect.x + n.x * imageRect.width, imageRect.y + n.y * imageRect.height)
+        pts.push(effectiveRect.x + n.x * effectiveRect.width, effectiveRect.y + n.y * effectiveRect.height)
       }
       return pts
     },
-    [imageRect, nodeMap],
+    [effectiveRect, nodeMap],
   )
 
   // Active route points — filtered to the currently active floor only
@@ -470,7 +498,7 @@ export default function FloorPlanCanvas() {
   }, [nearestGpsNodeMatch, routeSelection, showToast])
 
   const gpsLayerState = useMemo(() => {
-    if (!imageRect || !activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) {
+    if (!effectiveRect || !activeFloor || !isGpsBoundsCalibrated(activeFloor.gpsBounds)) {
       return {
         visible: false,
         centerX: 0,
@@ -499,16 +527,16 @@ export default function FloorPlanCanvas() {
 
     return {
       visible: true,
-      centerX: imageRect.x + gpsProjectedPoint.x * imageRect.width,
-      centerY: imageRect.y + gpsProjectedPoint.y * imageRect.height,
+      centerX: effectiveRect.x + gpsProjectedPoint.x * effectiveRect.width,
+      centerY: effectiveRect.y + gpsProjectedPoint.y * effectiveRect.height,
       accuracyRadiusPx: accuracyMetersToMapPixelRadius(
         geolocation.fix.accuracyMeters,
         activeFloor.gpsBounds,
-        imageRect.width,
-        imageRect.height,
+        effectiveRect.width,
+        effectiveRect.height,
       ),
     }
-  }, [activeFloor, geolocation, gpsProjectedPoint, imageRect])
+  }, [activeFloor, geolocation, gpsProjectedPoint, effectiveRect])
 
   const interactionDisabled = isLoading || isFailed
 
@@ -561,16 +589,23 @@ export default function FloorPlanCanvas() {
           <GridBackground width={width} height={height} />
         </Layer>
 
-        {/* Content — floor plan image */}
+        {/* Content — floor plan (vector geometry or raster fallback) */}
         <Layer>
-          {!isLoading && !isFailed && image && (
-            <FloorPlanImage
-              image={image}
-              isFullLoaded={isFullLoaded}
-              viewportWidth={width}
-              viewportHeight={height}
-              onImageRectChange={setImageRect}
+          {activeFloorGeometry && geometryRect ? (
+            <FloorPlanGeometryLayer
+              geometry={activeFloorGeometry}
+              imageRect={geometryRect}
             />
+          ) : (
+            !isLoading && !isFailed && image && (
+              <FloorPlanImage
+                image={image}
+                isFullLoaded={isFullLoaded}
+                viewportWidth={width}
+                viewportHeight={height}
+                onImageRectChange={setImageRect}
+              />
+            )
           )}
         </Layer>
 
@@ -584,7 +619,7 @@ export default function FloorPlanCanvas() {
         {/* Landmarks — markers above floor plan image, filtered to active floor */}
         <LandmarkLayer
           nodes={filteredNodes}
-          imageRect={imageRect}
+          imageRect={effectiveRect}
           stageScale={stageScale}
           selectedNodeId={null}
           onSelectNode={handleLandmarkTap}
@@ -596,7 +631,7 @@ export default function FloorPlanCanvas() {
         <SelectionMarkerLayer
           start={routeSelection.start}
           destination={routeSelection.destination}
-          imageRect={imageRect}
+          imageRect={effectiveRect}
           stageScale={stageScale}
           onClearStart={routeSelection.clearStart}
           onClearDestination={routeSelection.clearDestination}

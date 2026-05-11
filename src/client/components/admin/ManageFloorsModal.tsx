@@ -126,6 +126,17 @@ export default function ManageFloorsModal({
   const [gpsSaveErrorsByFloorId, setGpsSaveErrorsByFloorId] = useState<Record<number, string>>({})
   const [gpsPendingFloorIds, setGpsPendingFloorIds] = useState<Record<number, true>>({})
 
+  // ── Vector geometry editing state ──
+  const [geometryDraftsByFloorId, setGeometryDraftsByFloorId] = useState<Record<number, string>>(() => {
+    const init: Record<number, string> = {}
+    for (const f of floors) {
+      init[f.id] = f.geometry ? JSON.stringify(f.geometry, null, 2) : ''
+    }
+    return init
+  })
+  const [geometrySavingFloorIds, setGeometrySavingFloorIds] = useState<Set<number>>(new Set())
+  const [geometryErrorsByFloorId, setGeometryErrorsByFloorId] = useState<Record<number, string>>({})
+
   const newFloorFileInputRef = useRef<HTMLInputElement>(null)
 
   // Per-row replace-image file inputs (keyed by floor.id)
@@ -292,6 +303,40 @@ export default function ManageFloorsModal({
       onFloorImageReplaced()
     } finally {
       setIsSaving(false)
+    }
+  }
+
+  async function handleSaveGeometry(floor: NavFloor) {
+    const draft = geometryDraftsByFloorId[floor.id] ?? ''
+    setGeometryErrorsByFloorId((prev) => ({ ...prev, [floor.id]: '' }))
+
+    // Validate JSON before sending
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(draft)
+    } catch {
+      setGeometryErrorsByFloorId((prev) => ({ ...prev, [floor.id]: 'Invalid JSON' }))
+      return
+    }
+
+    setGeometrySavingFloorIds((prev) => new Set(prev).add(floor.id))
+    try {
+      const res = await fetch(`/api/admin/floors/${floor.id}/geometry`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsed),
+      })
+      if (!res.ok) throw new Error('Save failed')
+      onFloorImageReplaced() // triggers navGraph reload
+    } catch {
+      setGeometryErrorsByFloorId((prev) => ({ ...prev, [floor.id]: 'Failed to save geometry' }))
+    } finally {
+      setGeometrySavingFloorIds((prev) => {
+        const next = new Set(prev)
+        next.delete(floor.id)
+        return next
+      })
     }
   }
 
@@ -507,6 +552,45 @@ export default function ManageFloorsModal({
                   <p className="text-xs text-red-600" role="alert">
                     {saveError}
                   </p>
+                )}
+
+                {/* ── Vector Geometry ── */}
+                {!isCampusMode && (
+                  <details className="mt-1">
+                    <summary className="text-xs font-medium text-gray-500 cursor-pointer hover:text-gray-700 select-none">
+                      Vector Geometry {floor.geometry ? '(active)' : '(none)'}
+                    </summary>
+                    <div className="mt-2 flex flex-col gap-2">
+                      <textarea
+                        value={geometryDraftsByFloorId[floor.id] ?? ''}
+                        onChange={(e) =>
+                          setGeometryDraftsByFloorId((prev) => ({
+                            ...prev,
+                            [floor.id]: e.target.value,
+                          }))
+                        }
+                        rows={8}
+                        placeholder={`{\n  "logicalWidth": 1000,\n  "logicalHeight": 800,\n  "walls": [...],\n  "rooms": [...],\n  "doors": [...],\n  "labels": [...]\n}`}
+                        className="border rounded px-2 py-1.5 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+                        aria-label={`floor-${floor.id}-geometry-json`}
+                      />
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveGeometry(floor)}
+                          disabled={geometrySavingFloorIds.has(floor.id)}
+                          className="text-xs px-2.5 py-1 rounded border border-violet-300 text-violet-700 hover:bg-violet-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {geometrySavingFloorIds.has(floor.id) ? 'Saving…' : 'Save Geometry'}
+                        </button>
+                        {geometryErrorsByFloorId[floor.id] && (
+                          <p className="text-xs text-red-600" role="alert">
+                            {geometryErrorsByFloorId[floor.id]}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </details>
                 )}
               </div>
             )

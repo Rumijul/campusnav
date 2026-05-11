@@ -164,6 +164,7 @@ app.get('/api/map', async (c) => {
           imagePath: f.imagePath,
           updatedAt: f.updatedAt,
           ...serializeFloorGpsBounds(f),
+          ...(f.geometry != null && { geometry: f.geometry as import('@shared/types').FloorPlanGeometry }),
           nodes: (nodesByFloor.get(f.id) ?? []).map((n) => ({
             id: n.id,
             x: n.x,
@@ -258,6 +259,9 @@ app.post('/api/admin/graph', async (c) => {
       await tx.delete(floors)
       await tx.delete(buildings)
 
+      // Pass 1: Insert buildings and floors, collect { floorNumber → floorId } map
+      const floorIdByNumber = new Map<number, number>()
+
       for (const b of graph.buildings) {
         const buildingRows = await tx.insert(buildings).values({ name: b.name }).returning({ id: buildings.id })
         if (buildingRows.length === 0) throw new Error('Failed to insert building')
@@ -272,6 +276,7 @@ app.post('/api/admin/graph', async (c) => {
           }).returning({ id: floors.id })
           if (floorRows.length === 0) throw new Error('Failed to insert floor')
           const floor = floorRows[0]!
+          floorIdByNumber.set(f.floorNumber, floor.id)
 
           for (const n of f.nodes) {
             await tx.insert(nodes).values({
@@ -280,11 +285,12 @@ app.post('/api/admin/graph', async (c) => {
               roomNumber: n.roomNumber ?? null,
               description: n.description ?? null,
               accessibilityNotes: n.accessibilityNotes ?? null,
-              connectsToFloorAboveId: n.connectsToFloorAboveId ?? null,
-              connectsToFloorBelowId: n.connectsToFloorBelowId ?? null,
-              connectsToNodeAboveId: n.connectsToNodeAboveId ?? null,
-              connectsToNodeBelowId: n.connectsToNodeBelowId ?? null,
-              connectsToBuildingId: n.connectsToBuildingId ?? null,
+              // Connector fields default to null here; resolved in Pass 2 below
+              connectsToFloorAboveId: null,
+              connectsToFloorBelowId: null,
+              connectsToNodeAboveId: null,
+              connectsToNodeBelowId: null,
+              connectsToBuildingId: null,
             })
           }
 
@@ -297,6 +303,59 @@ app.post('/api/admin/graph', async (c) => {
             })
           }
         }
+      }
+
+      // Pass 2: Resolve cross-floor connector references.
+      // In the JSON, nodes can use "FLOOR:{floorNumber}" (e.g. "FLOOR:2") as a
+      // placeholder for connectsToFloorAboveId / connectsToFloorBelowId.
+      // Also, connectsToNodeAboveId / connectsToNodeBelowId can use "NODE:{nodeId}"
+      // as a self-referential sentinel that gets resolved to the actual nodeId.
+      const resolveFloorRef = (ref: unknown): number | null => {
+        if (typeof ref === 'number') return ref
+        if (typeof ref === 'string') {
+          const m = ref.match(/^FLOOR:(\d+)$/)
+          if (m) {
+            const fid = floorIdByNumber.get(parseInt(m[1]!, 10))
+            return fid ?? null
+          }
+          return null
+        }
+        return null
+      }
+
+      const allNodeRows = await tx.select({ id: nodes.id, connectsToFloorAboveId: nodes.connectsToFloorAboveId, connectsToFloorBelowId: nodes.connectsToFloorBelowId, connectsToNodeAboveId: nodes.connectsToNodeAboveId, connectsToNodeBelowId: nodes.connectsToNodeBelowId }).from(nodes)
+      const needsUpdate: Array<{ id: string; patch: Record<string, unknown> }> = []
+
+      for (const row of allNodeRows) {
+        const patch: Record<string, unknown> = {}
+        let dirty = false
+
+        // Resolve "FLOOR:{n}" → actual floorId for both directions
+        if (row.connectsToFloorAboveId !== null) {
+          const resolved = resolveFloorRef(row.connectsToFloorAboveId)
+          if (resolved !== null) { patch.connectsToFloorAboveId = resolved; dirty = true }
+        }
+        if (row.connectsToFloorBelowId !== null) {
+          const resolved = resolveFloorRef(row.connectsToFloorBelowId)
+          if (resolved !== null) { patch.connectsToFloorBelowId = resolved; dirty = true }
+        }
+
+        // Resolve "NODE:{nodeId}" → actual nodeId for both directions
+        if (row.connectsToNodeAboveId !== null && typeof row.connectsToNodeAboveId === 'string') {
+          const m = row.connectsToNodeAboveId.match(/^NODE:(.+)$/)
+          if (m) { patch.connectsToNodeAboveId = m[1]; dirty = true }
+        }
+        if (row.connectsToNodeBelowId !== null && typeof row.connectsToNodeBelowId === 'string') {
+          const m = row.connectsToNodeBelowId.match(/^NODE:(.+)$/)
+          if (m) { patch.connectsToNodeBelowId = m[1]; dirty = true }
+        }
+
+        if (dirty) needsUpdate.push({ id: row.id, patch })
+      }
+
+      for (const { id, patch } of needsUpdate) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await tx.update(nodes).set(patch as any).where(eq(nodes.id, id))
       }
     })
 
@@ -449,6 +508,31 @@ app.post('/api/admin/floor-plan/:buildingId/:floorNumber', async (c) => {
   } catch (err) {
     console.error('Replace floor image failed:', err)
     return c.json({ error: 'Failed to replace floor image' }, 500)
+  }
+})
+
+/**
+ * POST /api/admin/floors/:id/geometry
+ * Updates the vector floor plan geometry for a floor.
+ * Accepts JSON body matching FloorPlanGeometry.
+ */
+app.post('/api/admin/floors/:id/geometry', async (c) => {
+  try {
+    const floorId = Number(c.req.param('id'))
+    if (!Number.isInteger(floorId) || floorId <= 0) {
+      return c.json({ error: 'Invalid floor id' }, 400)
+    }
+    const body = await c.req.json()
+    if (!body || typeof body !== 'object') {
+      return c.json({ error: 'Request body must be a JSON object' }, 400)
+    }
+    await db.update(floors)
+      .set({ geometry: body, updatedAt: new Date().toISOString() })
+      .where(eq(floors.id, floorId))
+    return c.json({ ok: true })
+  } catch (err) {
+    console.error('Geometry upload failed:', err)
+    return c.json({ error: 'Failed to save geometry' }, 500)
   }
 })
 

@@ -175,6 +175,68 @@ export interface NavFloorGpsBounds {
   maxLng: number
 }
 
+// ============================================================
+// Vector Floor Plan Geometry Types
+// ============================================================
+
+/** A single line segment of a wall, in normalized 0–1 coordinates. */
+export interface WallSegment {
+  x1: number; y1: number; x2: number; y2: number
+}
+
+/** A continuous wall composed of one or more line segments. */
+export interface Wall {
+  id: string
+  segments: WallSegment[]
+  type: 'exterior' | 'interior' | 'glass'
+}
+
+/** A closed polygon representing a room or area on the floor plan. */
+export interface RoomPolygon {
+  id: string
+  polygon: { x: number; y: number }[]
+  label: string
+  type: 'classroom' | 'office' | 'restroom' | 'lab' | 'stairs' | 'elevator' | 'corridor' | 'other'
+}
+
+/** A door indicator rendered at a specific position and rotation. */
+export interface DoorGeometry {
+  id: string
+  x: number; y: number
+  rotation: number
+  type: 'single' | 'double' | 'sliding'
+}
+
+/** A standalone text label on the floor plan. */
+export interface FloorLabel {
+  id: string
+  x: number; y: number
+  text: string
+  fontSize?: number
+  rotation?: number
+}
+
+/**
+ * Structured vector geometry for a floor plan, stored in `floors.geometry`.
+ *
+ * All coordinates are normalized (0.0–1.0) — the same system used by
+ * NavNodeData. The `logicalWidth` and `logicalHeight` define the aspect
+ * ratio for fit-to-screen scaling (equivalent to image.naturalWidth/Height).
+ *
+ * When geometry is present on a floor, the renderer draws walls, rooms,
+ * doors, and labels from this data instead of loading a raster PNG.
+ */
+export interface FloorPlanGeometry {
+  /** Logical pixel width for aspect-ratio calculations */
+  logicalWidth: number
+  /** Logical pixel height for aspect-ratio calculations */
+  logicalHeight: number
+  walls: Wall[]
+  rooms: RoomPolygon[]
+  doors: DoorGeometry[]
+  labels: FloorLabel[]
+}
+
 /**
  * A single floor within a building, containing all nodes and edges on that floor.
  */
@@ -189,6 +251,8 @@ export interface NavFloor {
   updatedAt: string
   /** Optional GPS calibration bounds for this floor */
   gpsBounds?: NavFloorGpsBounds
+  /** Optional vector geometry for Apple-Maps-style rendering (replaces raster PNG when present) */
+  geometry?: FloorPlanGeometry
   /** All navigation nodes on this floor */
   nodes: NavNode[]
   /** All navigation edges on this floor */
