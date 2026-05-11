@@ -199,6 +199,7 @@ app.get('/api/map', async (c) => {
     c.header('Cache-Control', 'public, max-age=60')
     return c.json(graph)
   } catch (_err) {
+    console.error('GET /api/map failed:', _err)
     return c.json({ error: 'Failed to load graph data' }, 500)
   }
 })
