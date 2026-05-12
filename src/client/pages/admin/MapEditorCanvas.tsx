@@ -8,6 +8,7 @@ import { EdgeDataTable } from '../../components/admin/EdgeDataTable'
 import EdgeLayer from '../../components/admin/EdgeLayer'
 import EditorSidePanel from '../../components/admin/EditorSidePanel'
 import EditorToolbar from '../../components/admin/EditorToolbar'
+import { GeometryEditor } from '../../components/admin/geometryEditor'
 import ManageFloorsModal from '../../components/admin/ManageFloorsModal'
 import { NodeDataTable } from '../../components/admin/NodeDataTable'
 import NodeMarkerLayer from '../../components/admin/NodeMarkerLayer'
@@ -138,6 +139,7 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
 
   const [activeTab, setActiveTab] = useState<'map' | 'data'>('map')
   const [activeSubTab, setActiveSubTab] = useState<'nodes' | 'edges'>('nodes')
+  const [activeMapSubTab, setActiveMapSubTab] = useState<'canvas' | 'geometry'>('canvas')
 
   const [imageRect, setImageRect] = useState<{
     x: number
@@ -216,6 +218,11 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
   const sortedFloors: NavFloor[] = (activeBuilding?.floors ?? [])
     .slice()
     .sort((a, b) => a.floorNumber - b.floorNumber)
+
+  const activeFloor: NavFloor | null = useMemo(
+    () => sortedFloors.find((f) => f.id === state.activeFloorId) ?? null,
+    [sortedFloors, state.activeFloorId],
+  )
 
   const selectedNode = useMemo(
     () => (state.selectedNodeId ? (state.nodes.find((node) => node.id === state.selectedNodeId) ?? null) : null),
@@ -683,70 +690,174 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
         </div>
       )}
 
+      {/* Map sub-tab row: Canvas / Geometry — outside the activeTab wrapper, shown on Map tab only */}
+      {activeTab === 'map' && !isCampusActive && (
+        <div className="flex items-center gap-1 border-b border-gray-100 bg-white px-4 py-1.5">
+          <button
+            type="button"
+            onClick={() => setActiveMapSubTab('canvas')}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+              activeMapSubTab === 'canvas'
+                ? 'bg-slate-700 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Canvas
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveMapSubTab('geometry')}
+            className={`px-3 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1.5 ${
+              activeMapSubTab === 'geometry'
+                ? 'bg-slate-700 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Geometry
+            {activeFloor && activeFloor.geometry && (
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Map panel — mounted but hidden when Data tab is active */}
       <div
         ref={canvasContainerRef}
         className={activeTab !== 'map' ? 'hidden' : 'relative flex-1 overflow-hidden'}
       >
-        <Stage
-          ref={stageRef}
-          width={canvasWidth}
-          height={canvasHeight}
-          draggable={state.mode === 'select'}
-          onClick={handleStageClick}
-          onMouseMove={handleMouseMove}
-          onWheel={handleWheel}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onDragEnd={handleDragEnd}
-          style={{ cursor: state.mode === 'select' ? 'default' : 'crosshair' }}
-        >
-          {/* Layer 1: Floor plan image */}
-          <Layer ref={floorPlanLayerRef}>
-            {image && (
-              <FloorPlanImage
-                image={image}
-                isFullLoaded={isFullLoaded}
-                viewportWidth={canvasWidth}
-                viewportHeight={canvasHeight}
-                onImageRectChange={setImageRect}
-                onClick={() => {
-                  if (state.mode === 'select') {
+        {/* Canvas sub-tab */}
+        {activeMapSubTab === 'canvas' && (
+          <>
+            <Stage
+              ref={stageRef}
+              width={canvasWidth}
+              height={canvasHeight}
+              draggable={state.mode === 'select'}
+              onClick={handleStageClick}
+              onMouseMove={handleMouseMove}
+              onWheel={handleWheel}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onDragEnd={handleDragEnd}
+              style={{ cursor: state.mode === 'select' ? 'default' : 'crosshair' }}
+            >
+              {/* Layer 1: Floor plan image */}
+              <Layer ref={floorPlanLayerRef}>
+                {image && (
+                  <FloorPlanImage
+                    image={image}
+                    isFullLoaded={isFullLoaded}
+                    viewportWidth={canvasWidth}
+                    viewportHeight={canvasHeight}
+                    onImageRectChange={setImageRect}
+                    onClick={() => {
+                      if (state.mode === 'select') {
+                        dispatch({ type: 'SELECT_NODE', id: null })
+                        dispatch({ type: 'SELECT_EDGE', id: null })
+                      }
+                    }}
+                  />
+                )}
+              </Layer>
+
+              {/* Layer 2: Edges */}
+              <EdgeLayer
+                edges={state.edges}
+                nodes={state.nodes}
+                selectedEdgeId={state.selectedEdgeId}
+                pendingEdgeSourceId={state.pendingEdgeSourceId}
+                cursorPosition={cursorCanvasPos}
+                imageRect={imageRect}
+                mode={state.mode}
+                onEdgeClick={handleEdgeClick}
+              />
+
+              {/* Layer 3: Node markers */}
+              <NodeMarkerLayer
+                nodes={state.nodes}
+                selectedNodeId={state.selectedNodeId}
+                stageScale={stageScale}
+                imageRect={imageRect}
+                mode={state.mode}
+                onNodeClick={handleNodeClick}
+                onNodeDragEnd={handleNodeDragEnd}
+                isCampusActive={isCampusActive}
+              />
+            </Stage>
+
+            {/* Side panel — only in canvas mode */}
+            <div className="pointer-events-none absolute right-0 top-0 h-full">
+              <div className="pointer-events-auto h-full">
+                <EditorSidePanel
+                  selectedNode={selectedNode}
+                  selectedEdge={selectedEdgeWithNames}
+                  onUpdateNode={(id, changes) => {
+                    dispatch({ type: 'UPDATE_NODE', id, changes })
+                    recordHistory()
+                  }}
+                  onUpdateEdge={(id, changes) => {
+                    dispatch({ type: 'UPDATE_EDGE', id, changes })
+                    recordHistory()
+                  }}
+                  onDeleteNode={(id) => {
+                    dispatch({ type: 'DELETE_NODE', id })
+                    recordHistory()
+                  }}
+                  onDeleteEdge={(id) => {
+                    dispatch({ type: 'DELETE_EDGE', id })
+                    recordHistory()
+                  }}
+                  onClose={() => {
                     dispatch({ type: 'SELECT_NODE', id: null })
                     dispatch({ type: 'SELECT_EDGE', id: null })
-                  }
-                }}
-              />
-            )}
-          </Layer>
+                  }}
+                  isCampusActive={isCampusActive}
+                  buildings={nonCampusBuildings}
+                  connectorCandidates={connectorCandidates}
+                  onConnectorLinkChange={handleConnectorLinkChange}
+                  connectorLinkError={connectorLinkError}
+                  isConnectorLinkPending={isConnectorLinkPending}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
-          {/* Layer 2: Edges (between floor plan and nodes so nodes render on top) */}
-          <EdgeLayer
-            edges={state.edges}
-            nodes={state.nodes}
-            selectedEdgeId={state.selectedEdgeId}
-            pendingEdgeSourceId={state.pendingEdgeSourceId}
-            cursorPosition={cursorCanvasPos}
+        {/* Geometry sub-tab */}
+        {activeMapSubTab === 'geometry' && !isCampusActive && (
+          <GeometryEditor
+            initialGeometry={activeFloor?.geometry
+              ? { walls: activeFloor.geometry.walls, rooms: activeFloor.geometry.rooms, doors: activeFloor.geometry.doors, labels: activeFloor.geometry.labels }
+              : { walls: [], rooms: [], doors: [], labels: [] }}
+            logicalWidth={image?.naturalWidth ?? 2000}
+            logicalHeight={image?.naturalHeight ?? 1600}
+            image={image}
             imageRect={imageRect}
-            mode={state.mode}
-            onEdgeClick={handleEdgeClick}
+            onSave={async (geom) => {
+              if (!activeFloor) return
+              const payload = {
+                logicalWidth: image?.naturalWidth ?? 2000,
+                logicalHeight: image?.naturalHeight ?? 1600,
+                ...geom,
+              }
+              const res = await fetch(`/api/admin/floors/${activeFloor.id}/geometry`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              })
+              if (!res.ok) throw new Error('Save failed')
+              // Reload navGraph to pick up saved geometry
+              await loadNavGraph()
+            }}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
           />
+        )}
 
-          {/* Layer 3: Node markers */}
-          <NodeMarkerLayer
-            nodes={state.nodes}
-            selectedNodeId={state.selectedNodeId}
-            stageScale={stageScale}
-            imageRect={imageRect}
-            mode={state.mode}
-            onNodeClick={handleNodeClick}
-            onNodeDragEnd={handleNodeDragEnd}
-            isCampusActive={isCampusActive}
-          />
-        </Stage>
-
-        {/* Campus empty state overlay */}
-        {isCampusActive && !image && (
+        {/* Campus empty state overlay — only in canvas */}
+        {isCampusActive && !image && activeMapSubTab === 'canvas' && (
           <button
             type="button"
             className="absolute inset-0 flex items-center justify-center pointer-events-auto cursor-pointer"
@@ -758,42 +869,6 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             </span>
           </button>
         )}
-
-        {/* Side panel — HTML overlay inside the padded container (positioned relative to editor area) */}
-        <div className="pointer-events-none absolute right-0 top-0 h-full">
-          <div className="pointer-events-auto h-full">
-            <EditorSidePanel
-              selectedNode={selectedNode}
-              selectedEdge={selectedEdgeWithNames}
-              onUpdateNode={(id, changes) => {
-                dispatch({ type: 'UPDATE_NODE', id, changes })
-                recordHistory()
-              }}
-              onUpdateEdge={(id, changes) => {
-                dispatch({ type: 'UPDATE_EDGE', id, changes })
-                recordHistory()
-              }}
-              onDeleteNode={(id) => {
-                dispatch({ type: 'DELETE_NODE', id })
-                recordHistory()
-              }}
-              onDeleteEdge={(id) => {
-                dispatch({ type: 'DELETE_EDGE', id })
-                recordHistory()
-              }}
-              onClose={() => {
-                dispatch({ type: 'SELECT_NODE', id: null })
-                dispatch({ type: 'SELECT_EDGE', id: null })
-              }}
-              isCampusActive={isCampusActive}
-              buildings={nonCampusBuildings}
-              connectorCandidates={connectorCandidates}
-              onConnectorLinkChange={handleConnectorLinkChange}
-              connectorLinkError={connectorLinkError}
-              isConnectorLinkPending={isConnectorLinkPending}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Data panel — mounted but hidden when Map tab is active */}
