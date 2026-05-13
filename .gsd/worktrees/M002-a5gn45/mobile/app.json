@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "CampusNav",
+    "slug": "campusnav-mobile",
+    "version": "1.0.0",
+    "scheme": "campusnav",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {}
+  }
+}

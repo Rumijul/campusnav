@@ -1,0 +1,3 @@
+{"ts":"2026-03-25T09:02:48.190Z","flowId":"0fffce0b-bac2-4eda-89b0-1e46514f5dfa","seq":1,"eventType":"iteration-start","data":{"iteration":1}}
+{"ts":"2026-03-25T09:02:48.592Z","flowId":"0fffce0b-bac2-4eda-89b0-1e46514f5dfa","seq":2,"eventType":"dispatch-match","rule":"planning (no research, not S01) → research-slice","data":{"unitType":"research-slice","unitId":"M002-a5gn45/S01"}}
+{"ts":"2026-03-25T09:02:48.621Z","flowId":"0fffce0b-bac2-4eda-89b0-1e46514f5dfa","seq":3,"eventType":"unit-start","data":{"unitType":"research-slice","unitId":"M002-a5gn45/S01"}}

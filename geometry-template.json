@@ -1,0 +1,47 @@
+{
+  "logicalWidth": 1600,
+  "logicalHeight": 1280,
+  "walls": [
+    {
+      "id": "wall-exterior-1",
+      "type": "exterior",
+      "segments": [
+        { "x1": 0.05, "y1": 0.05, "x2": 0.95, "y2": 0.05 },
+        { "x1": 0.95, "y1": 0.05, "x2": 0.95, "y2": 0.95 },
+        { "x1": 0.95, "y1": 0.95, "x2": 0.05, "y2": 0.95 },
+        { "x1": 0.05, "y1": 0.95, "x2": 0.05, "y2": 0.05 }
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "room-101",
+      "label": "Room 101",
+      "type": "classroom",
+      "polygon": [
+        { "x": 0.1, "y": 0.1 },
+        { "x": 0.4, "y": 0.1 },
+        { "x": 0.4, "y": 0.3 },
+        { "x": 0.1, "y": 0.3 }
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "door-1",
+      "x": 0.5,
+      "y": 0.1,
+      "rotation": 90,
+      "type": "single"
+    }
+  ],
+  "labels": [
+    {
+      "id": "label-main",
+      "x": 0.5,
+      "y": 0.05,
+      "text": "Main Building",
+      "fontSize": 16
+    }
+  ]
+}

@@ -2,9 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   PanResponder,
-  Pressable,
   StyleSheet,
-  Text,
   View, LayoutChangeEvent, PanResponderInstance,
 } from 'react-native';
 
@@ -15,6 +13,8 @@ import {
   mapTransformsEqual,
   type MapTransform, ViewportDimensions, ViewportPoint,
 } from './mapTransform';
+import { useTheme } from '../theme';
+
 
 interface MapViewportProps {
   imageUri: string;
@@ -62,6 +62,7 @@ function formatTransformValue(value: number): string {
 }
 
 export function MapViewport({ imageUri, onTransformChange, headingRotationDeg }: MapViewportProps) {
+  const { colors } = useTheme();
   const [viewport, setViewport] = useState<ViewportDimensions | null>(null);
   const [transform, setTransform] = useState<MapTransform>(createInitialMapTransform);
 
@@ -241,25 +242,7 @@ export function MapViewport({ imageUri, onTransformChange, headingRotationDeg }:
 
   return (
     <View style={styles.container}>
-      <View style={styles.controls}>
-        <Pressable onPress={() => applyScaleAtViewportCenter(1.2)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>Zoom +</Text>
-        </Pressable>
-        <Pressable onPress={() => applyScaleAtViewportCenter(1 / 1.2)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>Zoom -</Text>
-        </Pressable>
-        <Pressable onPress={() => applyRotationAtViewportCenter(-15)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>Rotate ↺</Text>
-        </Pressable>
-        <Pressable onPress={() => applyRotationAtViewportCenter(15)} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>Rotate ↻</Text>
-        </Pressable>
-        <Pressable onPress={() => setTransform(createInitialMapTransform())} style={styles.controlButton}>
-          <Text style={styles.controlButtonText}>Reset</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.viewport} onLayout={onLayout} {...panResponder.panHandlers}>
+      <View style={[styles.viewport, { backgroundColor: colors.background }]} onLayout={onLayout} {...panResponder.panHandlers}>
         <Image
           source={{ uri: imageUri }}
           resizeMode="contain"
@@ -276,11 +259,6 @@ export function MapViewport({ imageUri, onTransformChange, headingRotationDeg }:
           ]}
         />
       </View>
-
-      <Text style={styles.telemetry}>
-        scale={formatTransformValue(transform.scale)} rotation={formatTransformValue(transform.rotationDeg)}° tx=
-        {formatTransformValue(transform.translation.x)} ty={formatTransformValue(transform.translation.y)}
-      </Text>
     </View>
   );
 }
@@ -288,43 +266,14 @@ export function MapViewport({ imageUri, onTransformChange, headingRotationDeg }:
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    flex: 1,
-    gap: 8,
-  },
-  controls: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  controlButton: {
-    backgroundColor: '#0f172a',
-    borderColor: '#334155',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  controlButtonText: {
-    color: '#e2e8f0',
-    fontSize: 12,
-    fontWeight: '600',
+    height: '100%',
   },
   viewport: {
-    flex: 1,
-    minHeight: 280,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
-    overflow: 'hidden',
-    backgroundColor: '#020617',
+    width: '100%',
+    height: '100%',
   },
   mapImage: {
     width: '100%',
     height: '100%',
-  },
-  telemetry: {
-    color: '#94a3b8',
-    fontSize: 12,
-    fontVariant: ['tabular-nums'],
   },
 });

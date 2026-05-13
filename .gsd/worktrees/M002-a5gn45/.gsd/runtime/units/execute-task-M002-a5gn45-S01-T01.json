@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "unitType": "execute-task",
+  "unitId": "M002-a5gn45/S01/T01",
+  "startedAt": 1774521263964,
+  "updatedAt": 1774521864063,
+  "phase": "recovered",
+  "wrapupWarningSent": true,
+  "continueHereFired": false,
+  "timeoutAt": 1774521864035,
+  "lastProgressAt": 1774521864059,
+  "progressCount": 1,
+  "lastProgressKind": "hard-recovery-retry",
+  "recovery": {
+    "planPath": ".gsd/milestones/M002-a5gn45/slices/S01/S01-PLAN.md",
+    "summaryPath": ".gsd/milestones/M002-a5gn45/slices/S01/tasks/T01-SUMMARY.md",
+    "summaryExists": false,
+    "taskChecked": false,
+    "nextActionAdvanced": false,
+    "mustHaveCount": 3,
+    "mustHavesMentionedInSummary": 0
+  },
+  "recoveryAttempts": 1,
+  "lastRecoveryReason": "hard"
+}

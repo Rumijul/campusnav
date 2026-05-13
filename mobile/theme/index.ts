@@ -8,23 +8,23 @@ import { useColorScheme } from 'react-native';
 import { darkColors, lightColors } from './colors';
 import { spacing } from './spacing';
 import { typography } from './typography';
+import { shadows } from './shadows';
 
 export { darkColors, lightColors } from './colors';
 export { spacing } from './spacing';
 export { typography } from './typography';
+export { shadows } from './shadows';
 
 export interface Theme {
   colors: typeof darkColors | typeof lightColors;
   spacing: typeof spacing;
   typography: typeof typography;
+  shadows: typeof shadows;
   isDark: boolean;
 }
 
 /**
  * Returns the current theme based on the system color scheme.
- *
- * Usage:
- *   const { colors, spacing, typography, isDark } = useTheme();
  */
 export function useTheme(): Theme {
   const colorScheme = useColorScheme();
@@ -33,6 +33,7 @@ export function useTheme(): Theme {
     colors: isDark ? darkColors : lightColors,
     spacing,
     typography,
+    shadows,
     isDark,
   };
 }

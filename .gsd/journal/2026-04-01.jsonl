@@ -1,0 +1,2 @@
+{"ts":"2026-04-01T13:01:54.718Z","flowId":"644402dd-00eb-485c-8ee9-393ce226a4e7","seq":1,"eventType":"iteration-start","data":{"iteration":1}}
+{"ts":"2026-04-01T13:01:54.983Z","flowId":"644402dd-00eb-485c-8ee9-393ce226a4e7","seq":2,"eventType":"dispatch-stop","rule":"completing-milestone → complete-milestone","data":{"reason":"Cannot complete milestone M002-a5gn45: VALIDATION verdict is \"needs-remediation\". Address the remediation findings and re-run validation, or update the verdict manually."}}

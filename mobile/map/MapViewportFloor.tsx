@@ -4,6 +4,7 @@
  * Composes:
  * - MapViewport (floor plan image with pan/pinch/rotate controls)
  * - RoutePathOverlay (polyline overlay on active floor)
+ * - NodeMarkersOverlay (nav node dots on the active floor)
  * - Optional routeOverlay prop for additional overlay content inside the map container
  *
  * The active floor target is tracked in state and drives which floor segment is rendered.
@@ -14,13 +15,15 @@ import { StyleSheet, View } from 'react-native';
 
 import { MapViewport } from './MapViewport';
 import { RoutePathOverlay, RoutePathPoint } from '../components/route/RoutePathOverlay';
+import { NodeMarkersOverlay } from '../components/floor/NodeMarkersOverlay';
 import { FloorPlanTarget } from '../data/mapApiClient';
-import { MapTransform } from './mapTransform';
-import { ViewportDimensions } from './mapTransform';
+import { MapTransform, ViewportDimensions } from './mapTransform';
+import { NormalizedNavGraph, NormalizedNodeRecord } from '../domain/navGraph';
 
 /* ─── Props ─── */
 
 export interface MapViewportFloorProps {
+  imageUri: string;
   /** MapViewport props */
   onTransformChange?: (transform: MapTransform) => void;
   /** All available floor targets for the active route */
@@ -39,11 +42,18 @@ export interface MapViewportFloorProps {
   headingDegrees?: number | null;
   /** Optional additional overlay node rendered inside mapContainer alongside RoutePathOverlay. */
   routeOverlay?: React.ReactNode;
+  /** All normalized node records from the nav graph. */
+  nodeRecords?: NormalizedNodeRecord[];
+  /** ID of the currently selected node (for highlighting the dot). */
+  selectedNodeId?: string | null;
+  /** Called when user taps a node marker. */
+  onNodePress?: (record: NormalizedNodeRecord) => void;
 }
 
 /* ─── Component ─── */
 
 export function MapViewportFloor({
+  imageUri,
   onTransformChange,
   floorTargets,
   activeFloorTarget,
@@ -53,6 +63,9 @@ export function MapViewportFloor({
   showRouteOverlay = true,
   headingDegrees,
   routeOverlay,
+  nodeRecords,
+  selectedNodeId,
+  onNodePress,
 }: MapViewportFloorProps) {
   const [transform, setTransform] = useState<MapTransform>(() => ({
     scale: 1,
@@ -75,7 +88,7 @@ export function MapViewportFloor({
       {/* Map viewport with optional route overlay */}
       <View style={styles.mapContainer}>
         <MapViewport
-          imageUri=""
+          imageUri={imageUri}
           onTransformChange={handleTransformChange}
           headingRotationDeg={headingDegrees ?? undefined}
         />
@@ -85,6 +98,18 @@ export function MapViewportFloor({
             activeFloorId={activeFloorId}
             viewport={viewportDimensions}
             scale={transform.scale}
+          />
+        )}
+        {/* Node marker dots — synchronized with gesture transform */}
+        {nodeRecords && nodeRecords.length > 0 && (
+          <NodeMarkersOverlay
+            nodes={nodeRecords}
+            viewport={viewportDimensions}
+            scale={transform.scale}
+            transform={transform}
+            activeFloorId={activeFloorId}
+            selectedNodeId={selectedNodeId ?? null}
+            onNodePress={onNodePress}
           />
         )}
         {routeOverlay}
@@ -98,12 +123,9 @@ export function MapViewportFloor({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    gap: 8,
+    height: '100%',
   },
   mapContainer: {
     flex: 1,
-    minHeight: 280,
-    borderRadius: 12,
-    overflow: 'hidden',
   },
 });

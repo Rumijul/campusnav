@@ -70,6 +70,14 @@ export default function FloorPlanCanvas() {
     height: number
   } | null>(null)
   const [stageScale, setStageScale] = useState<number>(1)
+  // Manual pan/drag tracking — avoids Konva's built-in drag system which
+  // activates on pointer-move during mousedown and creates a click-vs-drag conflict.
+  // Implementation: we track `isPanning` from pointerdown→pointerup, and in the
+  // pointer-move handler directly manipulate stage.position(). This gives us
+  // pixel-perfect control over when pan starts (after threshold) vs. a click (no pan).
+  const isPanningRef = useRef(false)
+  const panStartRef = useRef<{ x: number; y: number } | null>(null)
+  const stagePosAtPanStartRef = useRef<{ x: number; y: number } | null>(null)
   const [activeMode, setActiveMode] = useState<'standard' | 'accessible'>('standard')
   const [sheetOpen, setSheetOpen] = useState<boolean>(false)
   // routeVisible tracks whether the route line should be drawn — decoupled from sheetOpen
@@ -222,8 +230,67 @@ export default function FloorPlanCanvas() {
     return ids
   }, [routeSelection.start, routeSelection.destination])
 
-  const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen } =
+  const { handleWheel, handleTouchMove, handleTouchEnd, zoomByButton, fitToScreen } =
     useMapViewport({ stageRef, imageRect: effectiveRect, onScaleChange: setStageScale })
+
+  // interactionDisabled must be declared before the pointer handlers that reference it
+  const interactionDisabled = isLoading || isFailed
+
+  // Manual pan/drag: pointer-based panning replaces Konva's built-in drag.
+  // Threshold: 4px movement before pan activates → distinguishes click from drag.
+  const PAN_THRESHOLD = 4
+
+  const handlePointerDown = useCallback(
+    (e: Konva.KonvaEventObject<PointerEvent>) => {
+      if (interactionDisabled) return
+      const stage = stageRef.current
+      if (!stage) return
+      // Only left mouse button for pan
+      if (e.evt.button !== 0) return
+      const pos = stage.getPointerPosition()
+      if (!pos) return
+      isPanningRef.current = false
+      panStartRef.current = pos
+      stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
+    },
+    [stageRef, interactionDisabled],
+  )
+
+  const handlePointerMove = useCallback(
+    () => {
+      if (interactionDisabled) return
+      const stage = stageRef.current
+      if (!stage) return
+      const pos = stage.getPointerPosition()
+      if (!pos || !panStartRef.current || !stagePosAtPanStartRef.current) return
+
+      const dx = pos.x - panStartRef.current.x
+      const dy = pos.y - panStartRef.current.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+
+      // Activate pan after threshold
+      if (dist >= PAN_THRESHOLD && !isPanningRef.current) {
+        isPanningRef.current = true
+      }
+
+      if (!isPanningRef.current) return
+
+      stage.position({
+        x: stagePosAtPanStartRef.current.x + dx,
+        y: stagePosAtPanStartRef.current.y + dy,
+      })
+    },
+    [stageRef, interactionDisabled],
+  )
+
+  const handlePointerUp = useCallback(
+    () => {
+      isPanningRef.current = false
+      panStartRef.current = null
+      stagePosAtPanStartRef.current = null
+    },
+    [],
+  )
 
   // Re-fit floor plan when viewport size changes (e.g. orientation change)
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — re-fit on viewport resize only when image/geometry is loaded
@@ -538,8 +605,6 @@ export default function FloorPlanCanvas() {
     }
   }, [activeFloor, geolocation, gpsProjectedPoint, effectiveRect])
 
-  const interactionDisabled = isLoading || isFailed
-
   return (
     <div className="relative w-full h-full">
       {/* Search overlay — HTML sibling above Stage in DOM */}
@@ -578,11 +643,12 @@ export default function FloorPlanCanvas() {
         ref={stageRef}
         width={width}
         height={height}
-        draggable={!interactionDisabled}
         onWheel={handleWheel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onDragEnd={handleDragEnd}
       >
         {/* Grid — static background, not transformed */}
         <Layer>

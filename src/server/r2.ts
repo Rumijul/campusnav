@@ -25,12 +25,27 @@ export const BUCKET = process.env.R2_BUCKET_NAME!
  * In AWS SDK v3, Body is a ReadableStream — use transformToByteArray().
  */
 export async function r2GetBuffer(key: string): Promise<Uint8Array<ArrayBuffer>> {
-  const result = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
-  if (!result.Body) throw new Error(`R2 object not found: ${key}`)
-  // transformToByteArray returns Uint8Array<ArrayBufferLike>; .slice() gives Uint8Array<ArrayBuffer>
-  // which satisfies Hono's Data type constraint for c.body().
-  const bytes = await result.Body.transformToByteArray()
-  return bytes.slice()
+  // Try R2 first if credentials are configured
+  if (process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID) {
+    try {
+      const result = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
+      if (!result.Body) throw new Error(`R2 object not found: ${key}`)
+      const bytes = await result.Body.transformToByteArray()
+      return bytes.slice()
+    } catch (_err) {
+      // Fall through to local fallback
+    }
+  }
+
+  // Local fallback: serve from src/server/assets/
+  try {
+    const localPath = `./src/server/assets/${key}`
+    const fs = await import('node:fs')
+    const buffer = fs.readFileSync(localPath)
+    return new Uint8Array(buffer)
+  } catch (_localErr) {
+    throw new Error(`R2 object not found: ${key}`)
+  }
 }
 
 /** Upload a Buffer to R2 with the given content type. */

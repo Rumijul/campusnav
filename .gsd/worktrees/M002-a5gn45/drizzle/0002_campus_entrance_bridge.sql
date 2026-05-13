@@ -1,0 +1,2 @@
+ALTER TABLE "nodes" ADD COLUMN "connects_to_building_id" integer;--> statement-breakpoint
+ALTER TABLE "nodes" ADD CONSTRAINT "nodes_connects_to_building_id_buildings_id_fk" FOREIGN KEY ("connects_to_building_id") REFERENCES "public"."buildings"("id") ON DELETE no action ON UPDATE no action;

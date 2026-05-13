@@ -266,7 +266,9 @@
               "y": 0.298245672065898,
               "label": "2nd Floor Ramp",
               "type": "stairs",
-              "searchable": false
+              "searchable": false,
+              "connectsToFloorAboveId": "FLOOR:2",
+              "connectsToNodeAboveId": "NODE:floor2-stairs-landing"
             },
             {
               "id": "room-new-node-1771678779712",
@@ -370,7 +372,9 @@
               "y": 0.931401071389998,
               "label": "2nd Floor Stairs SOUTH",
               "type": "stairs",
-              "searchable": false
+              "searchable": false,
+              "connectsToFloorAboveId": "FLOOR:2",
+              "connectsToNodeAboveId": "NODE:floor2-stairs-landing"
             },
             {
               "id": "room-new-node-1771679137642",
@@ -846,6 +850,48 @@
               "standardWeight": 0.040894019314194695,
               "accessibleWeight": 0.040894019314194695,
               "accessible": true,
+              "bidirectional": true
+            }
+          ]
+        },
+        {
+          "floorNumber": 2,
+          "imagePath": "floor-plan-final.png",
+          "nodes": [
+            {
+              "id": "floor2-stairs-landing",
+              "x": 0.89923096,
+              "y": 0.67387223,
+              "label": "2nd Floor Stairs Landing",
+              "type": "stairs",
+              "searchable": false,
+              "connectsToFloorAboveId": null,
+              "connectsToFloorBelowId": "FLOOR:1",
+              "connectsToNodeAboveId": null,
+              "connectsToNodeBelowId": "NODE:room-new-node-1771678769152"
+            },
+            {
+              "id": "room-new-node-1773061030915",
+              "x": 0.89923096,
+              "y": 0.73387223,
+              "label": "5 - LSP",
+              "type": "room",
+              "searchable": true,
+              "roomNumber": "LSP",
+              "connectsToFloorAboveId": null,
+              "connectsToFloorBelowId": null,
+              "connectsToNodeAboveId": "NODE:floor2-stairs-landing",
+              "connectsToNodeBelowId": null
+            }
+          ],
+          "edges": [
+            {
+              "id": "edge-floor2-stairs-landing-room-new-node-1773061030915",
+              "sourceId": "floor2-stairs-landing",
+              "targetId": "room-new-node-1773061030915",
+              "standardWeight": 0.015,
+              "accessibleWeight": 10000000000,
+              "accessible": false,
               "bidirectional": true
             }
           ]

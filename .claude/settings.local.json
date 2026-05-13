@@ -61,7 +61,19 @@
       "Bash(echo === 21-01 SUMMARY ===:*)",
       "Bash(npx:*)",
       "Skill(update-config)",
-      "Read(//c/Users/admin/.claude/**)"
+      "Read(//c/Users/admin/.claude/**)",
+      "Bash(find mobile:*)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(adb devices:*)",
+      "Read(//c/Users/admin/Desktop/projects/campusnav/$LOCALAPPDATA/Android/Sdk/**)",
+      "Read(//c/Users/admin/AppData/Local/Android/Sdk/platform-tools//**)",
+      "Bash(export PATH=\"$PATH:/c/Users/admin/AppData/Local/Android/Sdk/platform-tools\")",
+      "Bash(export PATH=\"$PATH:/c/Users/admin/AppData/Local/Android/Sdk\")",
+      "Read(//c/Users/admin/AppData/Local/Android/Sdk/emulator//**)",
+      "Bash(export PATH=\"$PATH:/c/Users/admin/AppData/Local/Android/Sdk/emulator\")",
+      "Bash(emulator -list-avds)",
+      "Bash(adb install:*)",
+      "Bash(adb shell:*)"
     ]
   }
 }

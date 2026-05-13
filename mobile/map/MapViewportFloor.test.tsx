@@ -23,6 +23,7 @@ describe('MapViewportFloor', () => {
     const onFloorChange = vi.fn();
     render(
       <MapViewportFloor
+        imageUri="mock"
         activeFloorId={1}
         floorTargets={TEST_FLOOR_TARGETS}
         activeFloorTarget={TEST_FLOOR_TARGETS[0]}
@@ -40,6 +41,7 @@ describe('MapViewportFloor', () => {
     const onFloorChange = vi.fn();
     render(
       <MapViewportFloor
+        imageUri="mock"
         activeFloorId={1}
         floorTargets={TEST_FLOOR_TARGETS}
         activeFloorTarget={TEST_FLOOR_TARGETS[0]}
@@ -57,6 +59,7 @@ describe('MapViewportFloor', () => {
     const onFloorChange = vi.fn();
     const { toJSON } = render(
       <MapViewportFloor
+        imageUri="mock"
         activeFloorId={0}
         floorTargets={[]}
         activeFloorTarget={null}

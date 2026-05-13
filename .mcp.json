@@ -1,7 +1,15 @@
 {
   "mcpServers": {
-    "supermemory": {
-      "url": "https://mcp.supermemory.ai/mcp"
+    "MiniMax": {
+      "command": "uvx",
+      "args": [
+        "minimax-coding-plan-mcp",
+        "-y"
+      ],
+      "env": {
+        "MINIMAX_API_KEY": "sk-cp-qL07dDWO932kaY-IY0tGPpPJxSpEy4ii1fNQGupEPROQ-nTVMrIqb6EAaz7KSJANHoOmgmQN9R07-eGHD78v-k1h8T7qIdqIdJV9gGImpujLVDigxbu0oHg",
+        "MINIMAX_API_HOST": "https://api.minimax.io"
+      }
     }
   }
 }
