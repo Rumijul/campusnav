@@ -402,12 +402,12 @@ app.post('/api/admin/graph', async (c) => {
               roomNumber: n.roomNumber ?? null,
               description: n.description ?? null,
               accessibilityNotes: n.accessibilityNotes ?? null,
-              // Connector fields default to null here; resolved in Pass 2 below
-              connectsToFloorAboveId: null,
-              connectsToFloorBelowId: null,
-              connectsToNodeAboveId: null,
-              connectsToNodeBelowId: null,
-              connectsToBuildingId: null,
+              // Pass connector references through as-is; Pass 2 resolves FLOOR:/NODE: placeholders
+              connectsToFloorAboveId: n.connectsToFloorAboveId ?? null,
+              connectsToFloorBelowId: n.connectsToFloorBelowId ?? null,
+              connectsToNodeAboveId: n.connectsToNodeAboveId ?? null,
+              connectsToNodeBelowId: n.connectsToNodeBelowId ?? null,
+              connectsToBuildingId: n.connectsToBuildingId ?? null,
             })
           }
 
