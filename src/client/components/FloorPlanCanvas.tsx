@@ -284,6 +284,9 @@ export default function FloorPlanCanvas() {
   // Threshold: 4px movement before pan activates → distinguishes click from drag.
   const PAN_THRESHOLD = 4
 
+  /** Track whether pointer is currently held down (not dragging, just held). */
+  const pointerDownRef = useRef(false)
+
   const handlePointerDown = useCallback(
     (e: Konva.KonvaEventObject<PointerEvent>) => {
       if (interactionDisabled) return
@@ -294,6 +297,7 @@ export default function FloorPlanCanvas() {
       const pos = stage.getPointerPosition()
       if (!pos) return
       isPanningRef.current = false
+      pointerDownRef.current = true
       panStartRef.current = pos
       stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
     },
@@ -301,10 +305,21 @@ export default function FloorPlanCanvas() {
   )
 
   const handlePointerMove = useCallback(
-    () => {
+    (e: Konva.KonvaEventObject<PointerEvent>) => {
       if (interactionDisabled) return
       const stage = stageRef.current
       if (!stage) return
+
+      // If the pointer is down but we don't have pan start refs captured yet
+      // (wheel was just scrolling — it cleared the refs), re-capture on the next
+      // real pointer move so drag resumes correctly after a wheel+drag combo.
+      if (pointerDownRef.current && !panStartRef.current) {
+        const pos = stage.getPointerPosition()
+        if (!pos) return
+        panStartRef.current = pos
+        stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
+      }
+
       const pos = stage.getPointerPosition()
       if (!pos || !panStartRef.current || !stagePosAtPanStartRef.current) return
 
@@ -330,6 +345,7 @@ export default function FloorPlanCanvas() {
   const handlePointerUp = useCallback(
     () => {
       isPanningRef.current = false
+      pointerDownRef.current = false
       panStartRef.current = null
       stagePosAtPanStartRef.current = null
     },

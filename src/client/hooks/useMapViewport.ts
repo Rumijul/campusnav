@@ -9,8 +9,8 @@ Konva.hitOnDragEnabled = true
 
 const MIN_SCALE = 0.3
 const MAX_SCALE = 4
-/** 10% per scroll tick — smooth incremental zoom */
-const SCROLL_SCALE_BY = 1.1
+/** 25% per scroll tick — responsive like Google Maps */
+const SCROLL_SCALE_BY = 1.25
 /** 30% per button click — larger step for discoverability */
 const BUTTON_SCALE_BY = 1.3
 
