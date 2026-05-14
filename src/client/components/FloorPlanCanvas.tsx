@@ -274,7 +274,7 @@ export default function FloorPlanCanvas() {
     return ids
   }, [routeSelection.start, routeSelection.destination])
 
-  const { handleWheel, handleTouchMove, handleTouchEnd, zoomByButton, fitToScreen } =
+  const { handleWheel, handleTouchMove, handleTouchEnd, zoomByButton, fitToScreen, setWheelAllowed } =
     useMapViewport({ stageRef, imageRect: effectiveRect, onScaleChange: setStageScale })
 
   // interactionDisabled must be declared before the pointer handlers that reference it
@@ -298,10 +298,11 @@ export default function FloorPlanCanvas() {
       if (!pos) return
       isPanningRef.current = false
       pointerDownRef.current = true
+      setWheelAllowed(false)
       panStartRef.current = pos
       stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
     },
-    [stageRef, interactionDisabled],
+    [stageRef, interactionDisabled, setWheelAllowed],
   )
 
   const handlePointerMove = useCallback(
@@ -346,10 +347,11 @@ export default function FloorPlanCanvas() {
     () => {
       isPanningRef.current = false
       pointerDownRef.current = false
+      setWheelAllowed(true)
       panStartRef.current = null
       stagePosAtPanStartRef.current = null
     },
-    [],
+    [setWheelAllowed],
   )
 
   // Re-fit floor plan when viewport size changes (e.g. orientation change)

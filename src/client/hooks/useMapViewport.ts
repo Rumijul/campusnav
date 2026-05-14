@@ -184,46 +184,39 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
   handleDragEnd: () => void
   zoomByButton: (direction: 1 | -1) => void
   fitToScreen: (viewportWidth: number, viewportHeight: number, animate?: boolean) => void
+  /** Call with false while pointer is held down to suppress wheel zoom (prevents scroll-drag conflict). */
+  setWheelAllowed: (allowed: boolean) => void
 } {
   const lastDist = useRef<number>(0)
   const lastCenter = useRef<{ x: number; y: number } | null>(null)
   const lastAngle = useRef<number | null>(null)
   const dragStoppedByMultiTouch = useRef(false)
   const activeTween = useRef<Konva.Tween | null>(null)
+  const wheelAllowed = useRef(true)
 
-/**
-   * Pointer-centric zoom with smooth animated transition.
-   * Uses wheel event coordinates directly (not stage.getPointerPosition())
-   * to avoid conflict with pointer-drag refs.
-   *
-   * Animation: Konva.Tween with easeOut — 150ms duration, short enough to
-   * feel snappy, long enough to communicate direction. Goog/OSM both use
-   * ~150-200ms ease-out for wheel zoom.
+  const setWheelAllowed = useCallback((allowed: boolean) => {
+    wheelAllowed.current = allowed
+  }, [])
+
+  /**
+   * Wheel zoom — matches official Konva Infinite Canvas demo exactly:
+   * - Instant (no animation) — responsive and predictable
+   * - Uses stage.getPointerPosition() for pointer-relative zoom anchor
+   * - Disabled while pointer is held (scroll-drag conflict guard)
    */
   const handleWheel = useCallback(
     (e: Konva.KonvaEventObject<WheelEvent>) => {
       const stage = stageRef.current
       if (!stage) return
+      if (!wheelAllowed.current) return
 
       e.evt.preventDefault()
 
-      // Use wheel event clientX/clientY — not stage.getPointerPosition().
-      // Wheel events fire even during pointer drag (from scrolling while
-      // mouse is held), and the pointer position in that case reflects the
-      // drag start, not the scroll position under the cursor. Wheel coords
-      // are unaffected by pointer drag state.
-      const clientX = e.evt.clientX
-      const clientY = e.evt.clientY
-
-      const rect = stage.container().getBoundingClientRect()
-      const pointerX = clientX - rect.left
-      const pointerY = clientY - rect.top
-
       const oldScale = stage.scaleX()
-      const oldPos = stage.position()
+      const pointer = stage.getPointerPosition()
+      if (!pointer) return
 
-      // Determine direction: deltaY > 0 = scroll down = zoom out
-      // ctrlKey is set for trackpad pinch gestures → invert
+      // deltaY > 0 = scroll down = zoom out; ctrlKey = trackpad pinch (inverts)
       let direction = e.evt.deltaY > 0 ? -1 : 1
       if (e.evt.ctrlKey) direction = -direction
 
@@ -233,36 +226,18 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
         MAX_SCALE,
       )
 
-      // Google Maps / OSM formula: keep the point under the cursor fixed.
-      // The mouse position in stage coordinates = (pointer - stagePos) / scale.
-      // New stagePos = pointer - mousePosInStage * newScale
-      const mousePointToX = (pointerX - oldPos.x) / oldScale
-      const mousePointToY = (pointerY - oldPos.y) / oldScale
-      const newPosX = pointerX - mousePointToX * newScale
-      const newPosY = pointerY - mousePointToY * newScale
-
-      // Kill any in-progress wheel animation before starting a new one.
-      // This prevents stacked tweens when scrolling rapidly.
-      if (activeTween.current) {
-        activeTween.current.destroy()
-        activeTween.current = null
+      const mousePointTo = {
+        x: (pointer.x - stage.x()) / oldScale,
+        y: (pointer.y - stage.y()) / oldScale,
+      }
+      const newPos = {
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale,
       }
 
-      const tween = new Konva.Tween({
-        node: stage,
-        duration: 0.15,
-        scaleX: newScale,
-        scaleY: newScale,
-        x: newPosX,
-        y: newPosY,
-        easing: Konva.Easings.EaseOut,
-        onFinish: () => {
-          activeTween.current = null
-          onScaleChange?.(newScale)
-        },
-      })
-      tween.play()
-      activeTween.current = tween
+      stage.scale({ x: newScale, y: newScale })
+      stage.position(newPos)
+      onScaleChange?.(newScale)
     },
     [stageRef, onScaleChange],
   )
@@ -519,12 +494,13 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
     [stageRef, imageRect, onScaleChange],
   )
 
-  return {
+return {
     handleWheel,
     handleTouchMove,
     handleTouchEnd,
     handleDragEnd,
     zoomByButton,
     fitToScreen,
+    setWheelAllowed,
   }
 }
