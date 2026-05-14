@@ -833,7 +833,6 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             logicalWidth={image?.naturalWidth ?? 2000}
             logicalHeight={image?.naturalHeight ?? 1600}
             image={image}
-            imageRect={imageRect}
             onSave={async (geom) => {
               if (!activeFloor) return
               const payload = {

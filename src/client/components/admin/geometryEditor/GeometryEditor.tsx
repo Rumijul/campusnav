@@ -1,8 +1,33 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DoorGeometry, FloorLabel, GeometryObject, GeometryState, GeometryTool, RoomPolygon, Wall } from './types'
 import GeometryCanvas from './GeometryCanvas'
 import GeometryToolbar from './GeometryToolbar'
 import GeometrySidePanel from './GeometrySidePanel'
+
+/** Compute the fitted image rect using the same padding/scale logic as FloorPlanImage */
+function computeFittedRect(
+  image: HTMLImageElement | undefined,
+  viewportWidth: number,
+  viewportHeight: number,
+): { x: number; y: number; width: number; height: number } | null {
+  if (!image) return null
+  const padding = 40
+  if (viewportWidth <= padding * 2 || viewportHeight <= padding * 2) return null
+  if (!image.naturalWidth || !image.naturalHeight) return null
+  const scale = Math.min(
+    (viewportWidth - padding * 2) / image.naturalWidth,
+    (viewportHeight - padding * 2) / image.naturalHeight,
+  )
+  if (!Number.isFinite(scale) || scale <= 0) return null
+  const scaledWidth = image.naturalWidth * scale
+  const scaledHeight = image.naturalHeight * scale
+  return {
+    x: (viewportWidth - scaledWidth) / 2,
+    y: (viewportHeight - scaledHeight) / 2,
+    width: scaledWidth,
+    height: scaledHeight,
+  }
+}
 
 interface GeometryEditorProps {
   /** The floor's existing FloorPlanGeometry (may be undefined) */
@@ -12,8 +37,6 @@ interface GeometryEditorProps {
   logicalHeight: number
   /** Floor plan image element (from useImage hook) */
   image: HTMLImageElement | undefined
-  /** Image rect from FloorPlanImage component */
-  imageRect: { x: number; y: number; width: number; height: number } | null
   /** Callback to save geometry to the server */
   onSave: (geometry: GeometryState) => Promise<void>
   canvasWidth: number
@@ -25,7 +48,6 @@ export default function GeometryEditor({
   logicalWidth: _logicalWidth,
   logicalHeight: _logicalHeight,
   image,
-  imageRect,
   onSave,
   canvasWidth,
   canvasHeight,
@@ -36,6 +58,14 @@ export default function GeometryEditor({
   const [selectedObject, setSelectedObject] = useState<GeometryObject | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
+
+  // ── Local image rect computation ───────────────────────────────────────────
+  // Compute the fitted image rect locally so the geometry tab is independent
+  // of the canvas tab's imageRect state (which can be null on first render).
+  const imageRect = useMemo<{ x: number; y: number; width: number; height: number } | null>(
+    () => computeFittedRect(image, canvasWidth, canvasHeight),
+    [image, canvasWidth, canvasHeight],
+  )
 
   // ── History ────────────────────────────────────────────────────────────────
   const historyRef = useRef<GeometryState[]>([initialGeometry])
