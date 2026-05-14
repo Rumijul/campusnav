@@ -106,36 +106,43 @@ export default function FloorPlanCanvas() {
   // ── Per-floor geometry cache (lazy-loaded on demand) ──
   const { fetchGeometry } = useFloorGeometryCache()
   const [floorGeometryMap, setFloorGeometryMap] = useState<Map<number, FloorPlanGeometry>>(new Map())
+  // Track activeFloorId in a ref so the effect can read the CURRENT value
+  // without needing activeFloor (which is declared later by useMemo) in the dep array.
+  const activeFloorIdRef = useRef<number | null>(null)
+  activeFloorIdRef.current = activeFloorId
 
-  // Fetch geometry when switching to a floor that has no cached geometry
+  // Fetch geometry when switching to a floor that has no cached geometry.
+  // Uses activeFloorIdRef to avoid TDZ with the useMemo-declared activeFloor.
   useEffect(() => {
-    if (!activeFloor) return
-    if (floorGeometryMap.has(activeFloor.id)) return
-    // Mark loading state with -1 sentinel while fetching
+    const floorId = activeFloorIdRef.current
+    if (floorId === null) return
+    if (floorGeometryMap.has(floorId)) return
+
+    // Sentinel while loading
     setFloorGeometryMap((prev) => {
-      if (prev.has(activeFloor.id)) return prev
+      if (prev.has(floorId)) return prev
       const next = new Map(prev)
-      next.set(activeFloor.id, undefined as unknown as FloorPlanGeometry)
+      next.set(floorId, undefined as unknown as FloorPlanGeometry)
       return next
     })
-    fetchGeometry(activeFloor.id)
+
+    fetchGeometry(floorId)
       .then((geo) => {
         if (!geo) return
         setFloorGeometryMap((prev) => {
           const next = new Map(prev)
-          next.set(activeFloor.id, geo)
+          next.set(floorId, geo)
           return next
         })
       })
       .catch(() => {
-        // Remove sentinel on failure so we don't keep retrying
         setFloorGeometryMap((prev) => {
           const next = new Map(prev)
-          next.delete(activeFloor.id)
+          next.delete(floorId)
           return next
         })
       })
-  }, [activeFloor, fetchGeometry, floorGeometryMap])
+  }, [activeFloorId, fetchGeometry, floorGeometryMap])
 
   // Non-campus buildings for the building selector
   const nonCampusBuildings = useMemo(
