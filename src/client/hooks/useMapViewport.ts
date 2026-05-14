@@ -208,12 +208,6 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
 
       const oldScale = stage.scaleX()
 
-      // The point in stage-local coordinates under the cursor
-      const mousePointTo = {
-        x: (pointer.x - stage.x()) / oldScale,
-        y: (pointer.y - stage.y()) / oldScale,
-      }
-
       // Determine direction: deltaY > 0 = scroll down = zoom out
       // ctrlKey is set for trackpad pinch gestures → invert
       let direction = e.evt.deltaY > 0 ? -1 : 1
@@ -225,11 +219,16 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
         MAX_SCALE,
       )
 
-      // Apply DIRECTLY to stage node — no React setState, no Tween
+// Apply DIRECTLY to stage node — no React setState, no Tween
       stage.scale({ x: newScale, y: newScale })
+      // Formula: stage.x() - (pointer.x - stage.x()) * ((newScale - oldScale) / oldScale)
+      // This correctly moves the stage LEFT when zooming out (keeping the point under
+      // the cursor fixed), unlike the naive pointer.x - mousePointTo.x * newScale which
+      // drifts right on zoom-out. The (newScale - oldScale) / oldScale term properly
+      // flips sign: positive when zooming in, negative when zooming out.
       stage.position({
-        x: pointer.x - mousePointTo.x * newScale,
-        y: pointer.y - mousePointTo.y * newScale,
+        x: pointer.x - ((pointer.x - stage.x()) / oldScale) * newScale,
+        y: pointer.y - ((pointer.y - stage.y()) / oldScale) * newScale,
       })
       onScaleChange?.(newScale)
     },
