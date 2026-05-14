@@ -13,7 +13,7 @@ async function fetchWithRetry(signal: AbortSignal): Promise<NavGraph> {
   let lastError: unknown
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const response = await fetch('/api/map', { signal })
+      const response = await fetch('/api/map/skeleton', { signal })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       return (await response.json()) as NavGraph
     } catch (err) {

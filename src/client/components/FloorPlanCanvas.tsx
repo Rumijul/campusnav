@@ -22,6 +22,7 @@ import {
 import { useFloorPlanImage } from '../hooks/useFloorPlanImage'
 import { useGeolocation } from '../hooks/useGeolocation'
 import { useGraphData } from '../hooks/useGraphData'
+import { useFloorGeometryCache } from '../hooks/useFloorGeometryCache'
 import { useMapViewport } from '../hooks/useMapViewport'
 import { routesAreIdentical, useRouteDirections } from '../hooks/useRouteDirections'
 import { useRouteSelection } from '../hooks/useRouteSelection'
@@ -102,6 +103,40 @@ export default function FloorPlanCanvas() {
     return graphState.data.buildings
   }, [graphState])
 
+  // ── Per-floor geometry cache (lazy-loaded on demand) ──
+  const { fetchGeometry } = useFloorGeometryCache()
+  const [floorGeometryMap, setFloorGeometryMap] = useState<Map<number, FloorPlanGeometry>>(new Map())
+
+  // Fetch geometry when switching to a floor that has no cached geometry
+  useEffect(() => {
+    if (!activeFloor) return
+    if (floorGeometryMap.has(activeFloor.id)) return
+    // Mark loading state with -1 sentinel while fetching
+    setFloorGeometryMap((prev) => {
+      if (prev.has(activeFloor.id)) return prev
+      const next = new Map(prev)
+      next.set(activeFloor.id, undefined as unknown as FloorPlanGeometry)
+      return next
+    })
+    fetchGeometry(activeFloor.id)
+      .then((geo) => {
+        if (!geo) return
+        setFloorGeometryMap((prev) => {
+          const next = new Map(prev)
+          next.set(activeFloor.id, geo)
+          return next
+        })
+      })
+      .catch(() => {
+        // Remove sentinel on failure so we don't keep retrying
+        setFloorGeometryMap((prev) => {
+          const next = new Map(prev)
+          next.delete(activeFloor.id)
+          return next
+        })
+      })
+  }, [activeFloor, fetchGeometry, floorGeometryMap])
+
   // Non-campus buildings for the building selector
   const nonCampusBuildings = useMemo(
     () => allBuildings.filter((b) => b.name !== 'Campus'),
@@ -137,9 +172,11 @@ export default function FloorPlanCanvas() {
   const floorCount = useMemo(() => totalFloorCount(allBuildings), [allBuildings])
 
   // ── Vector geometry mode — when floor has geometry, render from vector data ──
+  // Prefer cached per-floor geometry over the skeleton's embedded geometry (which may be absent)
   const activeFloorGeometry = useMemo<FloorPlanGeometry | undefined>(() => {
-    return activeFloor?.geometry
-  }, [activeFloor])
+    if (!activeFloor) return undefined
+    return floorGeometryMap.get(activeFloor.id) ?? activeFloor?.geometry
+  }, [activeFloor, floorGeometryMap])
 
   // Compute image rect from geometry logical dimensions (for vector mode)
   const geometryRect = useMemo<{ x: number; y: number; width: number; height: number } | null>(() => {

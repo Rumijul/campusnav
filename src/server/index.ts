@@ -117,6 +117,122 @@ app.get('/api/campus/image', async (c) => {
   }
 })
 
+/**
+ * Serve a lightweight navigation graph skeleton without per-floor geometry payloads.
+ * Used by the student app for fast initial load — geometry is fetched per-floor on demand.
+ */
+app.get('/api/map/skeleton', async (c) => {
+  try {
+    const [buildingRows, floorRows, nodeRows, edgeRows] = await Promise.all([
+      db.select().from(buildings),
+      db.select().from(floors),
+      db.select().from(nodes),
+      db.select().from(edges),
+    ])
+
+    if (buildingRows.length === 0) return c.json({ error: 'Graph data not found' }, 404)
+
+    const nodesByFloor = new Map<number, typeof nodeRows>()
+    for (const n of nodeRows) {
+      if (!nodesByFloor.has(n.floorId)) nodesByFloor.set(n.floorId, [])
+      nodesByFloor.get(n.floorId)!.push(n)
+    }
+
+    const edgesByFloor = new Map<number, typeof edgeRows>()
+    const nodeFloorMap = new Map(nodeRows.map(n => [n.id, n.floorId]))
+    for (const e of edgeRows) {
+      const floorId = nodeFloorMap.get(e.sourceId)
+      if (floorId !== undefined) {
+        if (!edgesByFloor.has(floorId)) edgesByFloor.set(floorId, [])
+        edgesByFloor.get(floorId)!.push(e)
+      }
+    }
+
+    const floorsByBuilding = new Map<number, typeof floorRows>()
+    for (const f of floorRows) {
+      if (!floorsByBuilding.has(f.buildingId)) floorsByBuilding.set(f.buildingId, [])
+      floorsByBuilding.get(f.buildingId)!.push(f)
+    }
+
+    const graph: NavGraph = {
+      buildings: buildingRows.map((b) => ({
+        id: b.id,
+        name: b.name,
+        floors: (floorsByBuilding.get(b.id) ?? []).map((f) => ({
+          id: f.id,
+          floorNumber: f.floorNumber,
+          imagePath: f.imagePath,
+          updatedAt: f.updatedAt,
+          ...serializeFloorGpsBounds(f),
+          // NOTE: geometry is intentionally OMITTED here for fast skeleton load
+          nodes: (nodesByFloor.get(f.id) ?? []).map((n) => ({
+            id: n.id,
+            x: n.x,
+            y: n.y,
+            label: n.label,
+            type: n.type as NavNode['type'],
+            searchable: n.searchable,
+            floorId: n.floorId,
+            ...(n.roomNumber != null && { roomNumber: n.roomNumber }),
+            ...(n.description != null && { description: n.description }),
+            ...(n.accessibilityNotes != null && { accessibilityNotes: n.accessibilityNotes }),
+            ...(n.connectsToFloorAboveId != null && { connectsToFloorAboveId: n.connectsToFloorAboveId }),
+            ...(n.connectsToFloorBelowId != null && { connectsToFloorBelowId: n.connectsToFloorBelowId }),
+            ...(n.connectsToNodeAboveId != null && { connectsToNodeAboveId: n.connectsToNodeAboveId }),
+            ...(n.connectsToNodeBelowId != null && { connectsToNodeBelowId: n.connectsToNodeBelowId }),
+            ...(n.connectsToBuildingId != null && { connectsToBuildingId: n.connectsToBuildingId }),
+          })),
+          edges: (edgesByFloor.get(f.id) ?? []).map((e) => ({
+            id: e.id,
+            sourceId: e.sourceId,
+            targetId: e.targetId,
+            standardWeight: e.standardWeight,
+            accessibleWeight: e.accessibleWeight,
+            accessible: e.accessible,
+            bidirectional: e.bidirectional,
+            ...(e.accessibilityNotes != null && { accessibilityNotes: e.accessibilityNotes }),
+          })),
+        })),
+      })),
+    }
+
+    c.header('Cache-Control', 'public, max-age=60')
+    return c.json(graph)
+  } catch (_err) {
+    console.error('GET /api/map/skeleton failed:', _err)
+    return c.json({ error: 'Failed to load graph data' }, 500)
+  }
+})
+
+/**
+ * Serve per-floor vector geometry on demand.
+ * The student app requests this when a floor is first viewed — geometry is cached
+ * in memory after the first fetch.
+ */
+app.get('/api/floors/:id/geometry', async (c) => {
+  try {
+    const floorId = Number(c.req.param('id'))
+    if (!Number.isInteger(floorId) || floorId <= 0) {
+      return c.json({ error: 'Invalid floor id' }, 400)
+    }
+
+    const [row] = await db
+      .select({ geometry: floors.geometry })
+      .from(floors)
+      .where(eq(floors.id, floorId))
+      .limit(1)
+
+    if (!row) return c.json({ error: 'Floor not found' }, 404)
+    if (row.geometry == null) return c.json({ error: 'Geometry not available for this floor' }, 404)
+
+    c.header('Cache-Control', 'private, max-age=300')
+    return c.json(row.geometry)
+  } catch (_err) {
+    console.error('GET /api/floors/:id/geometry failed:', _err)
+    return c.json({ error: 'Failed to load floor geometry' }, 500)
+  }
+})
+
 /** Serve the navigation graph as JSON — queries PostgreSQL via Drizzle. No auth required. */
 app.get('/api/map', async (c) => {
   try {
