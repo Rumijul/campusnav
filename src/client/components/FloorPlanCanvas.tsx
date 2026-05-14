@@ -305,7 +305,7 @@ export default function FloorPlanCanvas() {
   )
 
   const handlePointerMove = useCallback(
-    (e: Konva.KonvaEventObject<PointerEvent>) => {
+    (_e: Konva.KonvaEventObject<PointerEvent>) => {
       if (interactionDisabled) return
       const stage = stageRef.current
       if (!stage) return
