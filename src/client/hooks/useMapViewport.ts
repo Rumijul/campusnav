@@ -276,35 +276,36 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
       }
 
       const t0 = touches[0]
-      const t1 = touches[1]
-      if (!t0 || !t1) return
-
-      const p1 = { x: t0.clientX, y: t0.clientY }
-      const p2 = { x: t1.clientX, y: t1.clientY }
-
-      const dist = getDistance(p1, p2)
-      const center = getCenter(p1, p2)
-      const angle = getAngle(p1, p2)
-
-      // First frame of gesture — store initial values
-      if (lastDist.current === 0) {
-        lastDist.current = dist
-        lastCenter.current = center
-        lastAngle.current = angle
-        return
+            const t1 = touches[1]
+            if (!t0 || !t1) return
+      
+            const p1 = { x: t0.clientX, y: t0.clientY }
+            const p2 = { x: t1.clientX, y: t1.clientY }
+      
+            const dist = getDistance(p1, p2)
+            const angle = getAngle(p1, p2)
+      
+            // First frame — capture baseline, don't act yet
+            if (lastDist.current === 0) {
+              lastDist.current = dist
+              lastAngle.current = angle
+              return
       }
-
-      const previousCenter = lastCenter.current ?? center
-
-      const { newScale, newRotationDeg, newPosition } = computeTwoTouchFrameTransform({
-        stage,
-        previousDistance: lastDist.current,
-        currentDistance: dist,
-        previousCenterScreen: previousCenter,
-        currentCenterScreen: center,
-        previousAngleRad: lastAngle.current,
-        currentAngleRad: angle,
-      })
+      
+            const oldScale = stage.scaleX()
+            const newScale = clamp(oldScale * (dist / lastDist.current), MIN_SCALE, MAX_SCALE)
+      
+            // Rotate around screen center (like Google Maps)
+            const rawAngleDiffDeg =
+        (angle - (lastAngle.current ?? angle)) * (180 / Math.PI)
+            const angleDiffDeg = normalizeAngleDiffDeg(rawAngleDiffDeg)
+            const newRotationDeg = applyRotationThreshold(angleDiffDeg)
+        ? stage.rotation() + angleDiffDeg
+        : stage.rotation()
+      
+            const stageCenter = { x: stage.width() / 2, y: stage.height() / 2 }
+            const stageLocal = toStageLocalFromScreen(stage, stageCenter)
+            const newPosition = computePivotPosition(stageLocal, stageCenter, newScale, newRotationDeg)
 
       stage.scaleX(newScale)
       stage.scaleY(newScale)
@@ -312,9 +313,7 @@ export function useMapViewport({ stageRef, imageRect, onScaleChange }: UseMapVie
       stage.position(newPosition)
       onScaleChange?.(newScale)
 
-      // Update refs for next frame
       lastDist.current = dist
-      lastCenter.current = center
       lastAngle.current = angle
     },
     [stageRef, onScaleChange],
