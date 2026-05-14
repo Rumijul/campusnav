@@ -31,10 +31,17 @@ export default function FloorPlanImage({
   const rect = useMemo(() => {
     if (!image) return null
     const padding = 40
+    // Guard: viewport must be large enough to fit image with padding
+    if (viewportWidth <= padding * 2 || viewportHeight <= padding * 2) return null
+    // Guard: image must have non-zero natural dimensions
+    if (!image.naturalWidth || !image.naturalHeight) return null
     const scale = Math.min(
       (viewportWidth - padding * 2) / image.naturalWidth,
       (viewportHeight - padding * 2) / image.naturalHeight,
     )
+    // Guard: scale must be valid
+    if (!Number.isFinite(scale) || scale <= 0) return null
+
     const scaledWidth = image.naturalWidth * scale
     const scaledHeight = image.naturalHeight * scale
     const x = (viewportWidth - scaledWidth) / 2
