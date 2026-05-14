@@ -24,13 +24,6 @@ function getDistance(p1: { x: number; y: number }, p2: { x: number; y: number })
   return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2)
 }
 
-function getCenter(
-  p1: { x: number; y: number },
-  p2: { x: number; y: number },
-): { x: number; y: number } {
-  return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }
-}
-
 function getAngle(p1: { x: number; y: number }, p2: { x: number; y: number }): number {
   return Math.atan2(p2.y - p1.y, p2.x - p1.x)
 }
