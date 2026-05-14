@@ -188,11 +188,18 @@ export default function FloorPlanCanvas() {
   // Compute image rect from geometry logical dimensions (for vector mode)
   const geometryRect = useMemo<{ x: number; y: number; width: number; height: number } | null>(() => {
     if (!activeFloorGeometry) return null
+    // Guard against missing/invalid dimensions
+    if (!activeFloorGeometry.logicalWidth || !activeFloorGeometry.logicalHeight) return null
+    if (activeFloorGeometry.logicalWidth <= 0 || activeFloorGeometry.logicalHeight <= 0) return null
+
     const padding = 40
     const scale = Math.min(
       (width - padding * 2) / activeFloorGeometry.logicalWidth,
       (height - padding * 2) / activeFloorGeometry.logicalHeight,
     )
+    // Guard against invalid scale (NaN/Infinity)
+    if (!Number.isFinite(scale) || scale <= 0) return null
+
     const scaledW = activeFloorGeometry.logicalWidth * scale
     const scaledH = activeFloorGeometry.logicalHeight * scale
     return {
