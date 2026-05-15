@@ -835,9 +835,15 @@ export default function MapEditorCanvas({ onLogout }: MapEditorCanvasProps) {
             image={image}
             onSave={async (geom) => {
               if (!activeFloor) return
+              // Derive logical dimensions from the fitted image rect, which is the
+              // ground-truth pixel size of the floor plan image in the canvas.
+              // This is more reliable than relying on image?.naturalWidth (which
+              // can be undefined while the image is still loading).
+              const lw = imageRect ? Math.round(imageRect.width) : 2000
+              const lh = imageRect ? Math.round(imageRect.height) : 1600
               const payload = {
-                logicalWidth: image?.naturalWidth ?? 2000,
-                logicalHeight: image?.naturalHeight ?? 1600,
+                logicalWidth: lw,
+                logicalHeight: lh,
                 ...geom,
               }
               const res = await fetch(`/api/admin/floors/${activeFloor.id}/geometry`, {
