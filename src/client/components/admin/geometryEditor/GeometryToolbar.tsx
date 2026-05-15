@@ -5,43 +5,88 @@ import type { GeometryTool } from './types'
 function IconSelect({ active }: { active: boolean }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 2L13 8L8 10L6 14L3 2Z" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.5" strokeLinejoin="round" fill={active ? 'white' : 'none'} fillOpacity={active ? 0.2 : 0} />
+      <path d="M4 2L4 14L7.5 10.5L10 14L12.5 13L9.5 9L13 9L4 2Z"
+        stroke={active ? '#ffffff' : '#6b7280'}
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill={active ? '#ffffff' : 'none'}
+        fillOpacity={active ? 0.2 : 0}
+      />
     </svg>
   )
 }
 
 function IconWall({ active }: { active: boolean }) {
+  const s = active ? '#ffffff' : '#6b7280'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="2" y1="14" x2="14" y2="2" stroke={active ? 'white' : '#4b5563'} strokeWidth="2" strokeLinecap="round" />
-      <line x1="2" y1="8" x2="8" y2="14" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="8" y1="2" x2="14" y2="8" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="2" y="2" width="12" height="12" rx="1"
+        stroke={s} strokeWidth="1.5" fill="none"
+      />
+      <line x1="2" y1="6" x2="14" y2="6"
+        stroke={s} strokeWidth="1" strokeDasharray="2 1.5"
+      />
+      <line x1="2" y1="10" x2="14" y2="10"
+        stroke={s} strokeWidth="1" strokeDasharray="2 1.5"
+      />
+      <line x1="6" y1="2" x2="6" y2="14"
+        stroke={s} strokeWidth="0.8" strokeDasharray="1.5 1.5"
+      />
+      <line x1="10" y1="2" x2="10" y2="14"
+        stroke={s} strokeWidth="0.8" strokeDasharray="1.5 1.5"
+      />
     </svg>
   )
 }
 
 function IconRoom({ active }: { active: boolean }) {
+  const s = active ? '#ffffff' : '#6b7280'
+  const f = active ? '#ffffff' : 'none'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="3" width="10" height="10" rx="1" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.5" fill={active ? 'white' : 'none'} fillOpacity={active ? 0.15 : 0} />
+      <rect x="2" y="2" width="12" height="12" rx="1.5"
+        stroke={s} strokeWidth="1.5"
+        fill={f} fillOpacity={active ? 0.15 : 0}
+      />
+      <rect x="5" y="5" width="6" height="6" rx="0.5"
+        stroke={s} strokeWidth="1" fill="none" opacity={0.5}
+      />
     </svg>
   )
 }
 
 function IconDoor({ active }: { active: boolean }) {
-  // Door swing arc icon
+  const s = active ? '#ffffff' : '#6b7280'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="5" width="5" height="8" rx="0.5" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.5" fill={active ? 'white' : 'none'} fillOpacity={active ? 0.15 : 0} />
-      <path d="M9 9 Q13 9 13 6" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      <rect x="5" y="4" width="4" height="9" rx="0.5"
+        stroke={s} strokeWidth="1.5" fill="none"
+      />
+      <circle cx="8.5" cy="8.5" r="0.6" fill={s} />
+      <path d="M9 7.5 Q13 7 13 4" stroke={s} strokeWidth="1.2"
+        strokeLinecap="round" fill="none"
+        strokeDasharray="2 1.5"
+      />
     </svg>
   )
 }
 
 function IconLabel({ active }: { active: boolean }) {
+  const s = active ? '#ffffff' : '#6b7280'
+  const f = active ? '#ffffff' : 'none'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 3H10L14 8L8 14L2 9V3Z" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.3" strokeLinejoin="round" fill={active ? 'white' : 'none'} fillOpacity={active ? 0.15 : 0} />
+      <path d="M2 3H11L14.5 8.5L8 14L1.5 9.5V3Z"
+        stroke={s} strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill={f} fillOpacity={active ? 0.15 : 0}
+      />
+      <line x1="4.5" y1="6" x2="8.5" y2="6"
+        stroke={s} strokeWidth="1" strokeLinecap="round"
+      />
+      <line x1="4.5" y1="8.5" x2="10.5" y2="8.5"
+        stroke={s} strokeWidth="1" strokeLinecap="round"
+      />
     </svg>
   )
 }
@@ -49,7 +94,18 @@ function IconLabel({ active }: { active: boolean }) {
 function IconErase({ active }: { active: boolean }) {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 13L13 3M6 10L9 7" stroke={active ? 'white' : '#4b5563'} strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M2 14 L11 3 L14 6 L5 14 Z"
+        stroke={active ? '#ffffff' : '#6b7280'}
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill={active ? '#ffffff' : 'none'}
+        fillOpacity={active ? 0.2 : 0}
+      />
+      <line x1="9.5" y1="9.5" x2="13" y2="13"
+        stroke={active ? '#ffffff' : '#6b7280'}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
@@ -57,8 +113,13 @@ function IconErase({ active }: { active: boolean }) {
 function IconUndo() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 7C3 4.79 4.79 3 7 3C9.21 3 11 4.79 11 7C11 9.21 9.21 11 7 11" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M3 4L1 7L3 10" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M2.5 7C2.5 4.5 4.5 2.5 7 2.5C9.5 2.5 11.5 4.5 11.5 7C11.5 9.5 9.5 11.5 7 11.5"
+        stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" fill="none"
+      />
+      <path d="M2.5 5L1 7L2.5 9.5"
+        stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round"
+        strokeLinejoin="round" fill="none"
+      />
     </svg>
   )
 }
@@ -66,8 +127,13 @@ function IconUndo() {
 function IconRedo() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M11 7C11 4.79 9.21 3 7 3C4.79 3 3 4.79 3 7C3 9.21 4.79 11 7 11" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M11 4L13 7L11 10" stroke="#4b5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M11.5 7C11.5 4.5 9.5 2.5 7 2.5C4.5 2.5 2.5 4.5 2.5 7C2.5 9.5 4.5 11.5 7 11.5"
+        stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" fill="none"
+      />
+      <path d="M11.5 5L13 7L11.5 9.5"
+        stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round"
+        strokeLinejoin="round" fill="none"
+      />
     </svg>
   )
 }
