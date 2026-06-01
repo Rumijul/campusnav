@@ -196,7 +196,7 @@ app.get('/api/map/skeleton', async (c) => {
       })),
     }
 
-    c.header('Cache-Control', 'public, max-age=60')
+    c.header('Cache-Control', 'public, max-age=300, stale-while-revalidate=60')
     return c.json(graph)
   } catch (_err) {
     console.error('GET /api/map/skeleton failed:', _err)
@@ -376,29 +376,96 @@ app.post('/api/admin/graph', async (c) => {
       await tx.delete(floors)
       await tx.delete(buildings)
 
-      // Pass 1: Insert buildings and floors, collect { floorNumber → floorId } map
-      const floorIdByNumber = new Map<number, number>()
+      // ── Pass 1: Bulk-insert all buildings, then all floors, then all nodes/edges ──
+      // Single multi-row INSERT per table instead of N round-trips. For a
+      // 10-building school with ~50 nodes/floor and ~2500 edges, this drops
+      // the graph save from ~3000 round-trips to ~5 (delete-edges, delete-nodes,
+      // delete-floors, delete-buildings, then 4 bulk inserts).
+      const buildingInputs = graph.buildings.map((b) => ({ name: b.name }))
+      const insertedBuildings = await tx
+        .insert(buildings)
+        .values(buildingInputs)
+        .returning({ id: buildings.id })
+      if (insertedBuildings.length !== graph.buildings.length) {
+        throw new Error('Failed to insert buildings')
+      }
 
-      for (const b of graph.buildings) {
-        const buildingRows = await tx.insert(buildings).values({ name: b.name }).returning({ id: buildings.id })
-        if (buildingRows.length === 0) throw new Error('Failed to insert building')
-        const building = buildingRows[0]!
-
+      // Pair each floor with its (newly-assigned) building id by index
+      const floorInputs: Array<{
+        buildingId: number
+        floorNumber: number
+        imagePath: string
+        updatedAt: string
+      }> = []
+      const floorIdByNumber = new Map<number, number>() // floorNumber → assigned id (last write wins if duplicated)
+      const insertedFloorIds: number[] = []
+      for (let bi = 0; bi < graph.buildings.length; bi++) {
+        const b = graph.buildings[bi]!
+        const buildingId = insertedBuildings[bi]!.id
         for (const f of b.floors) {
-          const floorRows = await tx.insert(floors).values({
-            buildingId: building.id,
+          floorInputs.push({
+            buildingId,
             floorNumber: f.floorNumber,
             imagePath: f.imagePath,
             updatedAt: new Date().toISOString(),
-          }).returning({ id: floors.id })
-          if (floorRows.length === 0) throw new Error('Failed to insert floor')
-          const floor = floorRows[0]!
-          floorIdByNumber.set(f.floorNumber, floor.id)
+          })
+        }
+      }
+      const insertedFloors = await tx
+        .insert(floors)
+        .values(floorInputs)
+        .returning({ id: floors.id, floorNumber: floors.floorNumber })
+      if (insertedFloors.length !== floorInputs.length) {
+        throw new Error('Failed to insert floors')
+      }
+      for (let fi = 0; fi < insertedFloors.length; fi++) {
+        const row = insertedFloors[fi]!
+        insertedFloorIds.push(row.id)
+        floorIdByNumber.set(row.floorNumber, row.id)
+      }
 
+      // Build per-floor node/edge input arrays, paired by index with insertedFloorIds
+      const nodeInputs: Array<{
+        id: string
+        x: number
+        y: number
+        label: string
+        type: string
+        searchable: boolean
+        floorId: number
+        roomNumber: string | null
+        description: string | null
+        accessibilityNotes: string | null
+        connectsToFloorAboveId: number | null
+        connectsToFloorBelowId: number | null
+        connectsToNodeAboveId: string | null
+        connectsToNodeBelowId: string | null
+        connectsToBuildingId: number | null
+      }> = []
+      const edgeInputs: Array<{
+        id: string
+        sourceId: string
+        targetId: string
+        standardWeight: number
+        accessibleWeight: number
+        accessible: boolean
+        bidirectional: boolean
+        accessibilityNotes: string | null
+      }> = []
+      for (let fi = 0; fi < graph.buildings.length; fi++) {
+        const b = graph.buildings[fi]!
+        for (const f of b.floors) {
+          const floorId = insertedFloorIds.shift()
+          if (floorId === undefined) throw new Error('Floor id mapping lost during insert')
           for (const n of f.nodes) {
-            await tx.insert(nodes).values({
-              id: n.id, x: n.x, y: n.y, label: n.label, type: n.type,
-              searchable: n.searchable, floorId: floor.id,
+            nodeInputs.push({
+              id: n.id,
+              x: n.x,
+              y: n.y,
+              label: n.label,
+              type: n.type,
+              searchable: n.searchable,
+              floorId,
               roomNumber: n.roomNumber ?? null,
               description: n.description ?? null,
               accessibilityNotes: n.accessibilityNotes ?? null,
@@ -410,19 +477,30 @@ app.post('/api/admin/graph', async (c) => {
               connectsToBuildingId: n.connectsToBuildingId ?? null,
             })
           }
-
           for (const e of f.edges) {
-            await tx.insert(edges).values({
-              id: e.id, sourceId: e.sourceId, targetId: e.targetId,
-              standardWeight: e.standardWeight, accessibleWeight: e.accessibleWeight,
-              accessible: e.accessible, bidirectional: e.bidirectional,
+            edgeInputs.push({
+              id: e.id,
+              sourceId: e.sourceId,
+              targetId: e.targetId,
+              standardWeight: e.standardWeight,
+              accessibleWeight: e.accessibleWeight,
+              accessible: e.accessible,
+              bidirectional: e.bidirectional,
               accessibilityNotes: e.accessibilityNotes ?? null,
             })
           }
         }
       }
+      if (insertedFloorIds.length !== 0) throw new Error('Floor id mapping did not consume all ids')
 
-      // Pass 2: Resolve cross-floor connector references.
+      if (nodeInputs.length > 0) {
+        await tx.insert(nodes).values(nodeInputs)
+      }
+      if (edgeInputs.length > 0) {
+        await tx.insert(edges).values(edgeInputs)
+      }
+
+      // ── Pass 2: Resolve cross-floor connector references ──
       // In the JSON, nodes can use "FLOOR:{floorNumber}" (e.g. "FLOOR:2") as a
       // placeholder for connectsToFloorAboveId / connectsToFloorBelowId.
       // Also, connectsToNodeAboveId / connectsToNodeBelowId can use "NODE:{nodeId}"

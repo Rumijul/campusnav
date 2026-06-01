@@ -1,5 +1,5 @@
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
-import { boolean, integer, jsonb, pgTable, real, serial, text } from 'drizzle-orm/pg-core'
+import { boolean, index, integer, jsonb, pgTable, real, serial, text } from 'drizzle-orm/pg-core'
 
 export const buildings = pgTable('buildings', {
   id: serial('id').primaryKey(),
@@ -17,7 +17,11 @@ export const floors = pgTable('floors', {
   gpsMinLng: real('gps_min_lng'),
   gpsMaxLng: real('gps_max_lng'),
   geometry: jsonb('geometry'),
-})
+}, (t) => ({
+  // Speeds up /api/map/skeleton grouping and per-building lookups
+  // (e.g. /api/campus/image, /api/floor-plan/:buildingId/:floorNumber)
+  floorsBuildingIdIdx: index('floors_building_id_idx').on(t.buildingId),
+}))
 
 export const nodes = pgTable('nodes', {
   id: text('id').primaryKey(),
@@ -37,7 +41,12 @@ export const nodes = pgTable('nodes', {
   connectsToNodeAboveId: text('connects_to_node_above_id').references((): AnyPgColumn => nodes.id),
   connectsToNodeBelowId: text('connects_to_node_below_id').references((): AnyPgColumn => nodes.id),
   connectsToBuildingId: integer('connects_to_building_id').references(() => buildings.id),
-})
+}, (t) => ({
+  // Hot path: filter nodes by floor in /api/map/skeleton, useFloorFiltering,
+  // and the per-floor geometry cache. Without this, every skeleton load
+  // and floor switch is a sequential scan of all nodes.
+  nodesFloorIdIdx: index('nodes_floor_id_idx').on(t.floorId),
+}))
 
 export const edges = pgTable('edges', {
   id: text('id').primaryKey(),
@@ -48,6 +57,15 @@ export const edges = pgTable('edges', {
   accessible: boolean('accessible').notNull(),
   bidirectional: boolean('bidirectional').notNull(),
   accessibilityNotes: text('accessibility_notes'), // nullable
-})
+}, (t) => ({
+  // Hot path: edges.sourceId / edges.targetId are used by:
+  //   1. The cascade DELETE in /api/admin/floors/:id (O(edges) without index)
+  //   2. Grouping edges by floor in /api/map/skeleton (via nodeFloorMap)
+  //   3. Pathfinding lookups in ngraph (PathfindingEngine.getLink)
+  // edges grows quadratically with node count, so these indexes
+  // become critical past ~1k edges.
+  edgesSourceIdIdx: index('edges_source_id_idx').on(t.sourceId),
+  edgesTargetIdIdx: index('edges_target_id_idx').on(t.targetId),
+}))
 
 // graphMetadata table REMOVED — replaced by floors.updated_at

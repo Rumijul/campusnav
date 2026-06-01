@@ -29,6 +29,13 @@
       "when": 1774348304981,
       "tag": "0003_floor_gps_bounds",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1748774400000,
+      "tag": "0005_perf_indexes",
+      "breakpoints": true
     }
   ]
 }
