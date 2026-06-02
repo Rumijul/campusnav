@@ -1,5 +1,5 @@
 import type Konva from 'konva'
-import { Group, Layer, Line, Rect, Stage, Text } from 'react-konva'
+import { Group, Image as KonvaImage, Layer, Line, Stage, Text } from 'react-konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DoorGeometry, DrawSession, FloorLabel, GeometryObject, GeometryState, GeometryTool, RoomPolygon, Wall, WallSegment } from './types'
 import { generateId, pixelToNorm } from './types'
@@ -499,17 +499,20 @@ export default function GeometryCanvas({
         <GridLayer width={width} height={height} />
       </Layer>
 
-      {/* Layer 1: Floor plan image */}
+      {/* Layer 1: Floor plan image
+          Note: render with <Image> (not <Rect fillPatternImage=...>). The rect
+          approach with fillPatternScale=1 tiles the image at its natural pixel
+          size, which crops the image when the fitted rect is smaller than
+          natural dimensions and produces a 3×3 grid of duplicated copies when
+          the rect is larger (zoom-out). <Image> renders a single stretched copy. */}
       <Layer>
         {image && imageRect && (
-          <Rect
+          <KonvaImage
+            image={image}
             x={imageRect.x}
             y={imageRect.y}
             width={imageRect.width}
             height={imageRect.height}
-            fillPatternImage={image}
-            fillPatternScaleX={1}
-            fillPatternScaleY={1}
             opacity={imageOpacity}
             listening={false}
           />
