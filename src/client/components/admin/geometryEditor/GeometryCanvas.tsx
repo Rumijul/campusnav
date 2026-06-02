@@ -1,8 +1,12 @@
 import type Konva from 'konva'
 import { Group, Image as KonvaImage, Layer, Line, Stage, Text } from 'react-konva'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useMapViewport } from '../../../hooks/useMapViewport'
 import type { DoorGeometry, DrawSession, FloorLabel, GeometryObject, GeometryState, GeometryTool, RoomPolygon, Wall, WallSegment } from './types'
 import { generateId, pixelToNorm } from './types'
+
+/** Pan threshold (px) before pointer-down becomes a drag. Below this it's treated as a click. */
+const PAN_THRESHOLD = 4
 
 interface GeometryCanvasProps {
   image: HTMLImageElement | undefined
@@ -239,6 +243,20 @@ export default function GeometryCanvas({
 }: GeometryCanvasProps) {
   const stageRef = useRef<Konva.Stage>(null)
 
+  // ── Viewport (pan/zoom/pinch) ─────────────────────────────────────────────
+  // The existing drawing math (handleMouseMove / handleStageClick) already
+  // inverse-transforms pointer coordinates through stage.position() and
+  // stage.scaleX(), so any viewport transform is picked up automatically.
+  const { handleWheel, handleTouchMove, handleTouchEnd, handleDragEnd, zoomByButton, fitToScreen, setWheelAllowed } =
+    useMapViewport({ stageRef, imageRect })
+
+  // Manual pan state — pointer-down sets a baseline; movement beyond PAN_THRESHOLD
+  // is treated as a drag and translated to stage.position(). Below the threshold
+  // it stays a click so handleStageClick still fires for drawing tools.
+  const isPanningRef = useRef(false)
+  const panStartRef = useRef<{ x: number; y: number } | null>(null)
+  const stagePosAtPanStartRef = useRef<{ x: number; y: number } | null>(null)
+
   // Drawing session (wall/room in progress)
   const [session, setSession] = useState<DrawSession>({ type: 'idle' })
 
@@ -278,6 +296,69 @@ export default function GeometryCanvas({
   )
 
   // ── Stage event handlers ─────────────────────────────────────────────────
+
+  // Manual pointer-based panning with a PAN_THRESHOLD so that single clicks
+  // (for drawing tools) still register. Konva's built-in `draggable` cannot
+  // distinguish click vs drag — it commits to dragging on the first pixel of
+  // movement, which would swallow click-to-place.
+  const handlePointerDown = useCallback(
+    (e: Konva.KonvaEventObject<PointerEvent>) => {
+      if (!imageRect) return
+      const stage = stageRef.current
+      if (!stage || e.evt.button !== 0) return
+      const pos = stage.getPointerPosition()
+      if (!pos) return
+      isPanningRef.current = false
+      panStartRef.current = pos
+      stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
+      // Suppress wheel-zoom while pointer is held to avoid a scroll-drag
+      // conflict (mouse wheel fires on most trackpads during a drag).
+      setWheelAllowed(false)
+    },
+    [imageRect, setWheelAllowed],
+  )
+
+  const handlePointerMove = useCallback(() => {
+    if (!imageRect) return
+    const stage = stageRef.current
+    if (!stage) return
+    const pos = stage.getPointerPosition()
+    if (!pos || !panStartRef.current || !stagePosAtPanStartRef.current) return
+
+    const dx = pos.x - panStartRef.current.x
+    const dy = pos.y - panStartRef.current.y
+    const dist = Math.hypot(dx, dy)
+
+    // Activate pan only after the threshold is exceeded. Below this, pointer
+    // events propagate to handleStageClick for drawing tools.
+    if (dist >= PAN_THRESHOLD && !isPanningRef.current) {
+      isPanningRef.current = true
+    }
+
+    if (!isPanningRef.current) return
+
+    stage.position({
+      x: stagePosAtPanStartRef.current.x + dx,
+      y: stagePosAtPanStartRef.current.y + dy,
+    })
+  }, [imageRect])
+
+  const handlePointerUp = useCallback(() => {
+    isPanningRef.current = false
+    panStartRef.current = null
+    stagePosAtPanStartRef.current = null
+    setWheelAllowed(true)
+  }, [setWheelAllowed])
+
+  // If the pointer leaves the canvas mid-pan, treat as pointer-up.
+  const handlePointerLeave = useCallback(() => {
+    if (isPanningRef.current) {
+      isPanningRef.current = false
+      panStartRef.current = null
+      stagePosAtPanStartRef.current = null
+      setWheelAllowed(true)
+    }
+  }, [setWheelAllowed])
 
   const handleMouseMove = useCallback(() => {
     const stage = stageRef.current
@@ -485,15 +566,23 @@ export default function GeometryCanvas({
   const imageOpacity = imageDimmed ? 0.35 : 1.0
 
   return (
-    <Stage
-      ref={stageRef}
-      width={width}
-      height={height}
-      draggable={activeTool === 'select'}
-      onClick={handleStageClick}
-      onMouseMove={handleMouseMove}
-      style={{ cursor: cursorStyle }}
-    >
+    <div className="relative w-full h-full">
+      <Stage
+        ref={stageRef}
+        width={width}
+        height={height}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
+        onClick={handleStageClick}
+        onMouseMove={handleMouseMove}
+        onWheel={handleWheel}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDragEnd={handleDragEnd}
+        style={{ cursor: cursorStyle }}
+      >
       {/* Layer 0: Grid */}
       <Layer listening={false}>
         <GridLayer width={width} height={height} />
@@ -612,7 +701,57 @@ export default function GeometryCanvas({
           </>
         )}
       </Layer>
-    </Stage>
+      </Stage>
+
+      {/* Floating zoom controls (Google Maps style) — overlay, non-blocking */}
+      <div className="absolute top-3 right-3 flex flex-col gap-1 bg-black/60 backdrop-blur-sm rounded-lg p-1 pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => zoomByButton(1)}
+          className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/15 rounded transition-colors"
+          aria-label="Zoom in"
+          title="Zoom in"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="8" y1="3" x2="8" y2="13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => zoomByButton(-1)}
+          className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/15 rounded transition-colors"
+          aria-label="Zoom out"
+          title="Zoom out"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+        <div className="h-px bg-white/20 mx-1" />
+        <button
+          type="button"
+          onClick={() => fitToScreen(width, height, true)}
+          className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/15 rounded transition-colors"
+          aria-label="Reset view"
+          title="Reset to fit-to-screen"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.5 5.5 V3 a0.5 0.5 0 0 1 0.5 -0.5 h2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M13.5 5.5 V3 a0.5 0.5 0 0 0 -0.5 -0.5 h-2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2.5 10.5 V13 a0.5 0.5 0 0 0 0.5 0.5 h2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M13.5 10.5 V13 a0.5 0.5 0 0 1 -0.5 0.5 h-2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Subtle hint when zoom/pan is available — only shows on first render */}
+      <div className="absolute bottom-3 right-3 pointer-events-none">
+        <div className="bg-black/40 text-white/80 text-[10px] px-2 py-1 rounded backdrop-blur-sm">
+          Scroll to zoom · Drag to pan
+        </div>
+      </div>
+    </div>
   )
 }
 

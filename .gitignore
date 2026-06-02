@@ -36,3 +36,4 @@ mobile/.expo/
 mobile/.expo-shared/
 mobile/android/
 mobile/ios/
+.dev-server.sh
