@@ -396,6 +396,11 @@ app.post('/api/admin/graph', async (c) => {
         floorNumber: number
         imagePath: string
         updatedAt: string
+        gpsMinLat: number | null
+        gpsMaxLat: number | null
+        gpsMinLng: number | null
+        gpsMaxLng: number | null
+        geometry: unknown
       }> = []
       const floorIdByNumber = new Map<number, number>() // floorNumber → assigned id (last write wins if duplicated)
       const insertedFloorIds: number[] = []
@@ -403,13 +408,21 @@ app.post('/api/admin/graph', async (c) => {
         const b = graph.buildings[bi]!
         const buildingId = insertedBuildings[bi]!.id
         for (const f of b.floors) {
-          floorInputs.push({
-            buildingId,
-            floorNumber: f.floorNumber,
-            imagePath: f.imagePath,
-            updatedAt: new Date().toISOString(),
-          })
-        }
+        floorInputs.push({
+          buildingId,
+          floorNumber: f.floorNumber,
+          imagePath: f.imagePath,
+          updatedAt: f.updatedAt ?? new Date().toISOString(),
+          // Preserve per-floor GPS calibration + vector geometry — the full
+          // graph replace re-inserts every floor, so these columns must be
+          // carried over or they are wiped on every Save / floor switch.
+          gpsMinLat: f.gpsBounds?.minLat ?? null,
+          gpsMaxLat: f.gpsBounds?.maxLat ?? null,
+          gpsMinLng: f.gpsBounds?.minLng ?? null,
+          gpsMaxLng: f.gpsBounds?.maxLng ?? null,
+          geometry: f.geometry ?? null,
+        })
+      }
       }
       const insertedFloors = await tx
         .insert(floors)

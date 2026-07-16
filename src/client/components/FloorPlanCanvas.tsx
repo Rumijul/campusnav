@@ -185,6 +185,21 @@ export default function FloorPlanCanvas() {
     return floorGeometryMap.get(activeFloor.id) ?? activeFloor?.geometry
   }, [activeFloor, floorGeometryMap])
 
+  // A floor only renders from vector data if it has at least one drawable
+  // element. An empty-but-non-null geometry object ({walls:[],rooms:[],...})
+  // must fall back to the raster floor-plan image — otherwise the canvas shows
+  // a blank vector layer instead of the floor plan.
+  const hasDrawableGeometry = useMemo<boolean>(() => {
+    if (!activeFloorGeometry) return false
+    const g = activeFloorGeometry
+    return (
+      (g.walls?.length ?? 0) > 0
+      || (g.rooms?.length ?? 0) > 0
+      || (g.doors?.length ?? 0) > 0
+      || (g.labels?.length ?? 0) > 0
+    )
+  }, [activeFloorGeometry])
+
   // Compute image rect from geometry logical dimensions (for vector mode)
   const geometryRect = useMemo<{ x: number; y: number; width: number; height: number } | null>(() => {
     if (!activeFloorGeometry) return null
@@ -211,7 +226,7 @@ export default function FloorPlanCanvas() {
   }, [activeFloorGeometry, width, height])
 
   // Effective rect used by downstream layers — geometryRect takes priority
-  const effectiveRect = activeFloorGeometry ? geometryRect : imageRect
+  const effectiveRect = hasDrawableGeometry ? geometryRect : imageRect
 
   // Compute target for useFloorPlanImage — must be stable (not constructed inline) to avoid hook dependency issues
   const floorImageTarget = useMemo<
@@ -726,9 +741,9 @@ export default function FloorPlanCanvas() {
 
         {/* Content — floor plan (vector geometry or raster fallback) */}
         <Layer>
-          {activeFloorGeometry && geometryRect ? (
+          {hasDrawableGeometry && geometryRect ? (
             <FloorPlanGeometryLayer
-              geometry={activeFloorGeometry}
+              geometry={activeFloorGeometry!}
               imageRect={geometryRect}
             />
           ) : (

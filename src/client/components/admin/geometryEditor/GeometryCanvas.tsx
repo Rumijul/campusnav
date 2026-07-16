@@ -49,7 +49,12 @@ const ROOM_FILL: Record<string, string> = {
 
 const SELECTED_STROKE = '#3b82f6'
 const PREVIEW_STROKE  = '#60a5fa'
-const GRID_COLOR      = 'rgba(148,163,184,0.15)'
+const GRID_COLOR      = 'rgba(148,163,184,0.35)'
+// 50 divisions across the floor plan. At scale 1 a cell ≈ 40px, and the snap
+// grid (GRID_SPACING_NORM) lines up exactly with these lines so drawn walls
+// land on visible intersections.
+const GRID_DIVISIONS  = 50
+const GRID_SPACING_NORM = 1 / GRID_DIVISIONS
 
 // ── Coordinate helpers ────────────────────────────────────────────────────────
 
@@ -68,21 +73,25 @@ function toFlatPoints(polygon: { x: number; y: number }[], r: { x: number; y: nu
   return pts
 }
 
-function snapToGridNorm(v: number, grid = 0.01) {
+function snapToGridNorm(v: number, grid = GRID_SPACING_NORM) {
   return Math.round(v / grid) * grid
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function GridLayer({ width, height }: { width: number; height: number }) {
+function GridLayer({ imageRect }: { imageRect: { x: number; y: number; width: number; height: number } | null }) {
   const lines = useMemo(() => {
+    if (!imageRect) return [] as number[]
     const pts: number[] = []
-    // vertical
-    for (let x = 0; x <= width; x += 40) { pts.push(x, 0, x, height) }
-    // horizontal
-    for (let y = 0; y <= height; y += 40) { pts.push(0, y, width, y) }
+    for (let i = 0; i <= GRID_DIVISIONS; i++) {
+      const f = i / GRID_DIVISIONS
+      const x = imageRect.x + f * imageRect.width
+      const y = imageRect.y + f * imageRect.height
+      pts.push(x, imageRect.y, x, imageRect.y + imageRect.height)
+      pts.push(imageRect.x, y, imageRect.x + imageRect.width, y)
+    }
     return pts
-  }, [width, height])
+  }, [imageRect])
   return <Line points={lines} stroke={GRID_COLOR} strokeWidth={0.5} listening={false} />
 }
 
@@ -266,6 +275,12 @@ export default function GeometryCanvas({
   // Grid snap preference
   const [snapEnabled] = useState(true)
 
+  // Space-to-pan (Photoshop-style): hold Space to pan with the mouse even while
+  // a drawing tool is active. Ref for sync reads in handlers; state drives the
+  // cursor-style re-render.
+  const spaceDownRef = useRef(false)
+  const [spaceActive, setSpaceActive] = useState(false)
+
   // ── Hit-test helpers ──────────────────────────────────────────────────────
 
   const findObjectAtNorm = useCallback(
@@ -308,6 +323,14 @@ export default function GeometryCanvas({
       if (!stage || e.evt.button !== 0) return
       const pos = stage.getPointerPosition()
       if (!pos) return
+      // Space held → pan immediately (Photoshop-style), regardless of active tool
+      if (spaceDownRef.current) {
+        isPanningRef.current = true
+        panStartRef.current = pos
+        stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
+        setWheelAllowed(false)
+        return
+      }
       isPanningRef.current = false
       panStartRef.current = pos
       stagePosAtPanStartRef.current = { x: stage.x(), y: stage.y() }
@@ -324,6 +347,17 @@ export default function GeometryCanvas({
     if (!stage) return
     const pos = stage.getPointerPosition()
     if (!pos || !panStartRef.current || !stagePosAtPanStartRef.current) return
+
+    // Space-pan: move the stage directly, no threshold / drawing
+    if (spaceDownRef.current) {
+      const dx = pos.x - panStartRef.current.x
+      const dy = pos.y - panStartRef.current.y
+      stage.position({
+        x: stagePosAtPanStartRef.current.x + dx,
+        y: stagePosAtPanStartRef.current.y + dy,
+      })
+      return
+    }
 
     const dx = pos.x - panStartRef.current.x
     const dy = pos.y - panStartRef.current.y
@@ -385,6 +419,8 @@ export default function GeometryCanvas({
   const handleStageClick = useCallback(
     (e: Konva.KonvaEventObject<MouseEvent>) => {
       if (!imageRect) return
+      // Space-pan: a click during pan is a pan, not a draw/select action
+      if (spaceDownRef.current) return
       const stage = stageRef.current
       if (!stage) return
       const pos = stage.getPointerPosition()
@@ -500,6 +536,40 @@ export default function GeometryCanvas({
     [onObjectSelect],
   )
 
+  // ── Keyboard: Space-to-pan ─────────────────────────────────────────────────
+  useEffect(() => {
+    // Don't hijack Space while typing in an input/textarea
+    const isTypingTarget = (t: EventTarget | null) =>
+      t instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName)
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !isTypingTarget(e.target)) {
+        if (!spaceDownRef.current) {
+          spaceDownRef.current = true
+          setSpaceActive(true)
+        }
+        e.preventDefault() // stop page scroll
+      }
+    }
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        spaceDownRef.current = false
+        setSpaceActive(false)
+      }
+    }
+    // Blur safety: if focus leaves the window mid-hold, release pan
+    const onBlur = () => { spaceDownRef.current = false; setSpaceActive(false) }
+
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', onBlur)
+    }
+  }, [])
+
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -556,6 +626,7 @@ export default function GeometryCanvas({
   // ── Cursor style ──────────────────────────────────────────────────────────
 
   const cursorStyle = (() => {
+    if (spaceActive) return 'grab'
     if (activeTool === 'select') return 'default'
     if (activeTool === 'erase') return 'crosshair'
     return 'crosshair'
@@ -583,9 +654,9 @@ export default function GeometryCanvas({
         onDragEnd={handleDragEnd}
         style={{ cursor: cursorStyle }}
       >
-      {/* Layer 0: Grid */}
+      {/* Layer 0: Grid — drawn over the floor-plan image, aligned to snapping */}
       <Layer listening={false}>
-        <GridLayer width={width} height={height} />
+        <GridLayer imageRect={imageRect} />
       </Layer>
 
       {/* Layer 1: Floor plan image

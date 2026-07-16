@@ -56,56 +56,45 @@ function IconRoom({ active }: { active: boolean }) {
 }
 
 function IconDoor({ active }: { active: boolean }) {
+  // Tag / label symbol
   const s = active ? '#ffffff' : '#6b7280'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="5" y="4" width="4" height="9" rx="0.5"
-        stroke={s} strokeWidth="1.5" fill="none"
+      <path d="M2.5 3.5H9L13.5 8L8 13.5L2.5 8Z"
+        stroke={s} strokeWidth="1.4" strokeLinejoin="round" fill="none"
       />
-      <circle cx="8.5" cy="8.5" r="0.6" fill={s} />
-      <path d="M9 7.5 Q13 7 13 4" stroke={s} strokeWidth="1.2"
-        strokeLinecap="round" fill="none"
-        strokeDasharray="2 1.5"
-      />
+      <circle cx="5.5" cy="6.5" r="1" fill={s} />
     </svg>
   )
 }
 
 function IconLabel({ active }: { active: boolean }) {
+  // Shield / annotation badge symbol
   const s = active ? '#ffffff' : '#6b7280'
-  const f = active ? '#ffffff' : 'none'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 3H11L14.5 8.5L8 14L1.5 9.5V3Z"
-        stroke={s} strokeWidth="1.4"
-        strokeLinejoin="round"
-        fill={f} fillOpacity={active ? 0.15 : 0}
+      <path d="M8 1.5L13.5 3.5V7.5C13.5 11 11 13.5 8 14.5C5 13.5 2.5 11 2.5 7.5V3.5Z"
+        stroke={s} strokeWidth="1.4" strokeLinejoin="round" fill="none"
       />
-      <line x1="4.5" y1="6" x2="8.5" y2="6"
-        stroke={s} strokeWidth="1" strokeLinecap="round"
-      />
-      <line x1="4.5" y1="8.5" x2="10.5" y2="8.5"
-        stroke={s} strokeWidth="1" strokeLinecap="round"
-      />
+      <line x1="5.5" y1="6.5" x2="10.5" y2="6.5" stroke={s} strokeWidth="1" strokeLinecap="round" />
+      <line x1="5.5" y1="9" x2="10.5" y2="9" stroke={s} strokeWidth="1" strokeLinecap="round" />
     </svg>
   )
 }
 
 function IconErase({ active }: { active: boolean }) {
+  // Pen / stylus symbol (tip at bottom-right)
+  const s = active ? '#ffffff' : '#6b7280'
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M2 14 L11 3 L14 6 L5 14 Z"
-        stroke={active ? '#ffffff' : '#6b7280'}
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-        fill={active ? '#ffffff' : 'none'}
-        fillOpacity={active ? 0.2 : 0}
+      <path d="M3.5 12.5L11 5"
+        stroke={s} strokeWidth="1.6" strokeLinecap="round"
       />
-      <line x1="9.5" y1="9.5" x2="13" y2="13"
-        stroke={active ? '#ffffff' : '#6b7280'}
-        strokeWidth="1.5"
-        strokeLinecap="round"
+      <path d="M11 5L13 7L9.5 10.5Z"
+        stroke={s} strokeWidth="1.3" strokeLinejoin="round"
+        fill={active ? '#ffffff' : 'none'} fillOpacity={active ? 0.25 : 0}
       />
+      <line x1="3" y1="13" x2="5" y2="11" stroke={s} strokeWidth="1.3" strokeLinecap="round" />
     </svg>
   )
 }
