@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 /**
@@ -39,7 +41,7 @@ export async function r2GetBuffer(key: string): Promise<Uint8Array<ArrayBuffer>>
 
   // Local fallback: serve from src/server/assets/
   try {
-    const localPath = `./src/server/assets/${key}`
+    const localPath = join(process.cwd(), 'src/server/assets', key)
     const fs = await import('node:fs')
     const buffer = fs.readFileSync(localPath)
     return new Uint8Array(buffer)
@@ -48,14 +50,31 @@ export async function r2GetBuffer(key: string): Promise<Uint8Array<ArrayBuffer>>
   }
 }
 
-/** Upload a Buffer to R2 with the given content type. */
+/**
+ * Upload a Buffer with the given content type.
+ * Primary target is R2; if creds are absent (or the put fails) we fall back
+ * to writing the file into src/server/assets/, mirroring r2GetBuffer's local
+ * fallback so the admin upload endpoint never 500s on a missing-key deploy.
+ */
 export async function r2PutBuffer(key: string, buffer: Buffer, contentType: string): Promise<void> {
-  await r2.send(
-    new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-    }),
-  )
+  if (process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID) {
+    try {
+      await r2.send(
+        new PutObjectCommand({
+          Bucket: BUCKET,
+          Key: key,
+          Body: buffer,
+          ContentType: contentType,
+        }),
+      )
+      return
+    } catch (err) {
+      console.error('R2 upload failed, falling back to local assets:', err)
+    }
+  }
+
+  // Local fallback: write to src/server/assets/<key>
+  const localPath = join(process.cwd(), 'src/server/assets', key)
+  await mkdir(dirname(localPath), { recursive: true })
+  await writeFile(localPath, buffer)
 }

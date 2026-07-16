@@ -1,0 +1,25 @@
+name: deploy-vm
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write SSH key
+        run: |
+          printf '%s\n' "${{ secrets.VM_SSH_KEY }}" > key.pem
+          chmod 600 key.pem
+
+      - name: Deploy to Oracle VM
+        env:
+          SSH_KEY: key.pem
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          VM_APP_DIR: ${{ secrets.VM_APP_DIR }}
+        run: bash scripts/deploy-vm.sh
